@@ -12,7 +12,7 @@ const route = useRoute()
 const left = [{ to: '/', label: 'Home', icon: 'house' }, { to: '/activity', label: 'Activity', icon: 'swap' }]
 const right = [
   { to: '/analytics', label: 'Analytics', icon: 'chart', match: undefined },
-  { to: '/goals', label: 'Plan', icon: 'target', match: (p: string) => p.startsWith('/goals') || p.startsWith('/debts') },
+  { to: '/goals', label: 'Plan', icon: 'target', match: (p: string) => p.startsWith('/goals') || p.startsWith('/debts') || p.startsWith('/bills') },
 ]
 </script>
 

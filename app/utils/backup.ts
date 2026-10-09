@@ -1,4 +1,5 @@
 import type { State } from '../composables/useBudget'
+import { anchorOf } from './bills'
 
 export const BACKUP_VERSION = 1
 export const MAX_BACKUP_BYTES = 5 * 1024 * 1024
@@ -31,7 +32,7 @@ export function parseBackup(raw: string): ParseResult {
   const wrapped = json.app === 'budgetnow'
   if (wrapped && isNum(json.version) && json.version > BACKUP_VERSION) return { ok: false, error: 'This backup was made by a newer version of BudgetNow.' }
   const src = wrapped ? json.data : json
-  if (!isObj(src) || !['incomes', 'expenses', 'debts', 'goals'].some(k => Array.isArray(src[k]))) {
+  if (!isObj(src) || !['incomes', 'expenses', 'debts', 'goals', 'bills'].some(k => Array.isArray(src[k]))) {
     return { ok: false, error: 'That file is not a BudgetNow backup.' }
   }
 
@@ -53,10 +54,17 @@ export function parseBackup(raw: string): ParseResult {
   }
   const debtIds = new Set(debts.map(d => d.id))
 
+  const bills: State['bills'] = []
+  for (const b of list(src.bills)) {
+    if (!isObj(b) || !text(b.name).trim() || !isNum(b.amount) || b.amount < 0 || !['needs', 'wants', 'debt'].includes(b.category) || !['week', 'month', 'year'].includes(b.every) || !isDate(b.nextDue)) { skipped++; continue }
+    bills.push({ id: uid(b.id), name: text(b.name), amount: r2(b.amount), category: b.category, every: b.every, nextDue: b.nextDue, anchorDay: Number.isInteger(b.anchorDay) && b.anchorDay >= 1 && b.anchorDay <= 31 ? b.anchorDay : anchorOf(b.nextDue), auto: b.auto === true, debtId: b.category === 'debt' && typeof b.debtId === 'string' && debtIds.has(b.debtId) ? b.debtId : undefined })
+  }
+  const billIds = new Set(bills.map(b => b.id))
+
   const expenses: State['expenses'] = []
   for (const e of list(src.expenses)) {
     if (!isObj(e) || !isNum(e.amount) || e.amount < 0 || !isDate(e.date) || !CATS.includes(e.category)) { skipped++; continue }
-    expenses.push({ id: uid(e.id), label: text(e.label), amount: r2(e.amount), category: e.category, date: e.date, debtId: typeof e.debtId === 'string' && debtIds.has(e.debtId) ? e.debtId : undefined })
+    expenses.push({ id: uid(e.id), label: text(e.label), amount: r2(e.amount), category: e.category, date: e.date, debtId: typeof e.debtId === 'string' && debtIds.has(e.debtId) ? e.debtId : undefined, billId: typeof e.billId === 'string' && billIds.has(e.billId) ? e.billId : undefined })
   }
 
   const goals: State['goals'] = []
@@ -75,7 +83,7 @@ export function parseBackup(raw: string): ParseResult {
     } catch { /* unknown currency: keep current */ }
   }
   return {
-    ok: true, data: { incomes, expenses, debts, goals }, currency,
+    ok: true, data: { incomes, expenses, debts, goals, bills }, currency,
     name: wrapped ? text(json.name, 40) : undefined,
     exportedAt: wrapped && typeof json.exportedAt === 'string' ? json.exportedAt : undefined,
     skipped,
