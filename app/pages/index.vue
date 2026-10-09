@@ -1,8 +1,9 @@
 <template>
   <div>
+    <LegacyImport />
     <div class="hdr rise">
-      <NuxtLink to="/settings" class="avatar">{{ initial }}</NuxtLink>
-      <div class="grow"><strong>{{ greeting }}{{ userName ? ', ' + userName : '' }}</strong><div class="muted sm">{{ todayLabel }}</div></div>
+      <NuxtLink to="/settings" class="avatar" aria-label="Account and settings"><img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="avimg" width="44" height="44" /><template v-else>{{ initial }}</template></NuxtLink>
+      <div class="grow"><strong>{{ greeting }}{{ display ? ', ' + display : '' }}</strong><div class="muted sm">{{ todayLabel }}</div><SyncBadge /></div>
       <NuxtLink to="/settings" class="circ" aria-label="Settings"><Icon name="settings" :size="20" /></NuxtLink>
     </div>
 
@@ -15,12 +16,6 @@
       <BillRow v-for="b in dueSoon.slice(0, 3)" :key="b.id" :bill="b" compact />
       <NuxtLink v-if="dueSoon.length > 3" to="/bills" class="link" style="margin-top:6px">+{{ dueSoon.length - 3 }} more</NuxtLink>
     </div>
-    <div v-if="needsBackup" class="card white nudge rise" style="--i:3">
-      <span class="nd"><Icon name="shield" :size="20" /></span>
-      <div class="grow"><strong>Back up your data</strong><div class="muted sm">It's only stored in this browser. Save a copy.</div></div>
-      <button class="btn sm" @click="exportBackup"><Icon name="download" :size="16" /> Save</button>
-    </div>
-
     <div v-if="!state.incomes.length" class="card empty rise" style="margin-top:22px;--i:3">
       <div class="art"><Icon name="coins" :size="28" /></div>
       <h2 style="margin-bottom:6px">Let's plan your first pay</h2>
@@ -71,10 +66,11 @@ const txns = useTransactions()
 const month = computed(() => today().slice(0, 7))
 const stats = useMonthStats(month)
 const safe = useSafeToSpend()
-const { needsBackup, exportBackup } = useBackup()
 const dueSoon = computed(() => state.value.bills.filter(b => daysBetween(today(), b.nextDue) <= 7).sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
 const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
-const initial = computed(() => (userName.value || 'B').trim()[0]?.toUpperCase())
+const auth = useAppAuth()
+const display = computed(() => userName.value || auth.firstName.value)
+const initial = computed(() => (display.value || 'B').trim()[0]?.toUpperCase())
 const h = new Date().getHours()
 const greeting = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
 const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
@@ -84,10 +80,9 @@ const secondInc = computed(() => mini(state.value.incomes[1]))
 </script>
 
 <style scoped>
+.avimg { width:100%; height:100%; border-radius:50%; object-fit:cover; }
 .chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
 .chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
-.nudge { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; }
-.nd { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
 .glink { color:inherit; text-decoration:none; }
 .goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:#fff; padding:14px; }
 .gp { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; }

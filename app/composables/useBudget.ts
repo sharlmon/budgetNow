@@ -19,7 +19,6 @@ export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) =
 export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string }
 export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[] }
 
-const KEY = 'budgetnow:v1'
 const uid = () => Math.random().toString(36).slice(2, 10)
 export const today = () => new Date().toLocaleDateString('sv')
 const round = (n: number) => Math.round(n * 100) / 100
@@ -35,19 +34,8 @@ export function suggestSplit(amount: number, minDebt: number): Record<Category, 
 }
 
 export function useBudget() {
+  // Loading and saving is handled by the sync engine (useSync), which owns persistence per signed-in user.
   const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [] }))
-  const loaded = useState('budget-loaded', () => false)
-
-  if (import.meta.client && !loaded.value) {
-    try {
-      const raw = localStorage.getItem(KEY)
-      if (raw) state.value = { ...state.value, ...JSON.parse(raw) }
-    } catch { /* corrupt or blocked storage: start fresh */ }
-    loaded.value = true
-    watch(state, (v) => {
-      try { localStorage.setItem(KEY, JSON.stringify(v)) } catch { /* ignore */ }
-    }, { deep: true })
-  }
 
   const totalMinDebt = computed(() => state.value.debts.reduce((s, d) => s + (d.balance > 0 ? Math.min(d.minPayment, d.balance) : 0), 0))
   const totalDebt = computed(() => state.value.debts.reduce((s, d) => s + d.balance, 0))
@@ -165,17 +153,9 @@ export function useBudget() {
   return { addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
-const CUR_KEY = 'budgetnow:currency'
+// Profile values live in the synced snapshot, not in their own storage keys.
 export const currency = ref('USD')
-if (import.meta.client) {
-  try { currency.value = localStorage.getItem(CUR_KEY) || 'USD' } catch { /* ignore */ }
-  watch(currency, v => { try { localStorage.setItem(CUR_KEY, v) } catch { /* ignore */ } })
-}
 export const userName = ref('')
-if (import.meta.client) {
-  try { userName.value = localStorage.getItem('budgetnow:name') || '' } catch { /* ignore */ }
-  watch(userName, v => { try { localStorage.setItem('budgetnow:name', v) } catch { /* ignore */ } })
-}
 export const money = (n: number) =>
   new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }).format(n)
 export const ym = (d: string) => d.slice(0, 7)
