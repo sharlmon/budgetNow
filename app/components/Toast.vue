@@ -4,6 +4,7 @@
       <span class="tick"><Icon name="check" :size="14" :stroke="3" /></span>
       <span class="grow">{{ toast.msg }}</span>
       <button v-if="toast.undo" class="undo" @click="undo"><Icon name="undo" :size="14" /> Undo</button>
+      <button v-if="toast.action" class="undo" @click="act">{{ toast.action.label }}</button>
     </div>
   </Transition>
 </template>
@@ -11,6 +12,7 @@
 <script setup lang="ts">
 const toast = useToast()
 function undo() { toast.value?.undo?.(); toast.value = null }
+function act() { const a = toast.value?.action; toast.value = null; a?.run() }
 </script>
 
 <style scoped>

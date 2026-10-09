@@ -45,6 +45,7 @@
       <p class="muted sm" style="margin:6px 0 14px">Permanently deletes your account and everything stored with it. This cannot be undone. Export a backup first if you want to keep a copy.</p>
       <button class="btn soft" style="color:var(--bad)" :disabled="deleting" @click="deleteAccount"><Icon name="trash" :size="16" /> {{ deleting ? 'Deleting…' : 'Delete my account' }}</button>
     </div>
+    <AboutCard />
     <nav class="legal" aria-label="Legal"><NuxtLink to="/privacy">Privacy Policy</NuxtLink><span>·</span><NuxtLink to="/terms">Terms</NuxtLink></nav>
     <CraftedBy style="margin-top:10px" />
   </div>

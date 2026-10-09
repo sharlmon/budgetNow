@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs'
 import { buildCsp, clerkHostFromKey } from './shared/security'
 import { THEME_BOOT_SCRIPT } from './app/utils/theme'
 
 const base = process.env.NUXT_APP_BASE_URL || '/'
+// The version people see (package.json) and the exact build, so a redeploy is noticed even without a version bump.
+const appVersion: string = JSON.parse(readFileSync('./package.json', 'utf8')).version
+const buildId = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 7) || new Date().toISOString().slice(0, 16).replace(/\D/g, '')
 // `DEV_AUTH_BYPASS=1 nuxt dev` runs the app without Clerk keys for local work. It is ignored in production builds.
 // Canonical origin used for absolute URLs (canonical links, sitemap, social cards). Set NUXT_PUBLIC_SITE_URL once you have a custom domain.
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL
@@ -21,7 +25,7 @@ export default defineNuxtConfig({
   css: ['@fontsource-variable/inter'],
   modules: devAuth ? [] : ['@clerk/nuxt'],
   clerk: { signInUrl: '/sign-in', signUpUrl: '/sign-up', signInFallbackRedirectUrl: '/home', signUpFallbackRedirectUrl: '/home' },
-  runtimeConfig: { public: { devAuth, siteUrl } },
+  runtimeConfig: { public: { devAuth, siteUrl, appVersion, buildId, updateCheckDelayMs: Number(process.env.NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS) || 20_000 } },
   routeRules: {
     '/': { prerender: true },
     '/privacy': { prerender: true },

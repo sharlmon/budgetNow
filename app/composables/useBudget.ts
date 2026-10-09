@@ -187,13 +187,14 @@ export function useTransactions() {
   ].sort((a, b) => b.date.localeCompare(a.date)))
 }
 
-export const useToast = () => useState<{ id: number; msg: string; undo?: () => void } | null>('toast', () => null)
+export interface ToastAction { label: string; run: () => void }
+export const useToast = () => useState<{ id: number; msg: string; undo?: () => void; action?: ToastAction } | null>('toast', () => null)
 let toastTimer: ReturnType<typeof setTimeout> | undefined
-export function showToast(msg: string, undo?: () => void) {
+export function showToast(msg: string, undo?: () => void, opts?: { action?: ToastAction; ms?: number }) {
   const t = useToast()
-  t.value = { id: Date.now(), msg, undo }
+  t.value = { id: Date.now(), msg, undo, action: opts?.action }
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { t.value = null }, 4500)
+  toastTimer = setTimeout(() => { t.value = null }, opts?.ms ?? 4500)
 }
 
 /** What you can still spend today on Needs + Wants, spreading this month's remaining flexible budget over the days left. */

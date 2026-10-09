@@ -79,5 +79,15 @@ Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `d
 
 Optional PIN lock (Settings → App lock). The PIN is hashed with PBKDF2 (150k iterations, random salt) and stored in this browser only, so it never syncs and each device sets its own. Wrong guesses are throttled (30s after the fifth, doubling to 15 min). It locks on open and after a chosen time away, and "Forgot PIN" signs out so Clerk re-verifies the user. Optionally, Face ID / fingerprint unlock uses a WebAuthn platform credential bound to the site's hostname (`app/utils/webauthn.ts`); the app only accepts an assertion that is fresh, for this site, and carries the user-verified flag. If the domain changes, turn it off and on again. It is a screen lock, not encryption of on-device data.
 
+## Versions and updates
+
+The version lives in `package.json` ([Semantic Versioning](https://semver.org)): patch for fixes, minor for new features, major for breaking changes. To release:
+
+1. Bump `version` in `package.json`.
+2. Add an entry at the top of `shared/releases.ts` (shown in Settings → About → What's new) and a matching heading in `CHANGELOG.md`. A test fails if these three disagree.
+3. Merge, then tag it: `git tag v1.1.0 && git push --tags` (optionally publish a GitHub release).
+
+Open copies of the app learn about a new deployment from `/version.json` (never cached; it reports the version and the build). They check a little after opening, whenever you return to the app, and every 15 minutes. A different build shows **"Version X is available"** with **Update** and **Later**; after updating, the first open says **"Updated to version X"** once, with a link to what's new. A redeploy without a version bump still shows "An update is available".
+
 ## Roadmap
 See GitHub Issues.
