@@ -1,89 +1,160 @@
 <template>
   <div>
-    <LegacyImport />
-    <div class="hdr rise">
-      <NuxtLink to="/settings" class="avatar" aria-label="Account and settings"><img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="avimg" width="44" height="44" /><template v-else>{{ initial }}</template></NuxtLink>
-      <div class="grow"><strong>{{ greeting }}{{ display ? ', ' + display : '' }}</strong><div class="muted sm">{{ todayLabel }}</div><SyncBadge /></div>
-      <NuxtLink to="/settings" class="circ" aria-label="Settings"><Icon name="settings" :size="20" /></NuxtLink>
-    </div>
-
-    <WalletCard :balance="totalIncome - totalSpent" :first="firstInc" :second="secondInc" />
-
-    <div v-if="state.incomes.length && safe.hasBudget" class="rise" style="margin-top:22px;--i:3"><SafeToSpend /></div>
-    <div class="rise" style="--i:3"><InstallCard /></div>
-    <div v-if="dueSoon.length" class="card white rise" style="margin-top:16px;--i:3;padding:14px 18px">
-      <div class="row" style="justify-content:space-between;margin-bottom:2px"><h2>Bills due soon</h2><NuxtLink to="/bills" class="link">All bills <Icon name="next" :size="14" /></NuxtLink></div>
-      <BillRow v-for="b in dueSoon.slice(0, 3)" :key="b.id" :bill="b" compact />
-      <NuxtLink v-if="dueSoon.length > 3" to="/bills" class="link" style="margin-top:6px">+{{ dueSoon.length - 3 }} more</NuxtLink>
-    </div>
-    <div v-if="!state.incomes.length" class="card empty rise" style="margin-top:22px;--i:3">
-      <div class="art"><Icon name="coins" :size="28" /></div>
-      <h2 style="margin-bottom:6px">Let's plan your first pay</h2>
-      <p class="muted" style="margin:0 0 18px">Enter how much came in. We split it instantly and you can tweak it before confirming.</p>
-      <button class="btn" @click="sheet = { open: true, mode: 'income' }"><Icon name="plus" :size="18" :stroke="2.6" /> Add money in</button>
-    </div>
-
-    <template v-else>
-      <div class="card white rise" style="margin-top:16px;--i:3">
-        <div class="row" style="justify-content:space-between"><h2>Monthly budget</h2><NuxtLink to="/analytics" class="link">Details <Icon name="next" :size="14" /></NuxtLink></div>
-        <div class="muted sm" style="margin:4px 0 14px">{{ monthLabel(month) }}</div>
-        <div class="bar" style="height:10px"><i :style="{ width: Math.min(100, spendPct) + '%', background: spendPct > 100 ? 'var(--bad)' : 'var(--btn)' }" /></div>
-        <div class="row sm" style="justify-content:space-between;margin-top:10px">
-          <span class="muted">Spent <b style="color:var(--accent)">{{ money(stats.spentTotal) }}</b> of {{ money(stats.spendBudget) }}</span>
-          <b>{{ Math.round(spendPct) }}%</b>
-        </div>
-        <div class="chip" :class="stats.savingsRate >= 20 ? 'ok' : 'meh'">
-          <Icon name="trend" :size="16" /><span class="grow">{{ stats.savingsRate >= 20 ? 'Great savings rate this month' : 'Savings rate this month' }}</span><b>{{ Math.round(stats.savingsRate) }}%</b>
-        </div>
-      </div>
-
-      <div class="sec rise" style="--i:4"><h2>Budget envelopes</h2><NuxtLink to="/analytics" class="link">Analytics <Icon name="next" :size="14" /></NuxtLink></div>
-      <div v-for="(c, i) in CATEGORIES" :key="c.key" class="rise" :style="{ '--i': 5 + i }"><CatRow :c="c" :budgeted="stats.budgeted[c.key]" :spent="stats.spent[c.key]" /></div>
-
-      <div class="sec rise" style="--i:9"><h2>Savings goals</h2><NuxtLink to="/goals" class="link">{{ state.goals.length ? 'See all' : 'Set a goal' }} <Icon name="next" :size="14" /></NuxtLink></div>
-      <div v-if="state.goals.length" class="card white rise" style="padding:4px 18px;--i:9">
-        <NuxtLink v-for="g in state.goals.slice(0, 3)" :key="g.id" to="/goals" class="item glink">
-          <CatIcon :icon="g.icon" :color="g.color" :size="42" />
-          <div class="grow">
-            <div class="row" style="justify-content:space-between"><strong>{{ g.name }}</strong><span class="sm muted">{{ Math.round(Math.min(100, goalSaved(g) / g.target * 100)) }}%</span></div>
-            <div class="bar" style="margin:7px 0 4px"><i :style="{ width: Math.min(100, goalSaved(g) / g.target * 100) + '%', background: g.color }" /></div>
-            <small class="muted">{{ money(goalSaved(g)) }} of {{ money(g.target) }}</small>
+    <section class="hero">
+      <div class="wrap grid">
+        <div class="copy">
+          <p class="eyebrow">Free budgeting app</p>
+          <h1>Split every pay in seconds. Know what's safe to spend.</h1>
+          <p class="lead">Enter your salary or any money in. BudgetNow instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>. Adjust it if you like, then confirm. Track spending, debts, goals and bills in one calm place.</p>
+          <div class="actions">
+            <NuxtLink to="/sign-up" class="btn">Get started free</NuxtLink>
+            <NuxtLink to="/#how" class="btn soft">See how it works</NuxtLink>
           </div>
-        </NuxtLink>
+          <p class="fine">No bank login needed · Works offline · Installs like an app</p>
+        </div>
+        <div class="visual" aria-hidden="true">
+          <div class="phone">
+            <div class="ph-top">
+              <small>Safe to spend today</small>
+              <div class="ph-amt">$48.20</div>
+              <small>of $52.00 a day · 14 days left</small>
+            </div>
+            <div class="ph-row" v-for="r in demo" :key="r.n">
+              <span class="dot" :style="{ background: r.c }" />
+              <div class="grow"><b>{{ r.n }}</b><div class="bar"><i :style="{ width: r.p + '%', background: r.c }" /></div></div>
+              <span class="ph-v">{{ r.v }}</span>
+            </div>
+            <p class="ph-note">Example for illustration</p>
+          </div>
+        </div>
       </div>
-      <NuxtLink v-else to="/goals" class="card goalprompt rise" style="--i:9"><span class="gp"><Icon name="flag" :size="20" /></span><span class="grow"><strong>Saving for something?</strong><br><span class="muted sm">Create a goal and watch it fill up.</span></span><Icon name="next" :size="18" /></NuxtLink>
+    </section>
 
-      <div class="sec rise" style="--i:10"><h2>Recent transactions</h2><NuxtLink to="/activity" class="link">See all <Icon name="next" :size="14" /></NuxtLink></div>
-      <div class="card white rise" style="padding:4px 18px;--i:11"><TxnItem v-for="t in txns.slice(0, 5)" :key="t.id" :t="t" /></div>
-    </template>
+    <section class="wrap answer" aria-labelledby="what">
+      <h2 id="what">What is BudgetNow?</h2>
+      <p>BudgetNow is a free budgeting app that automatically splits each pay into Needs, Wants, Savings and Debt, then tracks your spending, debts, savings goals and recurring bills. It shows how much is safe to spend today, works offline, and never asks for your bank login.</p>
+    </section>
+
+    <section class="wrap" aria-labelledby="features">
+      <h2 id="features" class="sh">Everything you need to stay on top of your money</h2>
+      <div class="cards">
+        <article v-for="f in features" :key="f.t" class="fc">
+          <span class="fi"><Icon :name="f.i" :size="22" /></span>
+          <h3>{{ f.t }}</h3>
+          <p>{{ f.d }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="wrap" aria-labelledby="how-h">
+      <h2 id="how-h" class="sh">How it works</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><div><h3>Add your pay</h3><p>Type in your salary or any money that came in, using a simple keypad.</p></div></li>
+        <li><span class="n">2</span><div><h3>See the instant split</h3><p>Debt minimums come first, then 50% Needs, 30% Wants and 20% Savings of the rest. Drag any slider to change it. The others rebalance for you.</p></div></li>
+        <li><span class="n">3</span><div><h3>Confirm and track</h3><p>Log expenses, pay debts and bills, and add to goals. The home screen shows what is left and what is safe to spend today.</p></div></li>
+      </ol>
+    </section>
+
+    <section id="faq" class="wrap faq" aria-labelledby="faq-h">
+      <h2 id="faq-h" class="sh">Frequently asked questions</h2>
+      <details v-for="(f, i) in FAQS" :key="f.q" :open="i === 0">
+        <summary>{{ f.q }}</summary>
+        <p>{{ f.a }}</p>
+      </details>
+      <p class="more">New to budgeting? Read <NuxtLink to="/guides/50-30-20-rule">the 50/30/20 rule explained</NuxtLink>.</p>
+    </section>
+
+    <section class="wrap">
+      <div class="final">
+        <h2>Ready to know where your money goes?</h2>
+        <p>Create a free account and split your next pay in under a minute.</p>
+        <NuxtLink to="/sign-up" class="btn light">Get started free</NuxtLink>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-const { state, totalIncome, totalSpent } = useBudget()
-const sheet = useSheet()
-const txns = useTransactions()
-const month = computed(() => today().slice(0, 7))
-const stats = useMonthStats(month)
-const safe = useSafeToSpend()
-const dueSoon = computed(() => state.value.bills.filter(b => daysBetween(today(), b.nextDue) <= 7).sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
-const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
-const auth = useAppAuth()
-const display = computed(() => userName.value || auth.firstName.value)
-const initial = computed(() => (display.value || 'B').trim()[0]?.toUpperCase())
-const h = new Date().getHours()
-const greeting = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
-const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
-const mini = (i?: Income) => (i ? { label: i.label || 'Income', amount: i.amount } : undefined)
-const firstInc = computed(() => mini(state.value.incomes[0]))
-const secondInc = computed(() => mini(state.value.incomes[1]))
+import { FAQS, SITE } from '#shared/site'
+
+definePageMeta({ layout: 'public' })
+
+const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
+useSeo({
+  title: 'BudgetNow: free budget app that splits your pay instantly',
+  description: 'Enter your pay and BudgetNow instantly splits it into Needs, Wants, Savings and Debt. Track spending, debts, goals and bills, see what is safe to spend today, and use it offline. Free.',
+  path: '/',
+  jsonLd: [
+    ...siteGraph(site),
+    {
+      '@context': 'https://schema.org', '@type': 'WebApplication', '@id': `${site}/#app`, name: SITE.name, url: `${site}/`,
+      description: SITE.description, applicationCategory: 'FinanceApplication', operatingSystem: 'Any (web browser, installable)',
+      browserRequirements: 'Requires JavaScript', inLanguage: 'en', isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      creator: { '@id': `${site}/#maker` }, publisher: { '@id': `${site}/#maker` },
+      featureList: ['Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
+    },
+    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+  ],
+})
+
+const demo = [
+  { n: 'Needs', c: '#ef6a3a', p: 62, v: '$1,150' },
+  { n: 'Wants', c: '#f5c242', p: 38, v: '$420' },
+  { n: 'Savings', c: '#2fb67c', p: 20, v: '$320' },
+  { n: 'Debt', c: '#5b8def', p: 100, v: '$160' },
+]
+const features = [
+  { i: 'wallet', t: 'Instant income split', d: 'Your pay is divided into Needs, Wants, Savings and Debt the moment you enter it, with sliders to adjust before you confirm.' },
+  { i: 'shield', t: 'Safe to spend today', d: 'One daily number worked out from what is left in your budget and the bills still due this month.' },
+  { i: 'card', t: 'Debt tracking', d: 'Add what you owe, reserve the minimum from every pay, record payments and watch the balance fall.' },
+  { i: 'target', t: 'Savings goals', d: 'Set a target and a date, assign savings to it, and see how much to put aside each month.' },
+  { i: 'bill', t: 'Recurring bills', d: 'Rent, subscriptions and loan payments with due dates, one-tap paying and optional auto-logging.' },
+  { i: 'phone', t: 'Works offline, installs like an app', d: 'Add it to your home screen. Keep logging with no connection and it syncs when you are back online.' },
+]
 </script>
 
 <style scoped>
-.avimg { width:100%; height:100%; border-radius:50%; object-fit:cover; }
-.chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
-.chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
-.glink { color:inherit; text-decoration:none; }
-.goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:#fff; padding:14px; }
-.gp { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; }
+.hero { background:linear-gradient(180deg,#fff6f0 0%,#fff 100%); padding:40px 0 24px; overflow:hidden; }
+.grid { display:grid; gap:36px; align-items:center; }
+.eyebrow { display:inline-block; margin:0 0 14px; padding:5px 12px; border-radius:99px; background:#fff; border:1px solid #fbdfd0; color:var(--accent); font-weight:600; font-size:.8rem; }
+h1 { font-size:clamp(2.1rem,7vw,3.6rem); line-height:1.05; letter-spacing:-.04em; margin:0 0 18px; }
+.lead { font-size:1.08rem; line-height:1.65; color:#3c3f4a; margin:0 0 24px; max-width:56ch; }
+.actions { display:flex; gap:12px; flex-wrap:wrap; }
+.actions .btn { width:auto; padding:15px 24px; text-decoration:none; }
+.fine { margin:16px 0 0; color:var(--muted); font-size:.85rem; }
+.visual { display:flex; justify-content:center; }
+.phone { width:min(310px,100%); background:#fff; border:1px solid var(--line); border-radius:34px; padding:18px; box-shadow:0 40px 70px -30px rgba(239,106,58,.45), 0 8px 24px -12px rgba(20,20,40,.18); transform:rotate(2deg); }
+.ph-top { background:var(--grad); color:#fff; border-radius:22px; padding:18px; margin-bottom:14px; }
+.ph-top small { opacity:.9; display:block; }
+.ph-amt { font-size:2.3rem; font-weight:700; letter-spacing:-.03em; line-height:1.15; }
+.ph-row { display:flex; align-items:center; gap:10px; padding:9px 4px; font-size:.9rem; }
+.dot { width:10px; height:10px; border-radius:4px; flex:none; }
+.grow { flex:1; } .grow b { display:block; margin-bottom:5px; font-weight:600; }
+.bar { height:6px; background:#ececf1; border-radius:99px; overflow:hidden; } .bar i { display:block; height:100%; border-radius:99px; }
+.ph-v { font-weight:600; font-variant-numeric:tabular-nums; }
+.ph-note { margin:8px 0 0; text-align:center; font-size:.7rem; color:var(--muted); }
+.answer { margin-top:48px; }
+.answer h2 { font-size:1.4rem; margin:0 0 8px; letter-spacing:-.02em; }
+.answer p { font-size:1.12rem; line-height:1.7; color:#2c2f3a; max-width:70ch; margin:0; padding:20px 22px; background:var(--card); border:1px solid var(--line); border-radius:20px; }
+.sh { font-size:clamp(1.5rem,4vw,2rem); letter-spacing:-.03em; margin:64px 0 22px; }
+.cards { display:grid; gap:14px; grid-template-columns:1fr; }
+.fc { background:#fff; border:1px solid var(--line); border-radius:22px; padding:20px; box-shadow:0 1px 2px rgba(20,20,40,.04); }
+.fi { width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(145deg,#fff1ea,#ffe2d4); color:var(--accent); margin-bottom:12px; }
+.fc h3 { margin:0 0 6px; font-size:1.05rem; } .fc p { margin:0; color:#555968; line-height:1.6; font-size:.95rem; }
+.steps { list-style:none; padding:0; margin:0; display:grid; gap:14px; counter-reset:s; }
+.steps li { display:flex; gap:16px; background:var(--card); border:1px solid var(--line); border-radius:22px; padding:18px 20px; }
+.n { width:36px; height:36px; border-radius:50%; background:var(--btn); color:#fff; display:grid; place-items:center; font-weight:700; flex:none; }
+.steps h3 { margin:2px 0 4px; font-size:1.05rem; } .steps p { margin:0; color:#555968; line-height:1.6; }
+.faq details { background:#fff; border:1px solid var(--line); border-radius:18px; margin-bottom:10px; padding:0 18px; }
+.faq summary { cursor:pointer; padding:16px 0; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:12px; }
+.faq summary::-webkit-details-marker { display:none; }
+.faq summary::after { content:'+'; color:var(--accent); font-size:1.4rem; line-height:1; transition:transform .25s; }
+.faq details[open] summary::after { transform:rotate(45deg); }
+.faq details p { margin:0 0 16px; color:#3c3f4a; line-height:1.7; }
+.more { color:var(--muted); } .more a { color:var(--accent); font-weight:600; }
+.final { margin-top:64px; background:var(--grad); color:#fff; border-radius:28px; padding:36px 24px; text-align:center; box-shadow:0 24px 50px -24px rgba(239,106,58,.8); }
+.final h2 { margin:0 0 8px; font-size:clamp(1.4rem,4vw,2rem); letter-spacing:-.03em; } .final p { margin:0 0 20px; opacity:.92; }
+.btn.light { background:#fff; color:var(--accent); width:auto; display:inline-flex; padding:15px 26px; text-decoration:none; box-shadow:0 10px 24px -10px rgba(0,0,0,.35); }
+@media (min-width:820px) { .grid { grid-template-columns:1.15fr .85fr; } .hero { padding:64px 0 40px; } .cards { grid-template-columns:repeat(3,1fr); } .steps { grid-template-columns:repeat(3,1fr); } .steps li { flex-direction:column; } }
 </style>

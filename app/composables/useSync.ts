@@ -1,4 +1,4 @@
-import { diffSnaps, emptySnap, type Snap } from '../../shared/sync'
+import { diffSnaps, emptySnap, type Snap } from '#shared/sync'
 
 type Status = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -163,5 +163,22 @@ export function useSync() {
     return true
   }
 
-  return { startSync, stopSync, syncNow, prepareSignOut }
+  /** Deletes the account and all its data on the server, then wipes this device. Throws if the server refuses. */
+  async function deleteAccount() {
+    const owner = uid
+    if (!owner) return
+    // Stop syncing first so a pending push can never re-create rows after they are deleted.
+    clearTimeout(pushTimer); clearTimeout(retryTimer); clearTimeout(cacheTimer)
+    uid = null
+    try {
+      await $fetch('/api/account', { method: 'DELETE' })
+    } catch (e) {
+      uid = owner
+      throw e
+    }
+    try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+    stopSync()
+  }
+
+  return { startSync, stopSync, syncNow, prepareSignOut, deleteAccount }
 }
