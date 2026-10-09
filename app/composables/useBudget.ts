@@ -24,6 +24,11 @@ export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; 
 const uid = () => Math.random().toString(36).slice(2, 10)
 export const today = () => new Date().toLocaleDateString('sv')
 const round = (n: number) => Math.round(n * 100) / 100
+/**
+ * An item brought back by Undo returns as a new row: its old revision belonged to a row the server may already have deleted,
+ * and a change that names a revision of a missing row is treated as an edit to something another device deleted.
+ */
+const restored = <T extends { rev?: number }>(row: T): T => { const { rev: _gone, ...fresh } = row; return fresh as T }
 
 export function useBudget() {
   // Loading and saving is handled by the sync engine (useSync), which owns persistence per signed-in user.
@@ -66,7 +71,7 @@ export function useBudget() {
     if (debt && e) debt.balance = round(debt.balance + e.amount)
     return () => {
       if (!e) return
-      state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, e)
+      state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, restored(e))
       if (debt) debt.balance = Math.max(0, round(debt.balance - e.amount))
     }
   }
@@ -74,7 +79,7 @@ export function useBudget() {
     const i = state.value.incomes.findIndex(x => x.id === id)
     if (i < 0) return () => {}
     const [inc] = state.value.incomes.splice(i, 1)
-    return () => { if (inc) state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, inc) }
+    return () => { if (inc) state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, restored(inc)) }
   }
   function addDebt(name: string, balance: number, minPayment: number, apr?: number) {
     state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment, ...(apr && apr > 0 ? { apr } : {}) })
@@ -90,7 +95,7 @@ export function useBudget() {
     const i = state.value.goals.findIndex(g => g.id === id)
     if (i < 0) return () => {}
     const [g] = state.value.goals.splice(i, 1)
-    return () => { if (g) state.value.goals.splice(Math.min(i, state.value.goals.length), 0, g) }
+    return () => { if (g) state.value.goals.splice(Math.min(i, state.value.goals.length), 0, restored(g)) }
   }
   /** Positive amounts add to the goal, negative withdraw (never below zero saved). */
   function addToGoal(id: string, amount: number) {
@@ -113,7 +118,7 @@ export function useBudget() {
     const i = state.value.bills.findIndex(b => b.id === id)
     if (i < 0) return () => {}
     const [b] = state.value.bills.splice(i, 1)
-    return () => { if (b) state.value.bills.splice(Math.min(i, state.value.bills.length), 0, b) }
+    return () => { if (b) state.value.bills.splice(Math.min(i, state.value.bills.length), 0, restored(b)) }
   }
   /** Logs the bill's current due date as an expense (or skips it) and moves it to the next date. Returns an undo. */
   function payBill(id: string, skip = false) {
