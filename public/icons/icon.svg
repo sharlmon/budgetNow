@@ -5,10 +5,6 @@
   </defs>
   <rect width="512" height="512" fill="url(#g)"/>
   <rect width="512" height="512" fill="url(#h)"/>
-  <g fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" transform="rotate(-90 256 256)">
-    <circle cx="256" cy="256" r="124" stroke-dasharray="327 452" stroke-dashoffset="-31"/>
-    <circle cx="256" cy="256" r="124" stroke-dasharray="172 607" stroke-dashoffset="-420" stroke-opacity=".78"/>
-    <circle cx="256" cy="256" r="124" stroke-dasharray="94 685" stroke-dashoffset="-654" stroke-opacity=".5"/>
-  </g>
-  
+  <path d="M118 232 L188 382 L256 262 L324 382 L394 232" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="150" r="44" fill="#fff"/>
 </svg>
