@@ -49,6 +49,11 @@ npm run test:api      # ...and these in another: API tests (isolation, validatio
 npm run test:security # attack tests: CSRF, injection, oversized bodies, rate limits, error leaks
 ```
 
+## Dependency notes
+
+- `unplugin` is listed as a direct dependency on purpose: it pins one consistent copy at the top of the tree. Without it npm 10.9 (used in CI) writes a lockfile that fails `npm ci` ("lock file's unplugin@2.3.11 does not satisfy unplugin@3.4.0"). If you change dependencies, regenerate the lockfile in a clean folder with CI's npm (`npx npm@10.9.2 install --package-lock-only --ignore-scripts`), because a lockfile created on one OS can omit the native binaries other platforms need.
+- `overrides` in `package.json` force a patched `simple-git`.
+
 ## Database changes
 
 Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `drizzle/`. It's applied on the next deploy.
