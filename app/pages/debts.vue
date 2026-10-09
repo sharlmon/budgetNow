@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1 class="rise" style="margin-bottom:16px">Debts</h1>
+    <h1 class="rise" style="margin-bottom:14px">Plan</h1>
+    <div class="rise" style="--i:1;margin-bottom:16px"><PlanSwitch /></div>
     <div class="hero rise" style="--i:1">
       <div class="hico"><Icon name="card" :size="20" /></div>
       <small>Total you owe</small>

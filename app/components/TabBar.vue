@@ -2,14 +2,18 @@
   <nav class="tabs">
     <NuxtLink v-for="t in left" :key="t.to" :to="t.to" class="tab" active-class="on"><span class="ic"><Icon :name="t.icon" :size="22" /></span><small>{{ t.label }}</small></NuxtLink>
     <button class="fab" aria-label="Add transaction" @click="sheet = { open: true, mode: 'income' }"><Icon name="plus" :size="26" :stroke="2.6" /></button>
-    <NuxtLink v-for="t in right" :key="t.to" :to="t.to" class="tab" active-class="on"><span class="ic"><Icon :name="t.icon" :size="22" /></span><small>{{ t.label }}</small></NuxtLink>
+    <NuxtLink v-for="t in right" :key="t.to" :to="t.to" class="tab" :class="{ on: t.match ? t.match(route.path) : route.path === t.to }"><span class="ic"><Icon :name="t.icon" :size="22" /></span><small>{{ t.label }}</small></NuxtLink>
   </nav>
 </template>
 
 <script setup lang="ts">
 const sheet = useSheet()
+const route = useRoute()
 const left = [{ to: '/', label: 'Home', icon: 'house' }, { to: '/activity', label: 'Activity', icon: 'swap' }]
-const right = [{ to: '/analytics', label: 'Analytics', icon: 'chart' }, { to: '/debts', label: 'Debts', icon: 'card' }]
+const right = [
+  { to: '/analytics', label: 'Analytics', icon: 'chart', match: undefined },
+  { to: '/goals', label: 'Plan', icon: 'target', match: (p: string) => p.startsWith('/goals') || p.startsWith('/debts') },
+]
 </script>
 
 <style scoped>
