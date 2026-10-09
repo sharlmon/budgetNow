@@ -1,6 +1,6 @@
 // BudgetNow service worker: app shell works offline.
 // Navigations are network-first (so updates arrive), everything else is cache-first.
-const CACHE = 'budgetnow-v1'
+const CACHE = 'budgetnow-v2'
 const SCOPE = self.registration.scope
 
 self.addEventListener('install', (e) => {
@@ -33,6 +33,8 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url)
   const sameOrigin = url.origin === self.location.origin
   if (!sameOrigin && !FONT_HOSTS.includes(url.hostname)) return
+  // Account data and auth are always live: never serve them from cache.
+  if (sameOrigin && (url.pathname.startsWith('/api/') || url.searchParams.has('__clerk_handshake') || url.searchParams.has('__clerk_db_jwt'))) return
 
   if (req.mode === 'navigate') {
     e.respondWith(

@@ -1,18 +1,52 @@
 # BudgetNow
 
-A small personal budget tracker. Enter your salary (or any money in) and get an instant breakdown across **Needs / Wants / Savings / Debt**, adjust it if you like, then log expenses and track debts.
+A personal budget tracker. Enter your pay and it's split instantly across **Needs / Wants / Savings / Debt** (you can adjust before confirming), then track expenses, debts, savings goals and recurring bills. A "safe to spend today" number tells you what's left for the day.
 
-- Stack: Nuxt 4 (static SPA), no backend. Data is stored in your browser's `localStorage`.
-- Default split: minimum debt payments first, then 50/30/20 of what's left.
+**Stack:** Nuxt 4 (client-rendered) · Nuxt server routes on Vercel · Neon Postgres via Drizzle ORM · Clerk authentication · installable PWA.
 
-## Develop
+## How it works
+
+- Every account's data lives in Postgres tables (`incomes`, `expenses`, `debts`, `goals`, `goal_contributions`, `bills`, `profiles`), each keyed by `(user_id, id)`.
+- The app keeps a local copy so it's instant and works offline. When something changes it sends only the changed rows to `POST /api/sync`; on start and whenever you come back to the app it pushes pending changes first, then pulls the latest from `GET /api/state`. Edits made offline are kept and uploaded when you reconnect.
+- Two devices editing the *same row* resolve last-write-wins; everything else merges naturally.
+- `user_id` is always taken from the verified Clerk session on the server, never from the request.
+
+## Deploy (Vercel + Clerk + Neon)
+
+1. **Clerk** – create an application at <https://dashboard.clerk.com> (enable the sign-in methods you want). On *API keys*, pick **Nuxt** and copy the two keys.
+2. **Vercel** – *Add New → Project → import this GitHub repo*. Framework is detected as Nuxt.
+3. **Database** – in the Vercel project, *Storage → Create → Neon (Postgres)* and connect it to the project. This sets `DATABASE_URL` for you.
+4. **Environment variables** – add in *Project → Settings → Environment Variables*:
+   - `NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+   - `NUXT_CLERK_SECRET_KEY`
+5. **Deploy.** The build runs `scripts/migrate.mjs` first, so the database schema is always up to date.
+
+Clerk *development* instances work on any `*.vercel.app` URL. For a *production* Clerk instance you'll add your own domain in Clerk.
+
+See `.env.example` for every variable.
+
+## Develop locally
+
 ```bash
 npm install
-npm run dev
+npm run dev:local     # no Clerk keys or database needed
 ```
 
-## Deploy
-Pushing to `main` builds with `nuxt generate` and publishes to GitHub Pages (see `.github/workflows/deploy.yml`).
+`dev:local` sets `DEV_AUTH_BYPASS=1`: you're signed in as a fake user and data goes to an in-process Postgres in `.data/pglite`. The bypass only exists in `nuxt dev` and is ignored by every production build.
+
+To run against real Clerk and Neon instead, copy `.env.example` to `.env`, fill it in, and run `npm run dev`.
+
+## Tests
+
+```bash
+npm test              # unit tests: bill dates, backup parsing, sync diffing
+npm run dev:local     # in one terminal...
+npm run test:api      # ...and this in another: API tests (isolation, validation, atomicity)
+```
+
+## Database changes
+
+Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `drizzle/`. It's applied on the next deploy.
 
 ## Roadmap
 See GitHub Issues.
