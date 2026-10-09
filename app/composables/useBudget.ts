@@ -16,7 +16,7 @@ export const GOAL_STYLES = [
   { icon: 'grad', color: '#f5a524' }, { icon: 'laptop', color: '#64748b' }, { icon: 'heart', color: '#ec4899' }, { icon: 'shield', color: '#2fb67c' },
 ]
 export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) => s + c.amount, 0) * 100) / 100
-interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[] }
+export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[] }
 
 const KEY = 'budgetnow:v1'
 const uid = () => Math.random().toString(36).slice(2, 10)
