@@ -13,6 +13,8 @@ const take = (cols: Record<string, any>, keys: string[]) => Object.fromEntries(k
  */
 export default defineEventHandler(async (event) => {
   const userId = requireUser(event)
+  const db = await useDb()
+  await enforceUserLimit(event, db, userId, 'sync', 240, 60)
   // Measure the real body rather than trusting a Content-Length header (which can be missing or wrong).
   const raw = (await readRawBody(event, 'utf8')) ?? ''
   if (raw.length > MAX_BODY_BYTES) throw createError({ statusCode: 413, statusMessage: 'Too much data in one request' })
@@ -26,7 +28,6 @@ export default defineEventHandler(async (event) => {
   const putsOf = <K extends string>(t: K) => ops.filter(o => o.t === t && o.op === 'put').map(o => (o as any).row)
   const delsOf = (t: string) => ops.filter(o => o.t === t && o.op === 'del').map(o => (o as any).id as string)
 
-  const db = await useDb()
   await db.transaction(async (tx) => {
     const now = new Date()
 

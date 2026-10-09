@@ -5,6 +5,7 @@ import { bills, debts, expenses, goalContributions, goals, incomes, profiles } f
 export default defineEventHandler(async (event) => {
   const userId = requireUser(event)
   const db = await useDb()
+  await enforceUserLimit(event, db, userId, 'state', 60, 60)
   const [inc, exp, dbt, gl, contribs, bl, prof] = await Promise.all([
     db.select().from(incomes).where(eq(incomes.userId, userId)).orderBy(desc(incomes.date), desc(incomes.createdAt)),
     db.select().from(expenses).where(eq(expenses.userId, userId)).orderBy(desc(expenses.date), desc(expenses.createdAt)),

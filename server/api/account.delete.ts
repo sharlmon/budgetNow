@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
   // Deleting everything must be deliberate: the app sends this header only after the user types DELETE.
   if (getHeader(event, DELETE_CONFIRM.name) !== DELETE_CONFIRM.value) throw createError({ statusCode: 400, statusMessage: 'Confirmation required' })
   const db = await useDb()
+  await enforceUserLimit(event, db, userId, 'account', 5, 3600)
   await db.transaction(async (tx) => {
     await tx.delete(goalContributions).where(eq(goalContributions.userId, userId))
     await tx.delete(goals).where(eq(goals.userId, userId))

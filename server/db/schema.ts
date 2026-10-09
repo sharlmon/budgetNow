@@ -97,3 +97,10 @@ export const bills = pgTable('bills', {
   check('bills_category', sql`${t.category} IN ('needs','wants','debt')`), check('bills_frequency', sql`${t.frequency} IN ('week','month','year')`),
   check('bills_amount', sql`${t.amount} >= 0`), check('bills_anchor', sql`${t.anchorDay} BETWEEN 1 AND 31`),
 ])
+
+// Shared counters for rate limiting. Serverless instances do not share memory, so the limit lives in the database.
+export const rateLimits = pgTable('rate_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull(),
+  windowStart: timestamp('window_start', { withTimezone: true }).notNull().defaultNow(),
+})
