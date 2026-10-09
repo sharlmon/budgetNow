@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="hdr rise"><NuxtLink to="/" class="circ" aria-label="Back"><Icon name="back" :size="22" /></NuxtLink><h1>Settings</h1></div>
+    <div class="rise" style="margin-bottom:12px;--i:1"><InstallCard always /></div>
     <div class="card white rise" style="margin-bottom:12px;--i:1">
       <label class="muted sm" for="nm">Your name</label>
       <input id="nm" v-model="name" class="field" placeholder="What should we call you?" style="margin-top:8px" />

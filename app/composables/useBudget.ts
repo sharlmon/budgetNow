@@ -10,7 +10,13 @@ export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number> }
 export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string }
 export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number }
-interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[] }
+export interface Goal { id: string; name: string; target: number; icon: string; color: string; deadline?: string; contributions: { id: string; amount: number; date: string }[] }
+export const GOAL_STYLES = [
+  { icon: 'target', color: '#ef6a3a' }, { icon: 'house', color: '#5b8def' }, { icon: 'car', color: '#8b5cf6' }, { icon: 'plane', color: '#14b8a6' },
+  { icon: 'grad', color: '#f5a524' }, { icon: 'laptop', color: '#64748b' }, { icon: 'heart', color: '#ec4899' }, { icon: 'shield', color: '#2fb67c' },
+]
+export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) => s + c.amount, 0) * 100) / 100
+interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[] }
 
 const KEY = 'budgetnow:v1'
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -28,7 +34,7 @@ export function suggestSplit(amount: number, minDebt: number): Record<Category, 
 }
 
 export function useBudget() {
-  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [] }))
+  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [] }))
   const loaded = useState('budget-loaded', () => false)
 
   if (import.meta.client && !loaded.value) {
@@ -94,11 +100,34 @@ export function useBudget() {
     state.value.debts = state.value.debts.filter(d => d.id !== id)
   }
 
+  function addGoal(name: string, target: number, icon: string, color: string, deadline?: string) {
+    state.value.goals.push({ id: uid(), name, target, icon, color, deadline: deadline || undefined, contributions: [] })
+  }
+  function removeGoal(id: string) {
+    const i = state.value.goals.findIndex(g => g.id === id)
+    if (i < 0) return () => {}
+    const [g] = state.value.goals.splice(i, 1)
+    return () => { if (g) state.value.goals.splice(Math.min(i, state.value.goals.length), 0, g) }
+  }
+  /** Positive amounts add to the goal, negative withdraw (never below zero saved). */
+  function addToGoal(id: string, amount: number) {
+    const g = state.value.goals.find(x => x.id === id)
+    if (!g) return
+    const amt = amount < 0 ? -Math.min(-amount, goalSaved(g)) : amount
+    if (amt !== 0) g.contributions.push({ id: uid(), amount: round(amt), date: today() })
+  }
+  /** Savings you've set aside from income, minus what's already assigned to goals. */
+  const savingsPot = computed(() => {
+    const allocated = state.value.incomes.reduce((s, i) => s + i.split.savings, 0)
+    const assigned = state.value.goals.reduce((s, g) => s + goalSaved(g), 0)
+    return { allocated, assigned, available: round(allocated - assigned) }
+  })
+
   function resetAll() {
-    state.value = { incomes: [], expenses: [], debts: [] }
+    state.value = { incomes: [], expenses: [], debts: [], goals: [] }
   }
 
-  return { totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  return { addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 const CUR_KEY = 'budgetnow:currency'
@@ -151,4 +180,27 @@ export function showToast(msg: string, undo?: () => void) {
   t.value = { id: Date.now(), msg, undo }
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => { t.value = null }, 4500)
+}
+
+/** What you can still spend today on Needs + Wants, spreading this month's remaining flexible budget over the days left. */
+export function useSafeToSpend() {
+  const { state } = useBudget()
+  return computed(() => {
+    const t = today()
+    const month = ym(t)
+    const [y = 0, m = 0, d = 1] = t.split('-').map(Number)
+    const daysLeft = new Date(y, m, 0).getDate() - d + 1
+    let flex = 0, before = 0, spentToday = 0
+    for (const i of state.value.incomes) if (ym(i.date) === month) flex += i.split.needs + i.split.wants
+    for (const e of state.value.expenses) {
+      if (ym(e.date) !== month || (e.category !== 'needs' && e.category !== 'wants')) continue
+      if (e.date === t) spentToday += e.amount; else before += e.amount
+    }
+    const pool = flex - before
+    const allowance = Math.max(0, pool) / daysLeft
+    const leftToday = allowance - spentToday
+    const tomorrow = daysLeft > 1 ? Math.max(0, pool - spentToday) / (daysLeft - 1) : 0
+    const used = allowance > 0 ? spentToday / allowance : spentToday > 0 ? 1 : 0
+    return { hasBudget: flex > 0, flex, pool, daysLeft, allowance, spentToday, leftToday, used, tomorrow }
+  })
 }
