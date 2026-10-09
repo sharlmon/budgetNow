@@ -29,6 +29,13 @@
       "when": 1791544184227,
       "tag": "0003_debt_apr",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791544471802,
+      "tag": "0004_row_revisions",
+      "breakpoints": true
     }
   ]
 }

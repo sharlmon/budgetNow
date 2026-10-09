@@ -8,7 +8,7 @@ A personal budget tracker. Enter your pay and it's split instantly across **Need
 
 - Every account's data lives in Postgres tables (`incomes`, `expenses`, `debts`, `goals`, `goal_contributions`, `bills`, `profiles`), each keyed by `(user_id, id)`.
 - The app keeps a local copy so it's instant and works offline. When something changes it sends only the changed rows to `POST /api/sync`; on start and whenever you come back to the app it pushes pending changes first, then pulls the latest from `GET /api/state`. Edits made offline are kept and uploaded when you reconnect.
-- Two devices editing the *same row* resolve last-write-wins; everything else merges naturally.
+- Every record has a revision. An edit says which revision it was based on; the server refuses to overwrite a newer one. When two devices edit the same record the app first merges automatically (different fields both kept, debt payments added together, goal contributions combined). Only when both changed the same field differently does it ask on **Home → Review**.
 - `user_id` is always taken from the verified Clerk session on the server, never from the request.
 
 ## Deploy (Vercel + Clerk + Neon)

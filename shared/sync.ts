@@ -8,7 +8,7 @@ export const TABLES: TableName[] = ['incomes', 'expenses', 'debts', 'goals', 'bi
 
 export type Op =
   | { t: TableName; op: 'put'; row: Record<string, any> }
-  | { t: TableName; op: 'del'; id: string }
+  | { t: TableName; op: 'del'; id: string; rev?: number }
   | { t: 'profile'; op: 'put'; row: Profile }
 
 /** JSON with sorted keys so two equal rows always compare equal regardless of key order. */
@@ -23,13 +23,15 @@ export const emptySnap = (): Snap => ({ incomes: [], expenses: [], debts: [], go
 export function diffSnaps(prev: Snap, next: Snap): Op[] {
   const ops: Op[] = []
   for (const t of TABLES) {
+    const prevRows = new Map<string, any>((prev[t] as any[]).map(r => [r.id, r]))
     const before = new Map<string, string>((prev[t] as any[]).map(r => [r.id, canon(r)]))
     const seen = new Set<string>()
     for (const row of next[t] as any[]) {
       seen.add(row.id)
       if (before.get(row.id) !== canon(row)) ops.push({ t, op: 'put', row })
     }
-    for (const id of before.keys()) if (!seen.has(id)) ops.push({ t, op: 'del', id })
+    // A delete carries the revision being deleted, so the server can refuse it if another device edited the row since.
+    for (const id of before.keys()) if (!seen.has(id)) ops.push({ t, op: 'del', id, rev: prevRows.get(id)?.rev })
   }
   if (canon(prev.profile) !== canon(next.profile)) ops.push({ t: 'profile', op: 'put', row: next.profile })
   return ops

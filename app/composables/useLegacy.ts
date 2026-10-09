@@ -4,6 +4,7 @@ const DISMISSED = 'bn:legacy-dismissed'
 
 export function useLegacy() {
   const { state } = useBudget()
+  const { adoptRevs } = useSync()
   const found = useState<{ counts: string; raw: string } | null>('legacy', () => null)
   const dismissed = useState('legacy-dismissed', () => false)
 
@@ -28,7 +29,7 @@ export function useLegacy() {
     const has = state.value.incomes.length + state.value.expenses.length + state.value.debts.length + state.value.goals.length + state.value.bills.length > 0
     if (has && !confirm('This replaces what is currently in your account with the data from this device. Continue?')) return
     const snapshot = JSON.parse(JSON.stringify(state.value))
-    state.value = res.data
+    state.value = adoptRevs(res.data) as typeof res.data
     try {
       const cur = localStorage.getItem('budgetnow:currency'), name = localStorage.getItem('budgetnow:name')
       if (cur && /^[A-Z]{3}$/.test(cur)) currency.value = cur

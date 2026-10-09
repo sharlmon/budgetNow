@@ -6,6 +6,7 @@ if (import.meta.client) {
 
 export function useBackup() {
   const { state } = useBudget()
+  const { adoptRevs } = useSync()
 
   const hasData = computed(() => state.value.incomes.length + state.value.expenses.length + state.value.debts.length + state.value.goals.length + state.value.bills.length > 0)
   const daysSince = computed(() => (lastBackup.value ? Math.floor((Date.now() - new Date(lastBackup.value).getTime()) / 86400000) : null))
@@ -38,7 +39,7 @@ export function useBackup() {
     if (!confirm(`Replace everything in the app with this backup${when}?\n\n${summary}${skipNote}\n\nYou can undo right after.`)) return
     const snapshot = JSON.parse(JSON.stringify(state.value))
     const prevCurrency = currency.value, prevName = userName.value, prevSplit = { ...splitRule.value }
-    state.value = d
+    state.value = adoptRevs(d) as typeof d
     if (res.currency) currency.value = res.currency
     if (res.name !== undefined && res.name) userName.value = res.name
     if (res.split) splitRule.value = res.split

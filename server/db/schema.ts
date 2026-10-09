@@ -4,6 +4,8 @@ import { boolean, check, date, foreignKey, index, integer, numeric, pgTable, pri
 // Every table is keyed by (user_id, id): ids are generated on the client, so they are only unique per user.
 // user_id is the Clerk user id and is always set from the verified session on the server, never from the request body.
 const money = (name: string) => numeric(name, { precision: 14, scale: 2, mode: 'number' }).notNull()
+// Bumped on every change to a row. Clients send the revision they last saw, so the server can tell when two devices edited the same record.
+const rev = () => integer('rev').notNull().default(1)
 const stamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -30,6 +32,7 @@ export const incomes = pgTable('incomes', {
   wants: money('wants'),
   savings: money('savings'),
   debt: money('debt'),
+  rev: rev(),
   ...stamps,
 }, t => [
   primaryKey({ columns: [t.userId, t.id] }), index('incomes_user_date').on(t.userId, t.date),
@@ -45,6 +48,7 @@ export const expenses = pgTable('expenses', {
   date: date('date', { mode: 'string' }).notNull(),
   debtId: text('debt_id'),
   billId: text('bill_id'),
+  rev: rev(),
   ...stamps,
 }, t => [
   primaryKey({ columns: [t.userId, t.id] }), index('expenses_user_date').on(t.userId, t.date),
@@ -60,6 +64,7 @@ export const debts = pgTable('debts', {
   minPayment: money('min_payment'),
   // Annual percentage rate, used by the payoff planner. Optional: unknown means 0%.
   apr: numeric('apr', { precision: 6, scale: 3, mode: 'number' }),
+  rev: rev(),
   ...stamps,
 }, t => [primaryKey({ columns: [t.userId, t.id] }), check('debts_nonneg', sql`${t.balance} >= 0 AND ${t.minPayment} >= 0`), check('debts_apr', sql`${t.apr} IS NULL OR (${t.apr} >= 0 AND ${t.apr} <= 100)`)])
 
@@ -71,6 +76,7 @@ export const goals = pgTable('goals', {
   icon: text('icon').notNull().default('target'),
   color: text('color').notNull().default('#ef6a3a'),
   deadline: date('deadline', { mode: 'string' }),
+  rev: rev(),
   ...stamps,
 }, t => [primaryKey({ columns: [t.userId, t.id] }), check('goals_target', sql`${t.target} > 0`)])
 
@@ -97,6 +103,7 @@ export const bills = pgTable('bills', {
   anchorDay: integer('anchor_day').notNull(),
   auto: boolean('auto').notNull().default(false),
   debtId: text('debt_id'),
+  rev: rev(),
   ...stamps,
 }, t => [
   primaryKey({ columns: [t.userId, t.id] }),

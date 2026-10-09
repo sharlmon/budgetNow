@@ -17,6 +17,12 @@
       <BillRow v-for="b in dueSoon.slice(0, 3)" :key="b.id" :bill="b" compact />
       <NuxtLink v-if="dueSoon.length > 3" to="/bills" class="link" style="margin-top:6px">+{{ dueSoon.length - 3 }} more</NuxtLink>
     </div>
+    <div v-if="syncConflicts.length" class="card white clash rise" style="--i:3" role="alert">
+      <span class="cl"><Icon name="repeat" :size="20" /></span>
+      <div class="grow"><strong>{{ syncConflicts.length }} change{{ syncConflicts.length === 1 ? '' : 's' }} clashed</strong><div class="muted sm">Another device edited the same thing as you.</div></div>
+      <button class="btn sm" @click="conflictSheet = true">Review</button>
+    </div>
+
     <div v-if="!state.incomes.length" class="card empty rise" style="margin-top:22px;--i:3">
       <div class="art"><Icon name="coins" :size="28" /></div>
       <h2 style="margin-bottom:6px">Let's plan your first pay</h2>
@@ -69,6 +75,7 @@ const month = computed(() => today().slice(0, 7))
 const stats = useMonthStats(month)
 const safe = useSafeToSpend()
 const { lockNow } = useAppLock()
+const conflictSheet = useState('conflictSheet', () => false)
 const dueSoon = computed(() => state.value.bills.filter(b => daysBetween(today(), b.nextDue) <= 7).sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
 const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
 const auth = useAppAuth()
@@ -86,6 +93,8 @@ const secondInc = computed(() => mini(state.value.incomes[1]))
 .avimg { width:100%; height:100%; border-radius:50%; object-fit:cover; }
 .chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
 .chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
+.clash { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; background:linear-gradient(95deg,#fff,#fff4e8); border-color:#f6dcb9; }
+.cl { width:42px; height:42px; border-radius:14px; background:#fff1da; color:#d98a00; display:grid; place-items:center; flex:none; }
 .glink { color:inherit; text-decoration:none; }
 .goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:#fff; padding:14px; }
 .gp { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; }

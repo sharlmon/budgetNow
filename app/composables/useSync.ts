@@ -1,4 +1,5 @@
-import { diffSnaps, emptySnap, type Snap } from '#shared/sync'
+import { diffSnaps, emptySnap, TABLES, type Snap } from '#shared/sync'
+import { reconcile, type Conflict, type PushResponse } from '#shared/reconcile'
 import { API_MARKER, DELETE_CONFIRM } from '#shared/security'
 import { DEFAULT_SPLIT, isValidSplit } from '../utils/split'
 
@@ -11,6 +12,8 @@ export const syncStatus = ref<Status>('idle')
 export const syncReady = ref(false)
 export const syncPending = ref(0)
 export const lastSyncedAt = ref<string | null>(null)
+/** Edits where two devices changed the same thing differently. Shown to the user to resolve; kept across reloads. */
+export const syncConflicts = ref<Conflict[]>([])
 
 let uid: string | null = null
 let synced: Snap = emptySnap()
@@ -41,7 +44,7 @@ export function useSync() {
     userName.value = s.profile.name
     splitRule.value = isValidSplit(s.profile.split) ? { ...s.profile.split } : { ...DEFAULT_SPLIT }
   }
-  const persist = () => { if (uid) { write(key('cache', uid), snapshot()); write(key('synced', uid), synced) } }
+  const persist = () => { if (uid) { write(key('cache', uid), snapshot()); write(key('synced', uid), synced); write(`bn:conflicts:${uid}`, syncConflicts.value) } }
   const refreshPending = () => { syncPending.value = diffSnaps(synced, snapshot()).length }
 
   /** Records bills that came due while the app was closed. */
@@ -61,12 +64,26 @@ export function useSync() {
     syncStatus.value = 'syncing'
     const owner = uid
     try {
-      for (let i = 0; i < ops.length; i += 500) await $fetch('/api/sync', { method: 'POST', headers: { [API_MARKER.name]: API_MARKER.value }, body: { ops: ops.slice(i, i + 500) } })
+      const res: PushResponse = { revs: {}, conflicts: [] }
+      for (let i = 0; i < ops.length; i += 500) {
+        const part = await $fetch<PushResponse>('/api/sync', { method: 'POST', headers: { [API_MARKER.name]: API_MARKER.value }, body: { ops: ops.slice(i, i + 500) } })
+        for (const [t, m] of Object.entries(part.revs ?? {})) res.revs![t] = { ...(res.revs![t] ?? {}), ...m }
+        res.conflicts!.push(...(part.conflicts ?? []))
+      }
       if (uid !== owner) return false
-      synced = sent
+      // Apply the server's answer: new revisions, automatic merges, and any real clashes for the user to decide.
+      const out = reconcile({ prevSynced: synced, sent, live: snapshot(), res })
+      synced = out.synced
+      apply(out.live)
+      if (out.conflicts.length) {
+        const known = new Set(syncConflicts.value.map(c => c.key))
+        syncConflicts.value = [...syncConflicts.value, ...out.conflicts.filter(c => !known.has(c.key))]
+        showToast(`${out.conflicts.length} change${out.conflicts.length === 1 ? ' was' : 's were'} replaced by newer edits from another device. Tap Review on Home.`)
+      } else if (out.merged) showToast('Combined your edits with changes from another device')
       persist()
       retries = 0
       lastSyncedAt.value = new Date().toISOString()
+      if (out.merged) schedulePush() // send the merged rows
       refreshPending()
       syncStatus.value = syncPending.value ? 'syncing' : 'synced'
       return true
@@ -142,6 +159,7 @@ export function useSync() {
     uid = userId
     const cached = read(key('cache', userId))
     synced = read(key('synced', userId)) ?? emptySnap()
+    try { syncConflicts.value = JSON.parse(localStorage.getItem(`bn:conflicts:${userId}`) || '[]') } catch { syncConflicts.value = [] }
     apply(cached ?? emptySnap())
     try { localStorage.setItem('bn:lastUser', userId) } catch { /* ignore */ }
     wire()
@@ -157,6 +175,7 @@ export function useSync() {
     uid = null
     synced = emptySnap()
     syncReady.value = false
+    syncConflicts.value = []
     syncStatus.value = 'idle'
     syncPending.value = 0
     locked.value = false
@@ -171,7 +190,7 @@ export function useSync() {
     if (uid) {
       await push()
       if (syncPending.value > 0 && !confirm(`${syncPending.value} change${syncPending.value === 1 ? '' : 's'} haven't synced yet and will be lost if you sign out. Sign out anyway?`)) return false
-      try { localStorage.removeItem(key('cache', uid)); localStorage.removeItem(key('synced', uid)); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+      try { localStorage.removeItem(key('cache', uid)); localStorage.removeItem(key('synced', uid)); localStorage.removeItem(`bn:conflicts:${uid}`); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
       clearLock(uid)
     }
     stopSync()
@@ -191,10 +210,36 @@ export function useSync() {
       uid = owner
       throw e
     }
-    try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+    try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem(`bn:conflicts:${owner}`); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
     clearLock(owner)
     stopSync()
   }
 
-  return { startSync, stopSync, syncNow, prepareSignOut, deleteAccount }
+  const rowsOf = (t: string): any[] => (state.value as any)[t]
+
+  /** Keep the other device's version (already showing): just dismiss. */
+  function keepTheirs(key: string) { syncConflicts.value = syncConflicts.value.filter(c => c.key !== key); persist() }
+
+  /** Put my version back, as a normal edit based on the server's current revision. */
+  function useMine(key: string) {
+    const c = syncConflicts.value.find(x => x.key === key)
+    if (!c) return
+    const rows = rowsOf(c.t)
+    const at = rows.findIndex(r => r.id === c.id)
+    if (c.kind === 'edit' && at >= 0) rows[at] = { ...c.mine, rev: rows[at].rev }
+    else if (c.kind === 'removed-elsewhere') rows.unshift({ ...c.mine, rev: undefined }) // recreated as a new row
+    else if (c.kind === 'delete-blocked' && at >= 0) rows.splice(at, 1) // delete again, now against the current revision
+    keepTheirs(key)
+  }
+
+  /** After a backup restore or an import, rows that already exist on the server must keep their revision, or they would look like conflicting new rows. */
+  function adoptRevs(data: Record<string, any[]>) {
+    for (const t of TABLES) for (const row of data[t] ?? []) {
+      const known = ((synced as any)[t] as any[]).find(r => r.id === row.id)
+      if (known?.rev !== undefined) row.rev = known.rev
+    }
+    return data
+  }
+
+  return { startSync, stopSync, syncNow, prepareSignOut, deleteAccount, keepTheirs, useMine, adoptRevs }
 }

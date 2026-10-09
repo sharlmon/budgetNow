@@ -7,6 +7,7 @@
       <TabBar />
       <AddSheet />
       <Toast />
+      <ConflictSheet />
     </div>
     <LockScreen />
   </div>
