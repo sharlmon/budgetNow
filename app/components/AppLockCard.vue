@@ -12,6 +12,11 @@
       <select id="al" class="field" :value="lockTimeout" @change="e => setTimeoutSeconds(Number((e.target as HTMLSelectElement).value))">
         <option v-for="o in options" :key="o.v" :value="o.v">{{ o.l }}</option>
       </select>
+      <div v-if="bioSupported" class="row biorow">
+        <span class="lk fp"><Icon name="fingerprint" :size="20" /></span>
+        <div class="grow"><strong class="sm">Face ID or fingerprint</strong><div class="muted sm">Unlock faster. Your PIN still works.</div></div>
+        <Toggle :model-value="bioEnabled" aria-label="Face ID or fingerprint" @update:model-value="toggleBio" />
+      </div>
       <div class="row" style="margin-top:12px">
         <button class="btn soft sm" style="flex:1" @click="lockNow"><Icon name="lock" :size="15" /> Lock now</button>
         <button class="btn soft sm" style="flex:1" @click="open('change', 'old')">Change PIN</button>
@@ -38,7 +43,7 @@
 type Mode = 'setup' | 'change' | 'disable'
 type Step = 'old' | 'new' | 'confirm'
 
-const { verify, setup, remove, setTimeoutSeconds, lockNow } = useAppLock()
+const { verify, setup, remove, setTimeoutSeconds, lockNow, enableBio, disableBio } = useAppLock()
 const options = [{ v: 0, l: 'As soon as I leave' }, { v: 60, l: '1 minute' }, { v: 300, l: '5 minutes' }, { v: 900, l: '15 minutes' }, { v: -1, l: 'Only when I reopen the app' }]
 
 const dialog = ref<{ mode: Mode; step: Step } | null>(null)
@@ -65,6 +70,12 @@ const subtitle = computed(() => {
 
 function open(mode: Mode, step: Step) { error.value = ''; first.value = ''; dialog.value = { mode, step } }
 function close() { dialog.value = null; error.value = '' }
+async function toggleBio(on: boolean) {
+  if (!on) { disableBio(); showToast('Face ID or fingerprint turned off'); return }
+  const r = await enableBio()
+  if (r === 'ok') showToast('Face ID or fingerprint is on')
+  else if (r === 'failed') alert("This device couldn't set that up. You can keep using your PIN.")
+}
 function toggle(on: boolean) { on ? open('setup', 'new') : open('disable', 'old') }
 
 async function checkCurrent(pin: string): Promise<boolean> {
@@ -106,6 +117,8 @@ async function submit(pin: string) {
 .lockcard { margin-bottom:12px; }
 .lk { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
 .note { margin:12px 0 14px; }
+.biorow { margin-top:14px; padding:12px 0 2px; border-top:1px solid var(--line); }
+.fp { background:#eef2ff; color:#5b8def; }
 label { display:block; margin-bottom:6px; }
 .scrim { position:fixed; inset:0; z-index:90; background:rgba(15,15,25,.5); display:flex; align-items:flex-end; justify-content:center; }
 .sheet { position:relative; width:100%; max-width:480px; background:#fff; border-radius:28px 28px 0 0; padding:26px 24px calc(28px + env(safe-area-inset-bottom)); text-align:center; }

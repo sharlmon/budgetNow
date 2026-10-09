@@ -11,6 +11,8 @@ export interface LockConfig {
   len: number
   /** Seconds away from the app before it locks again. 0 = as soon as you leave, -1 = only when reopened. */
   timeout: number
+  /** Credential id for Face ID / fingerprint unlock, when the user has turned it on for this device. */
+  bio?: string
 }
 
 const enc = new TextEncoder()
