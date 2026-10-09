@@ -1,7 +1,7 @@
 <template>
   <div class="ringw" :style="{ width: size + 'px', height: size + 'px' }">
     <svg :viewBox="`0 0 ${size} ${size}`">
-      <circle :cx="size / 2" :cy="size / 2" :r="r" fill="none" stroke="#efeff3" :stroke-width="stroke" />
+      <circle :cx="size / 2" :cy="size / 2" :r="r" fill="none" style="stroke:var(--track)" :stroke-width="stroke" />
       <circle :cx="size / 2" :cy="size / 2" :r="r" fill="none" :stroke="color" :stroke-width="stroke" stroke-linecap="round" :transform="`rotate(-90 ${size / 2} ${size / 2})`"
         :stroke-dasharray="`${Math.min(1, Math.max(0, pct)) * C} ${C}`" class="arc" :style="{ '--C': C }" />
     </svg>

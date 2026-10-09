@@ -8,6 +8,41 @@
       "when": 1791534769573,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791541865697,
+      "tag": "0001_rate_limits",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791543857730,
+      "tag": "0002_split_rule",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791544184227,
+      "tag": "0003_debt_apr",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791544471802,
+      "tag": "0004_row_revisions",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791550603330,
+      "tag": "0005_default_currency_kes",
+      "breakpoints": true
     }
   ]
 }

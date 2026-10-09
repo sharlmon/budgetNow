@@ -57,12 +57,12 @@ function remove() { const name = props.bill.name; const undo = removeBill(props.
 </script>
 
 <style scoped>
-.bill { background:#fff; border:1px solid var(--line); border-radius:20px; padding:14px; margin-bottom:10px; box-shadow:0 1px 2px rgba(20,20,40,.03); transition:border-color .3s; }
+.bill { background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:14px; margin-bottom:10px; box-shadow:0 1px 2px rgba(20,20,40,.03); transition:border-color .3s; }
 .bill.compact { border:0; border-radius:0; box-shadow:none; margin:0; padding:12px 0; background:none; }
 .bill.compact + .bill.compact { border-top:1px solid var(--line); }
 .nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.st { font-weight:600; color:var(--muted); } .warn .st { color:#d98a00; } .over .st { color:var(--bad); }
-.over:not(.compact) { border-color:#f6c7ca; }
+.st { font-weight:600; color:var(--muted); } .warn .st { color:var(--warn-ink); } .over .st { color:var(--bad); }
+.over:not(.compact) { border-color:var(--bad-line); }
 .inl { display:inline-block; vertical-align:-1px; }
 .end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
 .paybtn { padding:8px 14px; border-radius:12px; font-size:.82rem; }

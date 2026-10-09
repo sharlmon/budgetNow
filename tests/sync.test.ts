@@ -21,7 +21,15 @@ describe('diffSnaps', () => {
     const next = { ...base, goals: [{ ...g, contributions: [...g.contributions, { id: 'c2', amount: 2, date: '2026-10-02' }] }] }
     expect(diffSnaps({ ...base, goals: [g] }, next)).toHaveLength(1)
   })
-  it('syncs profile changes', () => expect(diffSnaps(base, { ...base, profile: { currency: 'ZAR', name: '' } })).toEqual([{ t: 'profile', op: 'put', row: { currency: 'ZAR', name: '' } }]))
+  it('syncs profile changes', () => {
+    const next = { ...base, profile: { ...base.profile, currency: 'ZAR' } }
+    expect(diffSnaps(base, next)).toEqual([{ t: 'profile', op: 'put', row: next.profile }])
+  })
+  it('syncs a changed split rule as a profile change', () => {
+    const next = { ...base, profile: { ...base.profile, split: { needs: 60, wants: 20, savings: 20 } } }
+    expect(diffSnaps(base, next)).toEqual([{ t: 'profile', op: 'put', row: next.profile }])
+    expect(diffSnaps(next, JSON.parse(JSON.stringify(next)))).toEqual([])
+  })
   it('replacing a row is one delete and one put', () => {
     const rows = Array.from({ length: 5 }, (_, i) => ({ id: 'e' + i, label: '', amount: 1, category: 'needs', date: '2026-10-01' }))
     const ops = diffSnaps({ ...base, expenses: rows }, { ...base, expenses: [...rows.slice(1), { ...rows[0], id: 'new' }] })

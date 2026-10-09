@@ -1,5 +1,6 @@
 {
   "name": "budgetnow",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +14,9 @@
     "test": "vitest run",
     "test:api": "node tests/api.mjs",
     "dev:local": "DEV_AUTH_BYPASS=1 nuxt dev",
-    "test:security": "node tests/security.mjs"
+    "test:security": "node tests/security.mjs",
+    "test:webhook": "node tests/webhook.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@clerk/nuxt": "^3.1.11",
@@ -29,7 +32,8 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "drizzle-kit": "^0.31.11",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "@playwright/test": "^1.64.0"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -23,6 +23,9 @@ export default defineEventHandler((event) => {
   }
 
   if (!isWrite) return
+  // Clerk's servers call this one route. They are not a browser, so there is no Origin or marker header; the request is
+  // authenticated by its Svix signature inside the handler instead. Everything else keeps the full checks.
+  if (method === 'POST' && path === '/api/webhooks/clerk') return
   const reason = crossSiteReason({ method, host: getRequestHost(event), origin: getHeader(event, 'origin'), fetchSite: getHeader(event, 'sec-fetch-site') })
   if (reason) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   if (getHeader(event, API_MARKER.name) !== API_MARKER.value) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })

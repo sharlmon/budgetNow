@@ -8,7 +8,7 @@ A personal budget tracker. Enter your pay and it's split instantly across **Need
 
 - Every account's data lives in Postgres tables (`incomes`, `expenses`, `debts`, `goals`, `goal_contributions`, `bills`, `profiles`), each keyed by `(user_id, id)`.
 - The app keeps a local copy so it's instant and works offline. When something changes it sends only the changed rows to `POST /api/sync`; on start and whenever you come back to the app it pushes pending changes first, then pulls the latest from `GET /api/state`. Edits made offline are kept and uploaded when you reconnect.
-- Two devices editing the *same row* resolve last-write-wins; everything else merges naturally.
+- Every record has a revision. An edit says which revision it was based on; the server refuses to overwrite a newer one. When two devices edit the same record the app first merges automatically (different fields both kept, debt payments added together, goal contributions combined). Only when both changed the same field differently does it ask on **Home → Review**.
 - `user_id` is always taken from the verified Clerk session on the server, never from the request.
 
 ## Deploy (Vercel + Clerk + Neon)
@@ -54,6 +54,15 @@ npm run test:security # attack tests: CSRF, injection, oversized bodies, rate li
 - `unplugin` is listed as a direct dependency on purpose: it pins one consistent copy at the top of the tree. Without it npm 10.9 (used in CI) writes a lockfile that fails `npm ci` ("lock file's unplugin@2.3.11 does not satisfy unplugin@3.4.0"). If you change dependencies, regenerate the lockfile in a clean folder with CI's npm (`npx npm@10.9.2 install --package-lock-only --ignore-scripts`), because a lockfile created on one OS can omit the native binaries other platforms need.
 - `overrides` in `package.json` force a patched `simple-git`.
 
+## Clerk webhook (delete data when an account is deleted)
+
+The in-app **Delete account** removes a user's data and then their Clerk user. If someone deletes their Clerk account some other way (for example from Clerk's own profile screen), a webhook removes their data too:
+
+1. Clerk dashboard → **Webhooks** → **Add endpoint**: `https://<your-domain>/api/webhooks/clerk`, subscribe to **user.deleted**.
+2. Copy the endpoint's **signing secret** into the `NUXT_CLERK_WEBHOOK_SIGNING_SECRET` environment variable on Vercel and redeploy.
+
+Requests are verified with the Svix signature (HMAC over id, timestamp and body, with a 5 minute window against replays). Without the secret the endpoint refuses everything.
+
 ## Database changes
 
 Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `drizzle/`. It's applied on the next deploy.
@@ -69,6 +78,16 @@ Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `d
 ## App lock
 
 Optional PIN lock (Settings → App lock). The PIN is hashed with PBKDF2 (150k iterations, random salt) and stored in this browser only, so it never syncs and each device sets its own. Wrong guesses are throttled (30s after the fifth, doubling to 15 min). It locks on open and after a chosen time away, and "Forgot PIN" signs out so Clerk re-verifies the user. Optionally, Face ID / fingerprint unlock uses a WebAuthn platform credential bound to the site's hostname (`app/utils/webauthn.ts`); the app only accepts an assertion that is fresh, for this site, and carries the user-verified flag. If the domain changes, turn it off and on again. It is a screen lock, not encryption of on-device data.
+
+## Versions and updates
+
+The version lives in `package.json` ([Semantic Versioning](https://semver.org)): patch for fixes, minor for new features, major for breaking changes. To release:
+
+1. Bump `version` in `package.json`.
+2. Add an entry at the top of `shared/releases.ts` (shown in Settings → About → What's new) and a matching heading in `CHANGELOG.md`. A test fails if these three disagree.
+3. Merge, then tag it: `git tag v1.1.0 && git push --tags` (optionally publish a GitHub release).
+
+Open copies of the app learn about a new deployment from `/version.json` (never cached; it reports the version and the build). They check a little after opening, whenever you return to the app, and every 15 minutes. A different build shows **"Version X is available"** with **Update** and **Later**; after updating, the first open says **"Updated to version X"** once, with a link to what's new. A redeploy without a version bump still shows "An update is available".
 
 ## Roadmap
 See GitHub Issues.

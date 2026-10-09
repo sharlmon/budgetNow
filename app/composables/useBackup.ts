@@ -6,6 +6,7 @@ if (import.meta.client) {
 
 export function useBackup() {
   const { state } = useBudget()
+  const { adoptRevs } = useSync()
 
   const hasData = computed(() => state.value.incomes.length + state.value.expenses.length + state.value.debts.length + state.value.goals.length + state.value.bills.length > 0)
   const daysSince = computed(() => (lastBackup.value ? Math.floor((Date.now() - new Date(lastBackup.value).getTime()) / 86400000) : null))
@@ -13,7 +14,7 @@ export function useBackup() {
   const needsBackup = computed(() => hasData.value && state.value.incomes.length + state.value.expenses.length >= 3 && (daysSince.value === null || daysSince.value > 30))
 
   function exportBackup() {
-    const blob = new Blob([JSON.stringify(buildBackup(state.value, currency.value, userName.value), null, 2)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(buildBackup(state.value, currency.value, userName.value, splitRule.value), null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -37,11 +38,12 @@ export function useBackup() {
     const skipNote = res.skipped ? `\n\n${res.skipped} unreadable record${res.skipped === 1 ? ' was' : 's were'} skipped.` : ''
     if (!confirm(`Replace everything in the app with this backup${when}?\n\n${summary}${skipNote}\n\nYou can undo right after.`)) return
     const snapshot = JSON.parse(JSON.stringify(state.value))
-    const prevCurrency = currency.value, prevName = userName.value
-    state.value = d
+    const prevCurrency = currency.value, prevName = userName.value, prevSplit = { ...splitRule.value }
+    state.value = adoptRevs(d) as typeof d
     if (res.currency) currency.value = res.currency
     if (res.name !== undefined && res.name) userName.value = res.name
-    showToast('Backup restored', () => { state.value = snapshot; currency.value = prevCurrency; userName.value = prevName })
+    if (res.split) splitRule.value = res.split
+    showToast('Backup restored', () => { state.value = snapshot; currency.value = prevCurrency; userName.value = prevName; splitRule.value = prevSplit })
   }
 
   return { hasData, daysSince, needsBackup, exportBackup, importFile }

@@ -27,6 +27,23 @@ describe('backup file parsing', () => {
     expect(r.name).toBe('Sharl')
   })
 
+  it('carries the split rule and drops an invalid one', () => {
+    const good: any = parseBackup(JSON.stringify(buildBackup(state, 'USD', '', { needs: 60, wants: 20, savings: 20 })))
+    expect(good.split).toEqual({ needs: 60, wants: 20, savings: 20 })
+    const noSplit: any = parseBackup(JSON.stringify(buildBackup(state, 'USD', '')))
+    expect(noSplit.split).toBeUndefined()
+    for (const bad of [{ needs: 60, wants: 60, savings: 60 }, { needs: 'a', wants: 1, savings: 1 }, { needs: 50.5, wants: 29.5, savings: 20 }]) {
+      expect(parseBackup(wrap(state, { split: bad }) ).ok && (parseBackup(wrap(state, { split: bad })) as any).split).toBeUndefined()
+    }
+  })
+
+  it('keeps a debt interest rate and drops an invalid one', () => {
+    const withRate: any = { ...state, debts: [{ id: 'z', name: 'Card', balance: 100, minPayment: 5, apr: 19.9 }, { id: 'y', name: 'Bad', balance: 100, minPayment: 5, apr: 250 }, { id: 'x', name: 'Text', balance: 100, minPayment: 5, apr: '9' }] }
+    const r: any = parseBackup(JSON.stringify(buildBackup(withRate, 'USD', '')))
+    expect(r.data.debts.map((d: any) => d.apr)).toEqual([19.9, undefined, undefined])
+    expect(r.skipped).toBe(0) // an unreadable rate does not discard the whole debt
+  })
+
   it('rejects files that are not a BudgetNow backup', () => {
     expect(parseBackup('not json').ok).toBe(false)
     expect(parseBackup('{"hello":1}').ok).toBe(false)

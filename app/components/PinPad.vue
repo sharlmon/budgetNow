@@ -46,11 +46,11 @@ defineExpose({
 <style scoped>
 .pad { width:100%; max-width:320px; margin:0 auto; }
 .dots { display:flex; justify-content:center; gap:16px; margin:6px 0 28px; }
-.dots i { width:15px; height:15px; border-radius:50%; border:2px solid #d9d9e1; transition:all .2s var(--spring); }
+.dots i { width:15px; height:15px; border-radius:50%; border:2px solid color-mix(in srgb, var(--muted) 45%, transparent); transition:all .2s var(--spring); }
 .dots i.on { background:var(--accent); border-color:var(--accent); transform:scale(1.15); }
 .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:10px 14px; }
-.keys button { height:68px; border-radius:50%; border:0; background:#f3f3f7; font:inherit; font-size:1.7rem; font-weight:500; color:var(--ink); cursor:pointer; display:grid; place-items:center; transition:transform .15s var(--spring), background .15s; }
-.keys button:active { transform:scale(.9); background:#e8e8ef; }
+.keys button { height:68px; border-radius:50%; border:0; background:var(--soft); font:inherit; font-size:1.7rem; font-weight:500; color:var(--ink); cursor:pointer; display:grid; place-items:center; transition:transform .15s var(--spring), background .15s; }
+.keys button:active { transform:scale(.9); background:var(--track); }
 .keys button:empty { visibility:hidden; }
 .keys button[aria-label='Delete'] { background:none; }
 .keys button:disabled { opacity:.4; }

@@ -52,7 +52,8 @@
           <Donut :segments="segments" :size="190">
             <small class="muted">Total</small><strong style="font-size:1.25rem">{{ money(amount) }}</strong>
           </Donut>
-          <p v-if="totalMinDebt > 0" class="hint" style="margin-top:10px">Debt minimums ({{ money(totalMinDebt) }}) are covered first, then 50/30/20.</p>
+          <p v-if="totalMinDebt > 0" class="hint" style="margin-top:10px">Debt minimums ({{ money(totalMinDebt) }}) are covered first, then {{ splitLabel(splitRule) }} (change it in Settings).</p>
+          <p v-else class="hint" style="margin-top:10px">Split {{ splitLabel(splitRule) }} between Needs, Wants and Savings (change it in Settings).</p>
           <div v-for="c in CATEGORIES" :key="c.key" class="cat">
             <div class="row">
               <CatIcon :cat="c.key" :size="40" />
@@ -70,10 +71,12 @@
 </template>
 
 <script setup lang="ts">
+import { splitLabel, suggestSplit } from '../utils/split'
+import { keypadSymbol } from '../utils/money'
 const sheet = useSheet()
 const mode = computed({ get: () => sheet.value.mode, set: (v: string) => { sheet.value.mode = v as 'income' | 'expense' } })
 const { totalMinDebt, addIncome, addExpense } = useBudget()
-const symbol = computed(() => (0).toLocaleString(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: 0 }).replace(/[\d\s.,]/g, ''))
+const symbol = computed(() => keypadSymbol(currency.value))
 
 const step = ref(1)
 const str = ref('')
@@ -101,7 +104,7 @@ const split = reactive<Record<Category, number>>({ needs: 0, wants: 0, savings: 
 const r2 = (n: number) => Math.round(n * 100) / 100
 const pct = (k: Category) => (amount.value > 0 ? (split[k] / amount.value) * 100 : 0)
 const segments = computed(() => CATEGORIES.map(c => ({ value: split[c.key], color: c.color })))
-function resetSplit() { Object.assign(split, suggestSplit(amount.value, totalMinDebt.value)) }
+function resetSplit() { Object.assign(split, suggestSplit(amount.value, totalMinDebt.value, splitRule.value)) }
 function toBreakdown() { resetSplit(); step.value = 2 }
 /** Set one category and spread the change across the others so the total always matches. */
 function setCat(k: Category, v: number) {
@@ -144,7 +147,7 @@ function close() {
 .sub { text-align:center; opacity:.85; font-size:.85rem; }
 .lbl { display:block; margin:0 auto; width:80%; text-align:center; background:rgba(255,255,255,.2); border:0; color:#fff; border-radius:99px; padding:10px 14px; font:inherit; font-size:.9rem; outline:none; }
 .lbl::placeholder { color:rgba(255,255,255,.8); }
-.panel { flex:1; overflow:auto; background:#fff; border-radius:28px 28px 0 0; margin-top:-24px; padding:20px 18px calc(18px + env(safe-area-inset-bottom)); }
+.panel { flex:1; overflow:auto; background:var(--surface); border-radius:28px 28px 0 0; margin-top:-24px; padding:20px 18px calc(18px + env(safe-area-inset-bottom)); }
 .pills { display:flex; gap:10px; }
 .pill { flex:1; position:relative; display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line); border-radius:99px; padding:11px 16px; font-size:.85rem; font-weight:500; cursor:pointer; }
 .pl { display:inline-flex; align-items:center; gap:8px; } .pill svg { color:var(--muted); } .pl svg { color:var(--accent); }
@@ -155,9 +158,9 @@ function close() {
 .keys button { display:grid; place-items:center; background:none; border:0; font:inherit; font-size:1.7rem; font-weight:500; padding:14px 0; cursor:pointer; color:var(--ink); border-radius:18px; transition:background .15s, transform .15s var(--spring); }
 .keys button:active { background:var(--card); transform:scale(.9); }
 .cat { padding:10px 0; } .cat + .cat { border-top:1px solid var(--line); }
-.cat input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:99px; margin:12px 0 4px; outline:none; background:linear-gradient(to right,var(--c) var(--p),#ebebef var(--p)); }
-.cat input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:3px solid var(--c); box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; }
-.cat input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--c); cursor:pointer; }
+.cat input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:99px; margin:12px 0 4px; outline:none; background:linear-gradient(to right,var(--c) var(--p),var(--track) var(--p)); }
+.cat input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--surface); border:3px solid var(--c); box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; }
+.cat input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:var(--surface); border:3px solid var(--c); cursor:pointer; }
 .slide-enter-active { transition:transform .5s cubic-bezier(.2,1,.3,1), opacity .3s; } .slide-leave-active { transition:transform .3s ease-in, opacity .3s; }
 .slide-enter-from,.slide-leave-to { transform:translateY(100%); opacity:.6; }
 </style>

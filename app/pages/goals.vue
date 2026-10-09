@@ -46,7 +46,7 @@
         <button class="icon-btn" aria-label="Delete goal" @click="remove(g)"><Icon name="trash" :size="15" /></button>
       </div>
       <div v-if="!done(g)" class="row" style="margin-top:14px">
-        <AmountInput v-model="amt[g.id]" placeholder="Amount" />
+        <AmountInput :model-value="amt[g.id] ?? 0" placeholder="Amount" @update:model-value="v => (amt[g.id] = v)" />
         <button v-if="savingsPot.available > 0" class="btn soft sm" @click="amt[g.id] = Math.min(savingsPot.available, g.target - goalSaved(g))">Max</button>
         <button class="btn sm" :disabled="!(amt[g.id] > 0)" @click="contribute(g, amt[g.id] ?? 0)"><Icon name="plus" :size="16" :stroke="2.6" /> Add</button>
       </div>

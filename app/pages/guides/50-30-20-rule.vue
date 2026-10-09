@@ -29,8 +29,8 @@
       <p class="muted sm" style="margin:12px 0 0">Want this applied to every pay automatically? <NuxtLink to="/sign-up">BudgetNow does it for you</NuxtLink>.</p>
     </div>
 
-    <h2>Example: a {{ fmtUsd(3000) }} monthly income</h2>
-    <p>With {{ fmtUsd(3000) }} after tax, the rule gives you {{ fmtUsd(1500) }} for needs, {{ fmtUsd(900) }} for wants, and {{ fmtUsd(600) }} for savings and debt.</p>
+    <h2>Example: a {{ fmtKes(100000) }} monthly income</h2>
+    <p>With {{ fmtKes(100000) }} after tax, the rule gives you {{ fmtKes(50000) }} for needs, {{ fmtKes(30000) }} for wants, and {{ fmtKes(20000) }} for savings and debt.</p>
 
     <h2>How to apply it in four steps</h2>
     <ol>
@@ -61,6 +61,7 @@
 
 <script setup lang="ts">
 import { SITE } from '#shared/site'
+import { formatMoney } from '../../utils/money'
 
 definePageMeta({ layout: 'public' })
 
@@ -88,11 +89,11 @@ useSeo({
   ],
 })
 
-const income = ref(3000)
-const cur = ref('USD')
+const income = ref(100000)
+const cur = ref('KES')
 const rows = [{ n: 'Needs', p: 50, c: '#ef6a3a' }, { n: 'Wants', p: 30, c: '#f5c242' }, { n: 'Savings and debt', p: 20, c: '#2fb67c' }]
-const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: cur.value, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0)
-const fmtUsd = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+const fmt = (n: number) => formatMoney(Math.round(Number.isFinite(n) ? n : 0), cur.value)
+const fmtKes = (n: number) => formatMoney(n, 'KES')
 </script>
 
 <style scoped>
@@ -103,7 +104,7 @@ const fmtUsd = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency'
 .out { margin-top:14px; display:grid; gap:2px; }
 .o { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
 .sw { width:10px; height:10px; border-radius:4px; } .on { flex:1; } .on small { color:var(--muted); margin-left:4px; }
-details { background:#fff; border:1px solid var(--line); border-radius:16px; padding:0 16px; margin-bottom:10px; }
+details { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:0 16px; margin-bottom:10px; }
 summary { cursor:pointer; padding:14px 0; font-weight:600; } details p { margin:0 0 14px; }
-.cta { margin:40px 0 0; text-align:center; background:linear-gradient(95deg,#fff0e8,#fff8f4); border-color:#fbdfd0; padding:26px 20px; }
+.cta { margin:40px 0 0; text-align:center; background:linear-gradient(95deg,var(--tint-accent-soft),var(--tint-accent-soft)); border-color:var(--tint-accent-line); padding:26px 20px; }
 </style>

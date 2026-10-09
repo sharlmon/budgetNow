@@ -1,7 +1,7 @@
 <template>
   <div class="donut" :style="{ width: size + 'px', height: size + 'px' }">
     <svg viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="76" fill="none" stroke="#efeff3" stroke-width="14" />
+      <circle cx="100" cy="100" r="76" fill="none" style="stroke:var(--track)" stroke-width="14" />
       <circle v-for="(a, i) in arcs" :key="i" cx="100" cy="100" r="76" fill="none" :stroke="a.color" stroke-width="14" stroke-linecap="round"
         :stroke-dasharray="`${a.len} ${C - a.len}`" :stroke-dashoffset="-a.start" transform="rotate(-90 100 100)" class="arc" :style="{ animationDelay: i * 110 + 'ms' }" />
     </svg>
@@ -36,5 +36,5 @@ const arcs = computed(() => {
 .donut { position:relative; margin:0 auto; }
 svg { width:100%; height:100%; }
 .center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-.bubble { position:absolute; transform:translate(-50%,-50%); background:#fff; border-radius:99px; padding:2px 6px; font-size:.65rem; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,.18); animation:pin .4s var(--spring) both; }
+.bubble { position:absolute; transform:translate(-50%,-50%); background:var(--surface); border-radius:99px; padding:2px 6px; font-size:.65rem; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,.18); animation:pin .4s var(--spring) both; }
 </style>

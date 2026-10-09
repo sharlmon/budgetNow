@@ -51,6 +51,8 @@ if (PROD) {
   ok((await req('/api/state', { headers: { authorization: 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEifQ.AAAA' }, dev: false })).status === 401, 'forged bearer token rejected')
   ok((await req('/api/state', { headers: { cookie: '__session=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEifQ.AAAA; __client_uat=1' }, dev: false })).status === 401, 'forged session cookie rejected')
   ok((await req('/api/state?userId=user_victim', { dev: false })).status === 401, 'userId in the query string grants nothing')
+  const wh = await req('/api/webhooks/clerk', { method: 'POST', headers: J, body: json({ type: 'user.deleted', data: { id: 'user_victim' } }), dev: false })
+  ok([400, 503].includes(wh.status), `unsigned webhook is refused (${wh.status}): it cannot be used to delete anyone's data`)
 }
 
 // ---------- CSRF / cross-site (dev bypass lets us reach the guarded path) ----------
@@ -132,7 +134,25 @@ if (!PROD) {
   ok(wcount.includes(429), 'a burst of 70 writes from one IP gets 429')
   const limited = await req('/api/sync', { method: 'POST', headers: { ...J, ...MARK }, body: json({ ops: [] }), ipaddr: wIp, dev: !PROD })
   ok(limited.status === 429 && Number(limited.headers.get('retry-after')) > 0, '429 includes Retry-After')
-  ok((await req('/api/state', { ipaddr: ip(), dev: !PROD })).status !== 429, 'a different client IP is unaffected')
+  ok((await req('/api/state', { ipaddr: ip(), dev: !PROD, headers: { 'x-dev-user': 'fresh_' + Date.now() } })).status !== 429, 'a different client IP (and user) is unaffected')
+}
+
+// ---------- per-user limit shared across IPs (database-backed) ----------
+if (!PROD) {
+  // The in-memory limiter is per IP. A user rotating IPs must still hit the per-user limit kept in the database.
+  const rl = 'rl_user_' + Date.now()
+  const hit = (path, init = {}) => fetch(ORIGIN + path, { ...init, headers: { 'x-forwarded-for': ip(), 'x-dev-user': rl, ...MARK, ...J, ...(init.headers || {}) } })
+  const syncs = []
+  for (let i = 0; i < 250; i++) syncs.push((await hit('/api/sync', { method: 'POST', body: json({ ops: [] }) })).status)
+  ok(syncs.slice(0, 240).every(s => s === 200), 'first 240 writes in a minute are served, even from many IPs')
+  ok(syncs.slice(240).includes(429), 'writes beyond 240/min for ONE user are refused even when the IP keeps changing')
+  const blocked = await hit('/api/sync', { method: 'POST', body: json({ ops: [] }) })
+  ok(blocked.status === 429 && Number(blocked.headers.get('retry-after')) > 0, 'refusal carries Retry-After')
+  const other = await fetch(ORIGIN + '/api/sync', { method: 'POST', headers: { 'x-forwarded-for': ip(), 'x-dev-user': 'rl_other_' + Date.now(), ...MARK, ...J }, body: json({ ops: [] }) })
+  ok(other.status === 200, "another user is not affected by someone else's limit")
+  const reads = []
+  for (let i = 0; i < 70; i++) reads.push((await hit('/api/state')).status)
+  ok(reads.includes(429), 'state reads are limited per user too (60/min)')
 }
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed')

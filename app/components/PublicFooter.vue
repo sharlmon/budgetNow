@@ -32,7 +32,7 @@ const year = new Date().getFullYear()
 </script>
 
 <style scoped>
-.pf { border-top:1px solid var(--line); background:#fafafc; margin-top:64px; }
+.pf { border-top:1px solid var(--line); background:var(--surface2); margin-top:64px; }
 .in { max-width:1080px; margin:0 auto; padding:36px 20px 8px; display:grid; gap:28px; grid-template-columns:1fr; }
 .col { display:flex; flex-direction:column; gap:10px; }
 .col h2 { font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 2px; }

@@ -3,9 +3,10 @@
 </template>
 
 <script setup lang="ts">
+import { clerkVariables } from '../../utils/theme'
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Create account · BudgetNow' })
-const appearance = { variables: { colorPrimary: '#ef6a3a', borderRadius: '0.9rem', fontFamily: 'Inter, system-ui, sans-serif' } }
+const appearance = computed(() => ({ variables: clerkVariables(activeTheme.value) })) // follows Light / Dark
 </script>
 
 <style scoped>

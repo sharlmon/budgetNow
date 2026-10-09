@@ -18,6 +18,6 @@ onMounted(detect)
 </script>
 
 <style scoped>
-.leg { display:flex; gap:14px; margin-bottom:16px; padding:14px; background:linear-gradient(95deg,#fff,#f1faf5); border-color:#cfeadc; }
-.lg { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
+.leg { display:flex; gap:14px; margin-bottom:16px; padding:14px; background:linear-gradient(95deg,var(--surface),var(--goodbg)); border-color:var(--good-line); }
+.lg { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; flex:none; }
 </style>
