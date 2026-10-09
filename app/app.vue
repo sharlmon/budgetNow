@@ -72,7 +72,7 @@ h1 { font-size:1.5rem; margin:0; letter-spacing:-.025em; font-weight:700; } h2 {
 .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:18px; }
 .card.white { background:var(--surface); box-shadow:0 1px 2px rgba(20,20,40,.04), 0 8px 24px -16px rgba(20,20,40,.14); }
 .sec { display:flex; justify-content:space-between; align-items:center; margin:28px 0 12px; }
-.link { display:inline-flex; align-items:center; gap:2px; background:none; border:0; color:var(--accent); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; padding:4px 0; text-decoration:none; }
+.link { display:inline-flex; align-items:center; gap:2px; background:none; border:0; color:var(--accent); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; padding:0 2px; min-height:44px; text-decoration:none; }
 
 /* buttons */
 .btn { display:flex; align-items:center; justify-content:center; gap:8px; appearance:none; border:0; border-radius:16px; padding:16px 20px; font:inherit; font-weight:600; letter-spacing:-.005em; color:#fff; background:var(--btn); cursor:pointer; width:100%; box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.08), 0 10px 22px -8px rgba(239,106,58,.75); transition:transform .18s var(--spring), box-shadow .2s, opacity .2s; position:relative; overflow:hidden; }
@@ -80,8 +80,9 @@ h1 { font-size:1.5rem; margin:0; letter-spacing:-.025em; font-weight:700; } h2 {
 .btn:active { transform:scale(.97); }
 .btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; transform:none; }
 .btn.soft { background:var(--surface); color:var(--ink); border:1px solid var(--line); box-shadow:0 1px 2px rgba(20,20,40,.05); }
-.btn.sm { width:auto; padding:12px 18px; border-radius:14px; font-size:.9rem; }
-.icon-btn { width:34px; height:34px; border-radius:11px; border:1px solid var(--line); background:var(--surface); color:var(--muted); display:grid; place-items:center; cursor:pointer; flex:none; transition:all .2s var(--spring); }
+.btn.sm { width:auto; min-height:44px; padding:12px 18px; border-radius:14px; font-size:.9rem; }
+.icon-btn { width:34px; height:34px; border-radius:11px; border:1px solid var(--line); background:var(--surface); color:var(--muted); display:grid; place-items:center; cursor:pointer; flex:none; position:relative; transition:all .2s var(--spring); }
+.icon-btn::after { content:''; position:absolute; inset:-5px; } /* 44px touch target around the 34px button */
 .icon-btn:hover { color:var(--bad); border-color:#f5c4c6; background:#fff5f5; } .icon-btn:active { transform:scale(.9); }
 .circ { width:42px; height:42px; border-radius:50%; background:var(--surface); border:1px solid var(--line); display:grid; place-items:center; color:var(--ink); text-decoration:none; cursor:pointer; flex:none; box-shadow:0 1px 2px rgba(20,20,40,.05); transition:transform .18s var(--spring); }
 .circ:active { transform:scale(.9); }

@@ -72,7 +72,7 @@ const stuck = computed(() => {
 .ic { width:42px; height:42px; border-radius:14px; background:var(--tint-blue); color:#5b8def; display:grid; place-items:center; flex:none; }
 .lab { margin-top:6px; }
 .quick { display:flex; flex-wrap:wrap; gap:8px; }
-.chip { border:1px solid var(--line); background:var(--surface); border-radius:99px; padding:7px 13px; font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; transition:transform .15s var(--spring); }
+.chip { border:1px solid var(--line); background:var(--surface); border-radius:99px; padding:11px 16px; font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; transition:transform .15s var(--spring); }
 .chip:active { transform:scale(.94); } .chip.clear { color:var(--muted); }
 .seg { margin-top:6px; } .explain { margin:0; }
 .warn { margin:6px 0 0; padding:12px 14px; border-radius:14px; background:var(--bad-bg); color:var(--bad); font-weight:500; font-size:.9rem; }
