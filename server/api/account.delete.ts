@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import { DELETE_CONFIRM } from '../../shared/security'
 import { bills, debts, expenses, goalContributions, goals, incomes, profiles } from '../db/schema'
 
 /**
@@ -7,6 +8,8 @@ import { bills, debts, expenses, goalContributions, goals, incomes, profiles } f
  */
 export default defineEventHandler(async (event) => {
   const userId = requireUser(event)
+  // Deleting everything must be deliberate: the app sends this header only after the user types DELETE.
+  if (getHeader(event, DELETE_CONFIRM.name) !== DELETE_CONFIRM.value) throw createError({ statusCode: 400, statusMessage: 'Confirmation required' })
   const db = await useDb()
   await db.transaction(async (tx) => {
     await tx.delete(goalContributions).where(eq(goalContributions.userId, userId))

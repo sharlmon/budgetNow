@@ -1,8 +1,13 @@
+import { buildCsp, clerkHostFromKey } from './shared/security'
+
 const base = process.env.NUXT_APP_BASE_URL || '/'
 // `DEV_AUTH_BYPASS=1 nuxt dev` runs the app without Clerk keys for local work. It is ignored in production builds.
 // Canonical origin used for absolute URLs (canonical links, sitemap, social cards). Set NUXT_PUBLIC_SITE_URL once you have a custom domain.
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://budget-now-psi.vercel.app')).replace(/\/$/, '')
+const isProd = process.env.NODE_ENV === 'production'
+// A strict CSP would break `nuxt dev` (hot reload uses inline scripts and websockets), so it is applied to builds only.
+const csp = isProd ? { 'Content-Security-Policy': buildCsp(clerkHostFromKey(process.env.NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY)) } : {}
 const devAuth = process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_BYPASS === '1'
 
 export default defineNuxtConfig({
@@ -23,6 +28,9 @@ export default defineNuxtConfig({
       .map(r => [r, { ssr: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } }])),
     '/api/**': { headers: { 'X-Robots-Tag': 'noindex', 'Cache-Control': 'private, no-store' } },
     '/**': { headers: {
+      ...csp,
+      'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'X-Frame-Options': 'SAMEORIGIN',

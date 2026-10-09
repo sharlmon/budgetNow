@@ -36,13 +36,23 @@ npm run dev:local     # no Clerk keys or database needed
 
 To run against real Clerk and Neon instead, copy `.env.example` to `.env`, fill it in, and run `npm run dev`.
 
+## Security
+
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability and what is protected. In short: every API route needs a verified Clerk session and is scoped to that user; writes must come from the app's own pages (CSRF checks + marker header); inputs are validated and queries parameterised; per-IP rate limits and size limits; CSP and other security headers; and CI attacks the dev server and the production build on every pull request.
+
 ## Tests
 
 ```bash
-npm test              # unit tests: bill dates, backup parsing, sync diffing
+npm test              # unit tests: bill dates, backup parsing, sync diffing, PIN/biometric checks, security helpers
 npm run dev:local     # in one terminal...
-npm run test:api      # ...and this in another: API tests (isolation, validation, atomicity)
+npm run test:api      # ...and these in another: API tests (isolation, validation, atomicity)
+npm run test:security # attack tests: CSRF, injection, oversized bodies, rate limits, error leaks
 ```
+
+## Dependency notes
+
+- `unplugin` is listed as a direct dependency on purpose: it pins one consistent copy at the top of the tree. Without it npm 10.9 (used in CI) writes a lockfile that fails `npm ci` ("lock file's unplugin@2.3.11 does not satisfy unplugin@3.4.0"). If you change dependencies, regenerate the lockfile in a clean folder with CI's npm (`npx npm@10.9.2 install --package-lock-only --ignore-scripts`), because a lockfile created on one OS can omit the native binaries other platforms need.
+- `overrides` in `package.json` force a patched `simple-git`.
 
 ## Database changes
 
@@ -55,6 +65,10 @@ Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `d
 - The signed-in app is client-only and sent `X-Robots-Tag: noindex`.
 - Set `NUXT_PUBLIC_SITE_URL` when you add a custom domain so every absolute URL follows it.
 - Settings has **Delete account**, which removes all of a user's rows and then their Clerk user (`DELETE /api/account`).
+
+## App lock
+
+Optional PIN lock (Settings → App lock). The PIN is hashed with PBKDF2 (150k iterations, random salt) and stored in this browser only, so it never syncs and each device sets its own. Wrong guesses are throttled (30s after the fifth, doubling to 15 min). It locks on open and after a chosen time away, and "Forgot PIN" signs out so Clerk re-verifies the user. Optionally, Face ID / fingerprint unlock uses a WebAuthn platform credential bound to the site's hostname (`app/utils/webauthn.ts`); the app only accepts an assertion that is fresh, for this site, and carries the user-verified flag. If the domain changes, turn it off and on again. It is a screen lock, not encryption of on-device data.
 
 ## Roadmap
 See GitHub Issues.
