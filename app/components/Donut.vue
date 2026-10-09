@@ -3,9 +3,9 @@
     <svg viewBox="0 0 200 200">
       <circle cx="100" cy="100" r="76" fill="none" stroke="#efeff3" stroke-width="14" />
       <circle v-for="(a, i) in arcs" :key="i" cx="100" cy="100" r="76" fill="none" :stroke="a.color" stroke-width="14" stroke-linecap="round"
-        :stroke-dasharray="`${a.len} ${C - a.len}`" :stroke-dashoffset="-a.start" transform="rotate(-90 100 100)" />
+        :stroke-dasharray="`${a.len} ${C - a.len}`" :stroke-dashoffset="-a.start" transform="rotate(-90 100 100)" class="arc" :style="{ animationDelay: i * 110 + 'ms' }" />
     </svg>
-    <span v-for="(a, i) in arcs" v-show="a.frac >= 0.06" :key="'b' + i" class="bubble" :style="{ left: a.x + '%', top: a.y + '%' }">{{ Math.round(a.frac * 100) }}%</span>
+    <span v-for="(a, i) in arcs" v-show="a.frac >= 0.06" :key="'b' + i" class="bubble" :style="{ left: a.x + '%', top: a.y + '%', animationDelay: 500 + i * 110 + 'ms' }">{{ Math.round(a.frac * 100) }}%</span>
     <div class="center"><slot /></div>
   </div>
 </template>
@@ -30,8 +30,11 @@ const arcs = computed(() => {
 </script>
 
 <style scoped>
+.arc { animation:draw .9s var(--ease) both; }
+@keyframes draw { from { stroke-dasharray:0 480; opacity:.4; } }
+@keyframes pin { from { opacity:0; transform:translate(-50%,-50%) scale(.4); } }
 .donut { position:relative; margin:0 auto; }
 svg { width:100%; height:100%; }
 .center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-.bubble { position:absolute; transform:translate(-50%,-50%); background:#fff; border-radius:99px; padding:2px 6px; font-size:.65rem; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.bubble { position:absolute; transform:translate(-50%,-50%); background:#fff; border-radius:99px; padding:2px 6px; font-size:.65rem; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,.18); animation:pin .4s var(--spring) both; }
 </style>

@@ -1,9 +1,9 @@
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
-export const CATEGORIES: { key: Category; label: string; hint: string; color: string; emoji: string }[] = [
-  { key: 'needs', label: 'Needs', hint: 'Rent, food, transport', color: '#ef6a3a', emoji: '🏠' },
-  { key: 'wants', label: 'Wants', hint: 'Fun, eating out, subs', color: '#f5c242', emoji: '🎉' },
-  { key: 'savings', label: 'Savings', hint: 'Emergency fund, goals', color: '#2fb67c', emoji: '🐷' },
-  { key: 'debt', label: 'Debt', hint: 'Loans and cards', color: '#5b8def', emoji: '💳' },
+export const CATEGORIES: { key: Category; label: string; hint: string; color: string; icon: string }[] = [
+  { key: 'needs', label: 'Needs', hint: 'Rent, food, transport', color: '#ef6a3a', icon: 'house' },
+  { key: 'wants', label: 'Wants', hint: 'Fun, eating out, subs', color: '#f5c242', icon: 'bag' },
+  { key: 'savings', label: 'Savings', hint: 'Emergency fund, goals', color: '#2fb67c', icon: 'piggy' },
+  { key: 'debt', label: 'Debt', hint: 'Loans and cards', color: '#5b8def', icon: 'card' },
 ]
 export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 
@@ -68,17 +68,24 @@ export function useBudget() {
       if (d) d.balance = Math.max(0, round(d.balance - amount))
     }
   }
+  /** Removes an expense and returns a function that puts it back (used for Undo). */
   function removeExpense(id: string) {
     const i = state.value.expenses.findIndex(e => e.id === id)
-    if (i < 0) return
+    if (i < 0) return () => {}
     const [e] = state.value.expenses.splice(i, 1)
-    if (e?.debtId) {
-      const d = state.value.debts.find(x => x.id === e.debtId)
-      if (d) d.balance = round(d.balance + e.amount)
+    const debt = e?.debtId ? state.value.debts.find(x => x.id === e!.debtId) : undefined
+    if (debt && e) debt.balance = round(debt.balance + e.amount)
+    return () => {
+      if (!e) return
+      state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, e)
+      if (debt) debt.balance = Math.max(0, round(debt.balance - e.amount))
     }
   }
   function removeIncome(id: string) {
-    state.value.incomes = state.value.incomes.filter(i => i.id !== id)
+    const i = state.value.incomes.findIndex(x => x.id === id)
+    if (i < 0) return () => {}
+    const [inc] = state.value.incomes.splice(i, 1)
+    return () => { if (inc) state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, inc) }
   }
   function addDebt(name: string, balance: number, minPayment: number) {
     state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment })
@@ -135,4 +142,13 @@ export function useTransactions() {
     ...state.value.incomes.map(i => ({ id: i.id, kind: 'income' as const, title: i.label || 'Income', amount: i.amount, date: i.date })),
     ...state.value.expenses.map(e => ({ id: e.id, kind: 'expense' as const, title: e.label || catMeta(e.category).label, amount: e.amount, date: e.date, category: e.category })),
   ].sort((a, b) => b.date.localeCompare(a.date)))
+}
+
+export const useToast = () => useState<{ id: number; msg: string; undo?: () => void } | null>('toast', () => null)
+let toastTimer: ReturnType<typeof setTimeout> | undefined
+export function showToast(msg: string, undo?: () => void) {
+  const t = useToast()
+  t.value = { id: Date.now(), msg, undo }
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.value = null }, 4500)
 }
