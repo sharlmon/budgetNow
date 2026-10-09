@@ -1,6 +1,19 @@
 <template>
   <div>
     <div class="hdr rise"><NuxtLink to="/" class="circ" aria-label="Back"><Icon name="back" :size="22" /></NuxtLink><h1>Settings</h1></div>
+    <div class="card white rise" style="margin-bottom:12px;--i:1">
+      <div class="row">
+        <img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="pic" width="48" height="48" />
+        <span v-else class="avatar">{{ (auth.fullName.value || auth.email.value || 'B')[0]?.toUpperCase() }}</span>
+        <div class="grow"><strong class="nm">{{ auth.fullName.value || 'Your account' }}</strong><div class="muted sm nm">{{ auth.email.value }}</div></div>
+      </div>
+      <div class="sync" :class="syncStatus"><Icon :name="syncStatus === 'synced' ? 'check' : syncStatus === 'error' ? 'x' : 'repeat'" :size="14" :stroke="2.6" /> {{ syncText }}</div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn soft sm" style="flex:1" @click="syncNow"><Icon name="repeat" :size="15" /> Sync now</button>
+        <button class="btn soft sm" style="flex:1" @click="auth.manageAccount()"><Icon name="settings" :size="15" /> Account</button>
+        <button class="btn soft sm" style="flex:1" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
+      </div>
+    </div>
     <div class="rise" style="margin-bottom:12px;--i:1"><InstallCard always /></div>
     <div class="card white rise" style="margin-bottom:12px;--i:1">
       <label class="muted sm" for="nm">Your name</label>
@@ -12,7 +25,7 @@
     </div>
     <div class="card white rise" style="margin-bottom:12px;--i:3">
       <div class="row"><span class="bk"><Icon name="shield" :size="20" /></span><div class="grow"><h2>Backup &amp; restore</h2><div class="muted sm">{{ lastText }}</div></div></div>
-      <p class="muted sm" style="margin:12px 0 14px">Your data lives only in this browser. Save a backup file now and then, and keep it somewhere safe (email it to yourself or put it in cloud storage). You can restore it on any device.</p>
+      <p class="muted sm" style="margin:12px 0 14px">Your data is already saved to your account. You can also keep a file copy of your own, or restore one. A backup file is plain text, so store it somewhere private.</p>
       <div class="row">
         <button class="btn" :disabled="!hasData" @click="exportBackup"><Icon name="download" :size="17" /> Export</button>
         <button class="btn soft" @click="picker?.click()"><Icon name="upload" :size="17" /> Restore</button>
@@ -21,7 +34,7 @@
     </div>
     <div class="card white rise" style="margin-bottom:16px;--i:4">
       <h2>Erase data</h2>
-      <p class="muted sm" style="margin:6px 0 14px">Removes all income, expenses, debts and goals from this browser.</p>
+      <p class="muted sm" style="margin:6px 0 14px">Permanently deletes all your income, expenses, debts, goals and bills from your account and every device.</p>
       <button class="btn soft" @click="erase"><Icon name="trash" :size="16" /> Erase all data</button>
     </div>
     <p class="muted sm" style="text-align:center">BudgetNow · <a class="link" href="https://github.com/sharlmon/budgetNow" target="_blank">GitHub</a></p>
@@ -42,9 +55,29 @@ async function onPick(e: Event) {
 const currencies = ['USD', 'EUR', 'GBP', 'ZAR', 'NGN', 'KES', 'GHS', 'INR', 'CAD', 'AUD', 'JPY', 'AED']
 const cur = computed({ get: () => currency.value, set: (v: string) => { currency.value = v } })
 const name = computed({ get: () => userName.value, set: (v: string) => { userName.value = v } })
-function erase() { if (confirm('Erase all income, expenses and debts? This cannot be undone.')) { resetAll(); showToast('All data erased') } }
+function erase() { if (confirm('Permanently erase all your data from your account and every device? This cannot be undone.')) { resetAll(); showToast('All data erased') } }
+
+const auth = useAppAuth()
+const { syncNow, prepareSignOut } = useSync()
+const syncText = computed(() => {
+  const n = syncPending.value
+  if (syncStatus.value === 'syncing') return 'Syncing…'
+  if (syncStatus.value === 'offline') return n ? `Offline · ${n} change${n === 1 ? '' : 's'} will sync when you're back` : 'Offline · changes will sync when you reconnect'
+  if (syncStatus.value === 'error') return n ? `Couldn't sync ${n} change${n === 1 ? '' : 's'} · retrying` : "Couldn't sync · retrying"
+  if (syncStatus.value === 'synced') return 'All changes saved to your account'
+  return 'Waiting to sync'
+})
+async function signOut() {
+  if (!(await prepareSignOut())) return
+  await auth.signOut()
+  await navigateTo('/sign-in')
+}
 </script>
 
 <style scoped>
+.pic { border-radius:50%; flex:none; }
+.nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:#f1f1f5; color:var(--muted); }
+.sync.synced { background:var(--goodbg); color:#1f8f5f; } .sync.error { background:#fdecec; color:var(--bad); } .sync.offline { background:#fff4e0; color:#b97800; }
 .bk { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
 </style>

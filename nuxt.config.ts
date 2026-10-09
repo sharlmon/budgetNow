@@ -1,8 +1,13 @@
 const base = process.env.NUXT_APP_BASE_URL || '/'
+// `DEV_AUTH_BYPASS=1 nuxt dev` runs the app without Clerk keys for local work. It is ignored in production builds.
+const devAuth = process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_BYPASS === '1'
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
-  ssr: false, // data lives in the browser (localStorage), so ship as a static SPA
+  ssr: false, // client-rendered app; the server only serves the API under /api
+  modules: devAuth ? [] : ['@clerk/nuxt'],
+  clerk: { signInUrl: '/sign-in', signUpUrl: '/sign-up', signInFallbackRedirectUrl: '/', signUpFallbackRedirectUrl: '/' },
+  runtimeConfig: { public: { devAuth } },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     baseURL: base,
