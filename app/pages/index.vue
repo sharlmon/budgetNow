@@ -10,6 +10,11 @@
 
     <div v-if="state.incomes.length && safe.hasBudget" class="rise" style="margin-top:22px;--i:3"><SafeToSpend /></div>
     <div class="rise" style="--i:3"><InstallCard /></div>
+    <div v-if="dueSoon.length" class="card white rise" style="margin-top:16px;--i:3;padding:14px 18px">
+      <div class="row" style="justify-content:space-between;margin-bottom:2px"><h2>Bills due soon</h2><NuxtLink to="/bills" class="link">All bills <Icon name="next" :size="14" /></NuxtLink></div>
+      <BillRow v-for="b in dueSoon.slice(0, 3)" :key="b.id" :bill="b" compact />
+      <NuxtLink v-if="dueSoon.length > 3" to="/bills" class="link" style="margin-top:6px">+{{ dueSoon.length - 3 }} more</NuxtLink>
+    </div>
     <div v-if="needsBackup" class="card white nudge rise" style="--i:3">
       <span class="nd"><Icon name="shield" :size="20" /></span>
       <div class="grow"><strong>Back up your data</strong><div class="muted sm">It's only stored in this browser. Save a copy.</div></div>
@@ -67,6 +72,7 @@ const month = computed(() => today().slice(0, 7))
 const stats = useMonthStats(month)
 const safe = useSafeToSpend()
 const { needsBackup, exportBackup } = useBackup()
+const dueSoon = computed(() => state.value.bills.filter(b => daysBetween(today(), b.nextDue) <= 7).sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
 const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
 const initial = computed(() => (userName.value || 'B').trim()[0]?.toUpperCase())
 const h = new Date().getHours()

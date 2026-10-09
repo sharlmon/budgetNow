@@ -8,7 +8,7 @@ export const CATEGORIES: { key: Category; label: string; hint: string; color: st
 export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 
 export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number> }
-export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string }
+export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string; billId?: string }
 export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number }
 export interface Goal { id: string; name: string; target: number; icon: string; color: string; deadline?: string; contributions: { id: string; amount: number; date: string }[] }
 export const GOAL_STYLES = [
@@ -16,7 +16,8 @@ export const GOAL_STYLES = [
   { icon: 'grad', color: '#f5a524' }, { icon: 'laptop', color: '#64748b' }, { icon: 'heart', color: '#ec4899' }, { icon: 'shield', color: '#2fb67c' },
 ]
 export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) => s + c.amount, 0) * 100) / 100
-export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[] }
+export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string }
+export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[] }
 
 const KEY = 'budgetnow:v1'
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -34,7 +35,7 @@ export function suggestSplit(amount: number, minDebt: number): Record<Category, 
 }
 
 export function useBudget() {
-  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [] }))
+  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [] }))
   const loaded = useState('budget-loaded', () => false)
 
   if (import.meta.client && !loaded.value) {
@@ -67,12 +68,14 @@ export function useBudget() {
   function addIncome(label: string, amount: number, split: Record<Category, number>, date = today()) {
     state.value.incomes.unshift({ id: uid(), label, amount, date, split })
   }
-  function addExpense(label: string, amount: number, category: Category, debtId?: string, date = today()) {
-    state.value.expenses.unshift({ id: uid(), label, amount, category, date, debtId })
+  function addExpense(label: string, amount: number, category: Category, debtId?: string, date = today(), billId?: string) {
+    const id = uid()
+    state.value.expenses.unshift({ id, label, amount, category, date, debtId, billId })
     if (debtId) {
       const d = state.value.debts.find(x => x.id === debtId)
       if (d) d.balance = Math.max(0, round(d.balance - amount))
     }
+    return id
   }
   /** Removes an expense and returns a function that puts it back (used for Undo). */
   function removeExpense(id: string) {
@@ -123,11 +126,43 @@ export function useBudget() {
     return { allocated, assigned, available: round(allocated - assigned) }
   })
 
-  function resetAll() {
-    state.value = { incomes: [], expenses: [], debts: [], goals: [] }
+  function addBill(b: Omit<Bill, 'id' | 'anchorDay'>) {
+    state.value.bills.push({ ...b, id: uid(), anchorDay: anchorOf(b.nextDue), debtId: b.category === 'debt' ? b.debtId : undefined })
+  }
+  function removeBill(id: string) {
+    const i = state.value.bills.findIndex(b => b.id === id)
+    if (i < 0) return () => {}
+    const [b] = state.value.bills.splice(i, 1)
+    return () => { if (b) state.value.bills.splice(Math.min(i, state.value.bills.length), 0, b) }
+  }
+  /** Logs the bill's current due date as an expense (or skips it) and moves it to the next date. Returns an undo. */
+  function payBill(id: string, skip = false) {
+    const b = state.value.bills.find(x => x.id === id)
+    if (!b) return () => {}
+    const due = b.nextDue
+    const expenseId = skip ? undefined : addExpense(b.name, b.amount, b.category, b.debtId, due < today() ? due : today(), b.id)
+    b.nextDue = addPeriod(due, b.every, b.anchorDay)
+    return () => {
+      if (expenseId) removeExpense(expenseId)
+      b.nextDue = due
+    }
+  }
+  /** Logs every due occurrence of bills set to auto-log. Returns how many expenses were added. */
+  function runAutoBills() {
+    const t = today()
+    let n = 0
+    for (const b of state.value.bills) {
+      if (!b.auto) continue
+      for (let k = 0; k < 12 && b.nextDue <= t; k++) { payBill(b.id); n++ }
+    }
+    return n
   }
 
-  return { addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  function resetAll() {
+    state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
+  }
+
+  return { addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 const CUR_KEY = 'budgetnow:currency'
@@ -194,13 +229,20 @@ export function useSafeToSpend() {
     for (const i of state.value.incomes) if (ym(i.date) === month) flex += i.split.needs + i.split.wants
     for (const e of state.value.expenses) {
       if (ym(e.date) !== month || (e.category !== 'needs' && e.category !== 'wants')) continue
-      if (e.date === t) spentToday += e.amount; else before += e.amount
+      // Bills are planned spending: they shrink the pool but never count against today's allowance.
+      if (e.date === t && !e.billId) spentToday += e.amount; else before += e.amount
     }
-    const pool = flex - before
+    // Bills still to come this month are already spoken for.
+    let upcomingBills = 0
+    for (const b of state.value.bills) {
+      if (b.category === 'debt') continue
+      upcomingBills += occurrencesUntil(b.nextDue, b.every, b.anchorDay, endOfMonth(t)).length * b.amount
+    }
+    const pool = flex - before - upcomingBills
     const allowance = Math.max(0, pool) / daysLeft
     const leftToday = allowance - spentToday
     const tomorrow = daysLeft > 1 ? Math.max(0, pool - spentToday) / (daysLeft - 1) : 0
     const used = allowance > 0 ? spentToday / allowance : spentToday > 0 ? 1 : 0
-    return { hasBudget: flex > 0, flex, pool, daysLeft, allowance, spentToday, leftToday, used, tomorrow }
+    return { hasBudget: flex > 0, flex, pool, daysLeft, allowance, spentToday, leftToday, used, tomorrow, upcomingBills }
   })
 }
