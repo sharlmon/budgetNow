@@ -15,6 +15,8 @@ export default defineNuxtConfig({
   // Public pages (landing, legal, guides) are rendered ahead of time as static HTML so search engines and AI crawlers can read them.
   // Everything behind login is client-only (ssr: false) and kept out of search results.
   ssr: true,
+  // Test output and test files must never make the dev server reload (browser tests write traces here while the server runs).
+  ignore: ['**/test-results/**', '**/playwright-report/**', 'tests/**'],
   css: ['@fontsource-variable/inter'],
   modules: devAuth ? [] : ['@clerk/nuxt'],
   clerk: { signInUrl: '/sign-in', signUpUrl: '/sign-up', signInFallbackRedirectUrl: '/home', signUpFallbackRedirectUrl: '/home' },

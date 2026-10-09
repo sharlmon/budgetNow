@@ -36,6 +36,9 @@ export async function pruneRateLimits(db: any) {
  * per-IP limiter in middleware still applies and a limiter outage must not take the app down.
  */
 export async function enforceUserLimit(event: any, db: any, userId: string, bucket: string, limit: number, windowSeconds: number) {
+  // The browser-test server polls constantly, so `nuxt dev` can multiply the limits. import.meta.dev is false in every
+  // production build, so a deployed app can never have its limits loosened this way.
+  if (import.meta.dev) limit *= Math.max(1, Number(process.env.RATE_LIMIT_MULTIPLIER) || 1)
   let r: DbLimitResult
   try {
     r = await dbRateLimit(db, `u:${userId}:${bucket}`, limit, windowSeconds)
