@@ -1,9 +1,11 @@
 // Run `npm run dev:local` first (API_URL defaults to its port). Uses the dev-only x-dev-user header to act as separate users.
 const B = (process.env.API_URL || 'http://localhost:3000') + '/api'
+// Each run uses its own fake client IP so the per-IP rate limiter never interferes between runs.
+const RUN_IP = `10.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`
 let fails = 0
 const ok = (c, m) => { if (!c) fails++; console.log(c ? 'ok  ' : 'FAIL', m) }
 const call = async (path, user, body) => {
-  const r = await fetch(B + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-dev-user': user }, body: body ? JSON.stringify(body) : undefined })
+  const r = await fetch(B + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-dev-user': user, 'x-requested-with': 'budgetnow', 'x-forwarded-for': RUN_IP }, body: body ? JSON.stringify(body) : undefined })
   let j; try { j = await r.json() } catch { j = null }
   return { s: r.status, j }
 }
@@ -72,7 +74,7 @@ const t0 = Date.now(); r = await sync(alice, many)
 ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk upsert in ${Date.now() - t0}ms`)
 
 // account deletion: removes everything for that user only
-const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u } }).then(r => r.status)
+const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u, 'x-requested-with': 'budgetnow', 'x-confirm': 'delete-my-account', 'x-forwarded-for': RUN_IP } }).then(r => r.status)
 await sync(bob, [{ t: 'incomes', op: 'put', row: { ...income, id: 'bob-i', split: { needs: 1, wants: 0, savings: 0, debt: 0 }, amount: 1 } }, { t: 'goals', op: 'put', row: { ...goal, id: 'bob-g' } }, { t: 'profile', op: 'put', row: { currency: 'EUR', name: 'Bob' } }])
 const before = await state(alice)
 ok((await del(bob)) === 200, 'DELETE /api/account succeeds')

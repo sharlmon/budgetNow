@@ -1,10 +1,14 @@
 <template>
-  <div class="shell">
-    <main v-if="syncReady"><slot /></main>
-    <main v-else class="boot"><div class="spin" /></main>
-    <TabBar />
-    <AddSheet />
-    <Toast />
+  <div>
+    <!-- While locked nothing behind the lock screen can be focused, tabbed to or read by a screen reader. -->
+    <div class="shell" :inert="locked || undefined" :aria-hidden="locked || undefined">
+      <main v-if="syncReady"><slot /></main>
+      <main v-else class="boot"><div class="spin" /></main>
+      <TabBar />
+      <AddSheet />
+      <Toast />
+    </div>
+    <LockScreen />
   </div>
 </template>
 

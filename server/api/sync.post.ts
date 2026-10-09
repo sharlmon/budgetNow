@@ -1,4 +1,5 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
+import { MAX_BODY_BYTES } from '../../shared/security'
 import { bills, debts, expenses, goalContributions, goals, incomes, profiles } from '../db/schema'
 
 const CHUNK = 200
@@ -12,10 +13,13 @@ const take = (cols: Record<string, any>, keys: string[]) => Object.fromEntries(k
  */
 export default defineEventHandler(async (event) => {
   const userId = requireUser(event)
-  const len = Number(getHeader(event, 'content-length') ?? 0)
-  if (len > 2_000_000) throw createError({ statusCode: 413, statusMessage: 'Too much data in one request' })
+  // Measure the real body rather than trusting a Content-Length header (which can be missing or wrong).
+  const raw = (await readRawBody(event, 'utf8')) ?? ''
+  if (raw.length > MAX_BODY_BYTES) throw createError({ statusCode: 413, statusMessage: 'Too much data in one request' })
+  let json: unknown
+  try { json = JSON.parse(raw) } catch { throw createError({ statusCode: 400, statusMessage: 'Invalid JSON' }) }
 
-  const parsed = syncBody.safeParse(await readBody(event))
+  const parsed = syncBody.safeParse(json)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid data', data: parsed.error.issues.slice(0, 3).map(i => `${i.path.join('.')}: ${i.message}`) })
   const { ops } = parsed.data
 

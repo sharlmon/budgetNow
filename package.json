@@ -12,7 +12,8 @@
     "db:migrate": "node scripts/migrate.mjs",
     "test": "vitest run",
     "test:api": "node tests/api.mjs",
-    "dev:local": "DEV_AUTH_BYPASS=1 nuxt dev"
+    "dev:local": "DEV_AUTH_BYPASS=1 nuxt dev",
+    "test:security": "node tests/security.mjs"
   },
   "dependencies": {
     "@clerk/nuxt": "^3.1.11",
@@ -22,7 +23,8 @@
     "nuxt": "^4.6.0",
     "postgres": "^3.4.9",
     "vue": "latest",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "unplugin": "^3.4.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -31,5 +33,9 @@
   },
   "engines": {
     "node": ">=20.9.0"
+  },
+  "overrides": {
+    "simple-git": "^4.0.2",
+    "@simple-git/argv-parser": "^2.0.1"
   }
 }

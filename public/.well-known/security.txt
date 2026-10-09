@@ -1,0 +1,5 @@
+Contact: https://github.com/sharlmon/budgetNow/security/advisories/new
+Contact: https://sharl-tech.co.ke/
+Expires: 2027-10-09T00:00:00.000Z
+Preferred-Languages: en
+Policy: https://github.com/sharlmon/budgetNow/security/policy
