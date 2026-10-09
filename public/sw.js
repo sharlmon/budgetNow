@@ -1,6 +1,6 @@
 // Weka service worker: app shell works offline.
 // Navigations are network-first (so updates arrive), everything else is cache-first.
-const CACHE = 'budgetnow-v4'
+const CACHE = 'budgetnow-v5'
 const SCOPE = self.registration.scope
 
 self.addEventListener('install', (e) => {
