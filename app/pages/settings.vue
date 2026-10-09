@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="hdr rise"><NuxtLink to="/" class="circ" aria-label="Back"><Icon name="back" :size="22" /></NuxtLink><h1>Settings</h1></div>
+    <div class="hdr rise"><NuxtLink to="/home" class="circ" aria-label="Back"><Icon name="back" :size="22" /></NuxtLink><h1>Settings</h1></div>
     <div class="card white rise" style="margin-bottom:12px;--i:1">
       <div class="row">
         <img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="pic" width="48" height="48" />
@@ -9,7 +9,7 @@
       </div>
       <div class="sync" :class="syncStatus"><Icon :name="syncStatus === 'synced' ? 'check' : syncStatus === 'error' ? 'x' : 'repeat'" :size="14" :stroke="2.6" /> {{ syncText }}</div>
       <div class="row" style="margin-top:12px">
-        <button class="btn soft sm" style="flex:1" @click="syncNow"><Icon name="repeat" :size="15" /> Sync now</button>
+        <button class="btn soft sm" style="flex:1" @click="syncNow"><Icon name="repeat" :size="15" /> Sync</button>
         <button class="btn soft sm" style="flex:1" @click="auth.manageAccount()"><Icon name="settings" :size="15" /> Account</button>
         <button class="btn soft sm" style="flex:1" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
       </div>
@@ -37,7 +37,13 @@
       <p class="muted sm" style="margin:6px 0 14px">Permanently deletes all your income, expenses, debts, goals and bills from your account and every device.</p>
       <button class="btn soft" @click="erase"><Icon name="trash" :size="16" /> Erase all data</button>
     </div>
-    <p class="muted sm" style="text-align:center">BudgetNow · <a class="link" href="https://github.com/sharlmon/budgetNow" target="_blank">GitHub</a></p>
+    <div class="card white rise" style="margin-bottom:16px;--i:5;border-color:#f6c7ca">
+      <h2 style="color:var(--bad)">Delete account</h2>
+      <p class="muted sm" style="margin:6px 0 14px">Permanently deletes your account and everything stored with it. This cannot be undone. Export a backup first if you want to keep a copy.</p>
+      <button class="btn soft" style="color:var(--bad)" :disabled="deleting" @click="deleteAccount"><Icon name="trash" :size="16" /> {{ deleting ? 'Deleting…' : 'Delete my account' }}</button>
+    </div>
+    <nav class="legal" aria-label="Legal"><NuxtLink to="/privacy">Privacy Policy</NuxtLink><span>·</span><NuxtLink to="/terms">Terms</NuxtLink></nav>
+    <CraftedBy style="margin-top:10px" />
   </div>
 </template>
 
@@ -58,7 +64,23 @@ const name = computed({ get: () => userName.value, set: (v: string) => { userNam
 function erase() { if (confirm('Permanently erase all your data from your account and every device? This cannot be undone.')) { resetAll(); showToast('All data erased') } }
 
 const auth = useAppAuth()
-const { syncNow, prepareSignOut } = useSync()
+const { syncNow, prepareSignOut, deleteAccount: wipeAccount } = useSync()
+const deleting = ref(false)
+async function deleteAccount() {
+  const typed = prompt('This permanently deletes your account and all your data. It cannot be undone.\n\nType DELETE to confirm.')
+  if (typed?.trim() !== 'DELETE') return
+  deleting.value = true
+  try {
+    await wipeAccount()
+  } catch (e: any) {
+    deleting.value = false
+    alert(e?.statusMessage || e?.data?.statusMessage || 'Something went wrong. Check your connection and try again.')
+    return
+  }
+  try { await auth.signOut() } catch { /* the account no longer exists, so there is nothing to sign out of */ }
+  showToast('Your account and data were deleted')
+  await navigateTo('/')
+}
 const syncText = computed(() => {
   const n = syncPending.value
   if (syncStatus.value === 'syncing') return 'Syncing…'
@@ -79,5 +101,7 @@ async function signOut() {
 .nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:#f1f1f5; color:var(--muted); }
 .sync.synced { background:var(--goodbg); color:#1f8f5f; } .sync.error { background:#fdecec; color:var(--bad); } .sync.offline { background:#fff4e0; color:#b97800; }
+.legal { display:flex; justify-content:center; gap:10px; font-size:.82rem; color:var(--muted); }
+.legal a { color:var(--muted); }
 .bk { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
 </style>

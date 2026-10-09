@@ -7,18 +7,26 @@
         <p class="muted">Split every pay instantly. Know what's safe to spend.</p>
       </div>
       <div class="rise" style="--i:2"><slot /></div>
+      <footer class="afoot">
+        <nav aria-label="Legal"><NuxtLink to="/privacy">Privacy</NuxtLink><span>·</span><NuxtLink to="/terms">Terms</NuxtLink><span>·</span><NuxtLink to="/">Home</NuxtLink></nav>
+        <CraftedBy />
+      </footer>
     </main>
     <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
+// Private screens must never show up in search results.
+useSeoMeta({ robots: 'noindex, nofollow' })
 const icon = `${useRuntimeConfig().app.baseURL}icons/icon-192.png`
 </script>
 
 <style>
 .authshell { background:linear-gradient(180deg,#fff7f2 0%,#fff 40%); }
 .authmain { display:flex; flex-direction:column; justify-content:center; gap:22px; padding-top:32px; }
+.afoot { display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:6px; }
+.afoot nav { display:flex; gap:10px; font-size:.82rem; color:var(--muted); } .afoot nav a { color:var(--muted); }
 .brand { text-align:center; }
 .brand p { margin:6px 0 0; }
 .logo { border-radius:18px; box-shadow:0 14px 28px -12px rgba(239,106,58,.8); margin-bottom:14px; }

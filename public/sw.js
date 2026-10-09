@@ -1,12 +1,12 @@
 // BudgetNow service worker: app shell works offline.
 // Navigations are network-first (so updates arrive), everything else is cache-first.
-const CACHE = 'budgetnow-v2'
+const CACHE = 'budgetnow-v3'
 const SCOPE = self.registration.scope
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll([SCOPE, SCOPE + 'manifest.webmanifest', SCOPE + 'icons/icon-192.png']))
+      .then(c => c.addAll([SCOPE, SCOPE + 'home', SCOPE + 'manifest.webmanifest', SCOPE + 'icons/icon-192.png']))
       .then(() => self.skipWaiting()),
   )
 })
