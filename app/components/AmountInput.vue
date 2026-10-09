@@ -1,9 +1,9 @@
 <template>
-  <input :value="text" inputmode="decimal" :placeholder="placeholder ?? '0'" :class="big ? 'amt-big' : 'field'" @input="onInput" />
+  <input :value="text" inputmode="decimal" :placeholder="placeholder ?? '0'" class="field" @input="onInput" />
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ modelValue: number; big?: boolean; placeholder?: string }>()
+const props = defineProps<{ modelValue: number; placeholder?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [number] }>()
 const parse = (s: string) => { const n = parseFloat(s); return Number.isFinite(n) ? n : 0 }
 const text = ref(props.modelValue ? String(props.modelValue) : '')
@@ -16,8 +16,3 @@ function onInput(e: Event) {
   emit('update:modelValue', parse(clean))
 }
 </script>
-
-<style scoped>
-.amt-big { width:100%; background:none; border:0; outline:none; color:var(--ink); font:700 3rem/1.1 inherit; font-family:inherit; text-align:center; letter-spacing:-.03em; padding:6px 0; }
-.amt-big::placeholder { color:var(--line); }
-</style>
