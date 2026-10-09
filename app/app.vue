@@ -1,37 +1,51 @@
 <template>
-  <div class="wrap">
-    <header>
-      <h1>BudgetNow</h1>
-      <p class="muted">Money in → instant breakdown → track every spend and debt.</p>
-    </header>
-    <NuxtPage />
+  <div class="shell">
+    <main><NuxtPage /></main>
+    <TabBar />
+    <AddSheet />
   </div>
 </template>
 
 <style>
-:root { --bg:#f6f7fb; --card:#fff; --ink:#1c2230; --muted:#6b7385; --line:#e3e6ee; --accent:#3b6cf6; --bad:#d64545; --good:#1f9d63; }
-@media (prefers-color-scheme: dark) {
-  :root { --bg:#12151c; --card:#1b2029; --ink:#e8ebf2; --muted:#9099ad; --line:#2a303c; --accent:#6d93ff; --bad:#ff7b7b; --good:#4cc78e; }
+:root {
+  --bg:#0c0f16; --surface:#151a24; --surface2:#1c2230; --line:#262d3d; --ink:#f2f4f9; --muted:#8b94a8;
+  --accent:#7c5cff; --accent2:#4d8dff; --good:#35d399; --bad:#ff6b81;
+  --hero: linear-gradient(135deg,#7c5cff 0%,#4d8dff 100%);
 }
-* { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif; }
-.wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
-h1 { margin:0; font-size:1.6rem; } h2 { margin:0 0 12px; font-size:1.1rem; }
-.muted { color:var(--muted); margin:4px 0 0; }
-.grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); margin-top:16px; }
-.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
-.full { grid-column: 1 / -1; }
-input, select, button { font:inherit; color:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); }
-input, select { width:100%; }
-button { cursor:pointer; background:var(--accent); color:#fff; border:0; font-weight:600; }
-button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); font-weight:400; padding:4px 8px; }
-button:disabled { opacity:.45; cursor:not-allowed; }
-.row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
-.row > * { flex:1; } .row > .fit { flex:0 0 auto; }
-.list { list-style:none; margin:0; padding:0; }
-.list li { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
-.bar { height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:4px; }
-.bar > i { display:block; height:100%; background:var(--accent); }
-.bad { color:var(--bad); } .good { color:var(--good); }
-.stack { display:flex; height:14px; border-radius:99px; overflow:hidden; margin:10px 0; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#eef0f6; --surface:#fff; --surface2:#f3f4f9; --line:#e2e5ee; --ink:#161a26; --muted:#6d7589; }
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 -apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif; }
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); position:relative; }
+@media (min-width:520px) { .shell { border-left:1px solid var(--line); border-right:1px solid var(--line); } }
+main { flex:1; padding:20px 16px 24px; }
+h1 { font-size:1.5rem; margin:0; letter-spacing:-.02em; } h2 { font-size:1rem; margin:0; }
+.muted { color:var(--muted); } .good { color:var(--good); } .bad { color:var(--bad); }
+.sec { display:flex; justify-content:space-between; align-items:baseline; margin:22px 2px 10px; }
+.sec h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:14px 16px; }
+.hero { background:var(--hero); color:#fff; border-radius:24px; padding:20px; box-shadow:0 12px 32px -12px rgba(100,90,255,.6); }
+.hero small { opacity:.8; }
+.big { font-size:2.4rem; font-weight:700; letter-spacing:-.03em; line-height:1.1; }
+.btn { appearance:none; border:0; border-radius:14px; padding:14px 18px; font:inherit; font-weight:600; color:#fff; background:var(--hero); cursor:pointer; width:100%; }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+.btn.soft { background:var(--surface2); color:var(--ink); }
+.link { background:none; border:0; color:var(--accent2); font:inherit; font-weight:600; cursor:pointer; padding:0; }
+.icon-x { background:var(--surface2); border:0; color:var(--muted); border-radius:50%; width:28px; height:28px; cursor:pointer; }
+.field { width:100%; background:var(--surface2); border:1px solid transparent; color:var(--ink); border-radius:14px; padding:13px 14px; font:inherit; outline:none; }
+.field:focus { border-color:var(--accent); }
+.bar { height:6px; background:var(--surface2); border-radius:99px; overflow:hidden; }
+.bar > i { display:block; height:100%; border-radius:99px; transition:width .3s; }
+.row { display:flex; align-items:center; gap:12px; }
+.grow { flex:1; min-width:0; }
+.ico { width:42px; height:42px; border-radius:13px; display:grid; place-items:center; font-size:1.2rem; flex:none; }
+.item { display:flex; align-items:center; gap:12px; padding:10px 0; }
+.item + .item { border-top:1px solid var(--line); }
+.empty { text-align:center; padding:28px 16px; }
+.empty .em { font-size:2.4rem; }
+.seg { display:flex; background:var(--surface2); border-radius:12px; padding:3px; }
+.seg button { flex:1; border:0; background:none; color:var(--muted); font:inherit; font-weight:600; padding:8px; border-radius:10px; cursor:pointer; }
+.seg button.on { background:var(--surface); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.25); }
 </style>
