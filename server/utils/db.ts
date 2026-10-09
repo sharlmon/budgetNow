@@ -21,7 +21,10 @@ export async function useDb(): Promise<Db> {
     const { PGlite } = await import('@electric-sql/pglite')
     const { drizzle } = await import('drizzle-orm/pglite')
     const { migrate } = await import('drizzle-orm/pglite/migrator')
-    const local = drizzle(new PGlite(process.env.PGLITE_DIR ?? '.data/pglite'), { schema })
+    const dir = process.env.PGLITE_DIR ?? '.data/pglite'
+    const { mkdirSync } = await import('node:fs')
+    mkdirSync(dir, { recursive: true }) // PGlite won't create missing parent folders
+    const local = drizzle(new PGlite(dir), { schema })
     await migrate(local, { migrationsFolder: 'drizzle' })
     // PGlite and postgres-js share the same query builder API, so the rest of the server treats them alike.
     db = local as unknown as Db
