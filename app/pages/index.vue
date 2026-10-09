@@ -5,7 +5,7 @@
         <div class="copy">
           <p class="eyebrow">Free budgeting app</p>
           <h1>Split every pay in seconds. Know what's safe to spend.</h1>
-          <p class="lead">Enter your salary or any money in. BudgetNow instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>. Adjust it if you like, then confirm. Track spending, debts, goals and bills in one calm place.</p>
+          <p class="lead">Enter your salary or any money in. Weka instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>. Adjust it if you like, then confirm. Track spending, debts, goals and bills in one calm place.</p>
           <div class="actions">
             <NuxtLink to="/sign-up" class="btn">Get started free</NuxtLink>
             <NuxtLink to="/#how" class="btn soft">See how it works</NuxtLink>
@@ -31,8 +31,8 @@
     </section>
 
     <section class="wrap answer" aria-labelledby="what">
-      <h2 id="what">What is BudgetNow?</h2>
-      <p>BudgetNow is a free budgeting app that automatically splits each pay into Needs, Wants, Savings and Debt, then tracks your spending, debts, savings goals and recurring bills. It shows how much is safe to spend today, works offline, and never asks for your bank login.</p>
+      <h2 id="what">What is Weka?</h2>
+      <p>Weka is a free budgeting app that automatically splits each pay into Needs, Wants, Savings and Debt, then tracks your spending, debts, savings goals and recurring bills. It shows how much is safe to spend today, works offline, and never asks for your bank login.</p>
     </section>
 
     <section class="wrap" aria-labelledby="features">
@@ -81,8 +81,8 @@ definePageMeta({ layout: 'public' })
 
 const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 useSeo({
-  title: 'BudgetNow: free budget app that splits your pay instantly',
-  description: 'Enter your pay and BudgetNow instantly splits it into Needs, Wants, Savings and Debt. Track spending, debts, goals and bills, see what is safe to spend today, and use it offline. Free.',
+  title: 'Weka: free budget app that splits your pay instantly',
+  description: 'Enter your pay and Weka instantly splits it into Needs, Wants, Savings and Debt. Track spending, debts, goals and bills, see what is safe to spend today, and use it offline. Free.',
   path: '/',
   jsonLd: [
     ...siteGraph(site),

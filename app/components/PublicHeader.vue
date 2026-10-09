@@ -1,7 +1,7 @@
 <template>
   <header class="ph">
     <div class="in">
-      <NuxtLink to="/" class="brand" aria-label="BudgetNow home"><img :src="icon" alt="" width="34" height="34" /><span>BudgetNow</span></NuxtLink>
+      <NuxtLink to="/" class="brand" aria-label="Weka home"><img :src="icon" alt="" width="34" height="34" /><span>Weka</span></NuxtLink>
       <nav class="links" aria-label="Main">
         <NuxtLink to="/#how">How it works</NuxtLink>
         <NuxtLink to="/#faq">FAQ</NuxtLink>

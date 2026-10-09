@@ -19,7 +19,7 @@ async function turnOnLock(page: any) {
 test('a PIN lock starts locked, refuses a wrong PIN, and opens with the right one', async ({ page }) => {
   await turnOnLock(page)
   await page.reload()
-  const lock = page.getByRole('dialog', { name: 'BudgetNow is locked' })
+  const lock = page.getByRole('dialog', { name: 'Weka is locked' })
   await expect(lock).toBeVisible()
   await expect(page.locator('.shell')).toHaveAttribute('inert', '')
 

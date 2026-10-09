@@ -2,7 +2,7 @@
   <section id="about" class="card white about">
     <div class="row">
       <span class="ic"><Icon name="sparkles" :size="20" /></span>
-      <div class="grow"><h2>About BudgetNow</h2><div class="muted sm">Version {{ current.version }} · build {{ current.build }}</div></div>
+      <div class="grow"><h2>About Weka</h2><div class="muted sm">Version {{ current.version }} · build {{ current.build }}</div></div>
     </div>
     <button class="btn soft sm chk" :disabled="busy" @click="manual"><Icon name="repeat" :size="15" /> {{ busy ? 'Checking…' : 'Check for updates' }}</button>
 

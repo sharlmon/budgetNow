@@ -37,7 +37,7 @@ describe('sitemap.xml', () => {
 describe('llms.txt and site facts', () => {
   const txt = buildLlmsTxt(base, FAQS)
   it('names the product and its maker with the link', () => {
-    expect(txt).toContain('# BudgetNow')
+    expect(txt).toContain('# Weka')
     expect(txt).toContain(`${SITE.maker} (${SITE.makerUrl})`)
   })
   it('includes every FAQ answer verbatim', () => { for (const f of FAQS) { expect(txt).toContain(f.q); expect(txt).toContain(f.a) } })

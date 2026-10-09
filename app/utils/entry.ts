@@ -1,4 +1,4 @@
-// People who already use BudgetNow on this device should land in the app, not on the marketing page.
+// People who already use Weka on this device should land in the app, not on the marketing page.
 
 export const LAST_USER_KEY = 'bn:lastUser'
 

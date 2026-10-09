@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to BudgetNow. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
+All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
 ## 1.0.0 - 2026-10-09
 

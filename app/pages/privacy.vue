@@ -3,10 +3,10 @@
     <h1>Privacy Policy</h1>
     <p class="meta">Last updated {{ SITE.privacyUpdated }}</p>
 
-    <p>This policy explains what personal information BudgetNow collects, why, who handles it, and the choices you have. We have written it in plain language, and we only describe things the app actually does.</p>
+    <p>This policy explains what personal information Weka collects, why, who handles it, and the choices you have. We have written it in plain language, and we only describe things the app actually does.</p>
 
     <h2>1. Who we are</h2>
-    <p>BudgetNow is a budgeting web app made and operated by <a :href="SITE.makerUrl" target="_blank" rel="noopener">{{ SITE.maker }}</a> ("we", "us"). For any privacy question or request, contact us through <a :href="SITE.makerUrl" target="_blank" rel="noopener">{{ SITE.makerUrl.replace('https://', '').replace(/\/$/, '') }}</a>.</p>
+    <p>Weka is a budgeting web app made and operated by <a :href="SITE.makerUrl" target="_blank" rel="noopener">{{ SITE.maker }}</a> ("we", "us"). For any privacy question or request, contact us through <a :href="SITE.makerUrl" target="_blank" rel="noopener">{{ SITE.makerUrl.replace('https://', '').replace(/\/$/, '') }}</a>.</p>
 
     <h2>2. What we collect</h2>
     <h3>Account information</h3>
@@ -16,7 +16,7 @@
     <h3>Technical data</h3>
     <p>Like any website, our hosting and sign-in providers process your IP address, browser and device type, and request logs. This is used to deliver the service, keep it secure and prevent abuse.</p>
     <h3>What we do not collect</h3>
-    <p>BudgetNow does not ask for bank logins, card numbers or account numbers, does not connect to your bank, does not use advertising trackers, and does not currently use analytics tools.</p>
+    <p>Weka does not ask for bank logins, card numbers or account numbers, does not connect to your bank, does not use advertising trackers, and does not currently use analytics tools.</p>
 
     <h2>3. How we use your information</h2>
     <ul>
@@ -68,10 +68,10 @@
     <p>For anything else, contact us using the details above. You also have the right to complain to your data protection authority, for example the Office of the Data Protection Commissioner in Kenya, or your local EU or UK authority.</p>
 
     <h2>10. Security</h2>
-    <p>Traffic between your device and BudgetNow is encrypted in transit. Every request is tied to your signed-in account, and the server only ever reads and writes the data belonging to that account. Your data is held by managed infrastructure providers. No online service can be guaranteed completely secure, so please protect your sign-in. Note that a backup file you export is plain text, so store it somewhere private.</p>
+    <p>Traffic between your device and Weka is encrypted in transit. Every request is tied to your signed-in account, and the server only ever reads and writes the data belonging to that account. Your data is held by managed infrastructure providers. No online service can be guaranteed completely secure, so please protect your sign-in. Note that a backup file you export is plain text, so store it somewhere private.</p>
 
     <h2>11. Children</h2>
-    <p>BudgetNow is intended for people aged 18 and over and is not directed at children. If you believe a child has given us personal information, contact us and we will delete it.</p>
+    <p>Weka is intended for people aged 18 and over and is not directed at children. If you believe a child has given us personal information, contact us and we will delete it.</p>
 
     <h2>12. Changes to this policy</h2>
     <p>If we make material changes we will update the date above and, where appropriate, tell you in the app.</p>
@@ -86,8 +86,8 @@ import { SITE } from '#shared/site'
 definePageMeta({ layout: 'public' })
 const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 useSeo({
-  title: 'Privacy Policy | BudgetNow',
-  description: 'What personal information BudgetNow collects, why, who handles it, how long it is kept, and how to export or delete your data.',
+  title: 'Privacy Policy | Weka',
+  description: 'What personal information Weka collects, why, who handles it, how long it is kept, and how to export or delete your data.',
   path: '/privacy',
   jsonLd: [...siteGraph(site), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'Privacy Policy', url: `${site}/privacy`, dateModified: '2026-10-09', isPartOf: { '@id': `${site}/#website` } }],
 })

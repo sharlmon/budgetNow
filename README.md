@@ -1,4 +1,4 @@
-# BudgetNow
+# Weka
 
 A personal budget tracker. Enter your pay and it's split instantly across **Needs / Wants / Savings / Debt** (you can adjust before confirming), then track expenses, debts, savings goals and recurring bills. A "safe to spend today" number tells you what's left for the day.
 

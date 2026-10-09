@@ -19,7 +19,7 @@ export function useSeo(o: SeoOptions) {
     description: o.description,
     robots: 'index, follow, max-image-preview:large',
     ogTitle: o.title, ogDescription: o.description, ogType: o.type ?? 'website', ogUrl: url,
-    ogImage: image, ogImageWidth: 1200, ogImageHeight: 630, ogImageAlt: 'BudgetNow: split every pay in seconds', ogSiteName: SITE.name, ogLocale: 'en_US',
+    ogImage: image, ogImageWidth: 1200, ogImageHeight: 630, ogImageAlt: 'Weka: split every pay in seconds', ogSiteName: SITE.name, ogLocale: 'en_US',
     twitterCard: 'summary_large_image', twitterTitle: o.title, twitterDescription: o.description, twitterImage: image,
   })
   useHead({
@@ -28,7 +28,7 @@ export function useSeo(o: SeoOptions) {
   })
 }
 
-/** Entities shared by every page, so search and answer engines connect BudgetNow with its maker. */
+/** Entities shared by every page, so search and answer engines connect Weka with its maker. */
 export function siteGraph(siteUrl: string) {
   const site = siteUrl.replace(/\/$/, '')
   return [

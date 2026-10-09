@@ -7,7 +7,7 @@ export const RELEASES: Release[] = [
   {
     version: '1.0.0',
     date: '2026-10-09',
-    title: 'BudgetNow 1.0',
+    title: 'Weka 1.0',
     notes: [
       'Enter a pay and see it split into Needs, Wants, Savings and Debt, then adjust it before you confirm',
       'A "safe to spend today" number worked out from your budget and bills still due',

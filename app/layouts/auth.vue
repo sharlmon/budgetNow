@@ -3,7 +3,7 @@
     <main class="authmain">
       <div class="brand rise">
         <img :src="icon" alt="" width="64" height="64" class="logo" />
-        <h1>BudgetNow</h1>
+        <h1>Weka</h1>
         <p class="muted">Split every pay instantly. Know what's safe to spend.</p>
       </div>
       <div class="rise" style="--i:2"><slot /></div>

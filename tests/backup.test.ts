@@ -44,7 +44,7 @@ describe('backup file parsing', () => {
     expect(r.skipped).toBe(0) // an unreadable rate does not discard the whole debt
   })
 
-  it('rejects files that are not a BudgetNow backup', () => {
+  it('rejects files that are not a Weka backup', () => {
     expect(parseBackup('not json').ok).toBe(false)
     expect(parseBackup('{"hello":1}').ok).toBe(false)
     expect(parseBackup('[1,2]').ok).toBe(false)

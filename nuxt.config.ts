@@ -50,13 +50,13 @@ export default defineNuxtConfig({
     baseURL: base,
     head: {
       htmlAttrs: { lang: 'en' },
-      title: 'BudgetNow',
+      title: 'Weka',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'theme-color', content: '#ef6a3a' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-title', content: 'BudgetNow' },
+        { name: 'apple-mobile-web-app-title', content: 'Weka' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
       script: [{ innerHTML: THEME_BOOT_SCRIPT, tagPosition: 'head' }, { innerHTML: ENTRY_BOOT_SCRIPT, tagPosition: 'head' }],
