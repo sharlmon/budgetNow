@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import { SITE } from '#shared/site'
 const { resetAll } = useBudget()
 const { hasData, daysSince, exportBackup, importFile } = useBackup()
 const picker = ref<HTMLInputElement>()
@@ -60,7 +61,7 @@ async function onPick(e: Event) {
   input.value = ''
   if (f) await importFile(f)
 }
-const currencies = ['USD', 'EUR', 'GBP', 'ZAR', 'NGN', 'KES', 'GHS', 'INR', 'CAD', 'AUD', 'JPY', 'AED']
+const currencies = SITE.currencies
 const cur = computed({ get: () => currency.value, set: (v: string) => { currency.value = v } })
 const name = computed({ get: () => userName.value, set: (v: string) => { userName.value = v } })
 function erase() { if (confirm('Permanently erase all your data from your account and every device? This cannot be undone.')) { resetAll(); showToast('All data erased') } }

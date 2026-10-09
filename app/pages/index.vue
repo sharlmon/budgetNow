@@ -16,8 +16,8 @@
           <div class="phone">
             <div class="ph-top">
               <small>Safe to spend today</small>
-              <div class="ph-amt">$48.20</div>
-              <small>of $52.00 a day · 14 days left</small>
+              <div class="ph-amt">KSh 1,850</div>
+              <small>of KSh 2,000 a day · 14 days left</small>
             </div>
             <div class="ph-row" v-for="r in demo" :key="r.n">
               <span class="dot" :style="{ background: r.c }" />
@@ -90,7 +90,7 @@ useSeo({
       '@context': 'https://schema.org', '@type': 'WebApplication', '@id': `${site}/#app`, name: SITE.name, url: `${site}/`,
       description: SITE.description, applicationCategory: 'FinanceApplication', operatingSystem: 'Any (web browser, installable)',
       browserRequirements: 'Requires JavaScript', inLanguage: 'en', isAccessibleForFree: true,
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'KES' },
       creator: { '@id': `${site}/#maker` }, publisher: { '@id': `${site}/#maker` },
       featureList: ['Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
     },
@@ -99,10 +99,10 @@ useSeo({
 })
 
 const demo = [
-  { n: 'Needs', c: '#ef6a3a', p: 62, v: '$1,150' },
-  { n: 'Wants', c: '#f5c242', p: 38, v: '$420' },
-  { n: 'Savings', c: '#2fb67c', p: 20, v: '$320' },
-  { n: 'Debt', c: '#5b8def', p: 100, v: '$160' },
+  { n: 'Needs', c: '#ef6a3a', p: 62, v: 'KSh 57,500' },
+  { n: 'Wants', c: '#f5c242', p: 38, v: 'KSh 21,000' },
+  { n: 'Savings', c: '#2fb67c', p: 20, v: 'KSh 16,000' },
+  { n: 'Debt', c: '#5b8def', p: 100, v: 'KSh 8,000' },
 ]
 const features = [
   { i: 'wallet', t: 'Instant income split', d: 'Your pay is divided into Needs, Wants, Savings and Debt the moment you enter it, with sliders to adjust before you confirm.' },

@@ -17,7 +17,7 @@ export const canon = (v: unknown): string => JSON.stringify(v, (_k, val) =>
     ? Object.fromEntries(Object.keys(val).sort().filter(k => val[k] !== undefined).map(k => [k, val[k]]))
     : val)
 
-export const emptySnap = (): Snap => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [], profile: { currency: 'USD', name: '', split: { needs: 50, wants: 30, savings: 20 } } })
+export const emptySnap = (): Snap => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [], profile: { currency: 'KES', name: '', split: { needs: 50, wants: 30, savings: 20 } } })
 
 /** The minimal set of row changes that turns `prev` into `next`. Puts and deletes are idempotent, so retrying is always safe. */
 export function diffSnaps(prev: Snap, next: Snap): Op[] {

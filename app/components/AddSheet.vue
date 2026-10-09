@@ -72,10 +72,11 @@
 
 <script setup lang="ts">
 import { splitLabel, suggestSplit } from '../utils/split'
+import { keypadSymbol } from '../utils/money'
 const sheet = useSheet()
 const mode = computed({ get: () => sheet.value.mode, set: (v: string) => { sheet.value.mode = v as 'income' | 'expense' } })
 const { totalMinDebt, addIncome, addExpense } = useBudget()
-const symbol = computed(() => (0).toLocaleString(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: 0 }).replace(/[\d\s.,]/g, ''))
+const symbol = computed(() => keypadSymbol(currency.value))
 
 const step = ref(1)
 const str = ref('')

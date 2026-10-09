@@ -1,4 +1,5 @@
 import { DEFAULT_SPLIT, type SplitRule } from '../utils/split'
+import { DEFAULT_CURRENCY, formatMoney } from '../utils/money'
 
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
 export const CATEGORIES: { key: Category; label: string; hint: string; color: string; icon: string }[] = [
@@ -151,12 +152,11 @@ export function useBudget() {
 }
 
 // Profile values live in the synced snapshot, not in their own storage keys.
-export const currency = ref('USD')
+export const currency = ref(DEFAULT_CURRENCY)
 export const userName = ref('')
 /** How each pay is divided after debt minimums. Saved with the profile, so it follows the user across devices. */
 export const splitRule = ref<SplitRule>({ ...DEFAULT_SPLIT })
-export const money = (n: number) =>
-  new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }).format(n)
+export const money = (n: number) => formatMoney(n, currency.value)
 export const ym = (d: string) => d.slice(0, 7)
 export const monthLabel = (m: string) => new Date(m + '-01T00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 export const shiftMonth = (m: string, by: number) => { const d = new Date(m + '-01T00:00'); d.setMonth(d.getMonth() + by); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }

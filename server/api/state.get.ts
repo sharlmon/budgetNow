@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     goals: gl.map(g => mapGoal(g, contribs)),
     bills: bl.map(mapBill),
     profile: {
-      currency: prof[0]?.currency ?? 'USD',
+      currency: prof[0]?.currency ?? 'KES',
       name: prof[0]?.name ?? '',
       split: { needs: prof[0]?.splitNeeds ?? 50, wants: prof[0]?.splitWants ?? 30, savings: prof[0]?.splitSavings ?? 20 },
     },

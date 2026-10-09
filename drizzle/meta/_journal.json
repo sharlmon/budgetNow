@@ -36,6 +36,13 @@
       "when": 1791544471802,
       "tag": "0004_row_revisions",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791550603330,
+      "tag": "0005_default_currency_kes",
+      "breakpoints": true
     }
   ]
 }

@@ -13,7 +13,7 @@ const stamps = {
 
 export const profiles = pgTable('profiles', {
   userId: text('user_id').primaryKey(),
-  currency: text('currency').notNull().default('USD'),
+  currency: text('currency').notNull().default('KES'),
   name: text('name').notNull().default(''),
   // How each pay is divided after debt minimums, as whole percentages that total 100.
   splitNeeds: integer('split_needs').notNull().default(50),

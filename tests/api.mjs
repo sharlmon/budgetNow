@@ -158,6 +158,14 @@ ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk up
   ok((await sync(erin, [debt({ apr: null })])).s === 200, 'an explicit null rate is accepted')
 }
 
+// default currency
+{
+  const nia = 'user_nia_' + Date.now()
+  ok((await state(nia)).profile.currency === 'KES', 'a brand-new account defaults to Kenyan shillings')
+  ok((await sync(nia, [{ t: 'profile', op: 'put', row: { currency: 'USD', name: '' } }])).s === 200 && (await state(nia)).profile.currency === 'USD', 'a chosen currency is kept (USD)')
+  ok((await sync(nia, [{ t: 'profile', op: 'put', row: { currency: 'KES', name: '' } }])).s === 200 && (await state(nia)).profile.currency === 'KES', 'and can be switched back to KES')
+}
+
 // split rule
 {
   const carol = 'user_carol_' + Date.now()

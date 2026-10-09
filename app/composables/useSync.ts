@@ -2,6 +2,7 @@ import { diffSnaps, emptySnap, TABLES, type Snap } from '#shared/sync'
 import { reconcile, type Conflict, type PushResponse } from '#shared/reconcile'
 import { API_MARKER, DELETE_CONFIRM } from '#shared/security'
 import { DEFAULT_SPLIT, isValidSplit } from '../utils/split'
+import { DEFAULT_CURRENCY } from '../utils/money'
 
 type Status = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -180,7 +181,7 @@ export function useSync() {
     syncPending.value = 0
     locked.value = false
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
-    currency.value = 'USD'
+    currency.value = DEFAULT_CURRENCY
     userName.value = ''
     splitRule.value = { ...DEFAULT_SPLIT }
   }
