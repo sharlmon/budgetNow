@@ -1,4 +1,5 @@
 import { diffSnaps, emptySnap, type Snap } from '#shared/sync'
+import { API_MARKER, DELETE_CONFIRM } from '#shared/security'
 
 type Status = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -50,7 +51,7 @@ export function useSync() {
     syncStatus.value = 'syncing'
     const owner = uid
     try {
-      for (let i = 0; i < ops.length; i += 500) await $fetch('/api/sync', { method: 'POST', body: { ops: ops.slice(i, i + 500) } })
+      for (let i = 0; i < ops.length; i += 500) await $fetch('/api/sync', { method: 'POST', headers: { [API_MARKER.name]: API_MARKER.value }, body: { ops: ops.slice(i, i + 500) } })
       if (uid !== owner) return false
       synced = sent
       persist()
@@ -174,7 +175,7 @@ export function useSync() {
     clearTimeout(pushTimer); clearTimeout(retryTimer); clearTimeout(cacheTimer)
     uid = null
     try {
-      await $fetch('/api/account', { method: 'DELETE' })
+      await $fetch('/api/account', { method: 'DELETE', headers: { [API_MARKER.name]: API_MARKER.value, [DELETE_CONFIRM.name]: DELETE_CONFIRM.value } })
     } catch (e) {
       uid = owner
       throw e

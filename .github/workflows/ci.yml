@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege: the workflow can only read the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Dummy keys: enough for the build and for attack tests that never reach Clerk. No real secrets are used in CI.
+      NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS1hcHAtMS5jbGVyay5hY2NvdW50cy5kZXYk
+      NUXT_CLERK_SECRET_KEY: sk_test_ci_dummy_key_for_tests_only_0000000000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: API and security tests (dev server, in-process Postgres)
+        run: |
+          DEV_AUTH_BYPASS=1 PGLITE_DIR="$RUNNER_TEMP/pglite" npx nuxt dev --port 3000 > "$RUNNER_TEMP/dev.log" 2>&1 &
+          for i in $(seq 1 120); do curl -sf http://localhost:3000/api/state > /dev/null && break; sleep 1; done
+          API_URL=http://localhost:3000 npm run test:api
+          API_URL=http://localhost:3000 npm run test:security
+          pkill -f "nuxt dev" || true
+
+      - name: Production build
+        run: NODE_ENV=production NITRO_PRESET=node-server npx nuxt build
+
+      - name: Dev auth bypass must not exist in the production bundle
+        run: |
+          if grep -rl "x-dev-user" .output; then echo "::error::dev bypass header found in production bundle"; exit 1; fi
+
+      - name: Security tests against the production build
+        run: |
+          NODE_ENV=production PORT=4000 node .output/server/index.mjs > "$RUNNER_TEMP/prod.log" 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4000/robots.txt && break; sleep 1; done
+          PROD=1 API_URL=http://localhost:4000 npm run test:security
+
+      - name: Dependency audit (fails on critical)
+        run: npm audit --audit-level=critical
+
+      - name: Dependency audit (full report, informational)
+        run: npm audit || true
