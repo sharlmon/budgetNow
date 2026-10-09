@@ -36,12 +36,17 @@ npm run dev:local     # no Clerk keys or database needed
 
 To run against real Clerk and Neon instead, copy `.env.example` to `.env`, fill it in, and run `npm run dev`.
 
+## Security
+
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability and what is protected. In short: every API route needs a verified Clerk session and is scoped to that user; writes must come from the app's own pages (CSRF checks + marker header); inputs are validated and queries parameterised; per-IP rate limits and size limits; CSP and other security headers; and CI attacks the dev server and the production build on every pull request.
+
 ## Tests
 
 ```bash
-npm test              # unit tests: bill dates, backup parsing, sync diffing
+npm test              # unit tests: bill dates, backup parsing, sync diffing, PIN/biometric checks, security helpers
 npm run dev:local     # in one terminal...
-npm run test:api      # ...and this in another: API tests (isolation, validation, atomicity)
+npm run test:api      # ...and these in another: API tests (isolation, validation, atomicity)
+npm run test:security # attack tests: CSRF, injection, oversized bodies, rate limits, error leaks
 ```
 
 ## Database changes

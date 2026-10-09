@@ -24,7 +24,7 @@ export function useSeo(o: SeoOptions) {
   })
   useHead({
     link: [{ rel: 'canonical', href: url }],
-    script: (o.jsonLd ?? []).map(j => ({ type: 'application/ld+json', innerHTML: JSON.stringify(j) })),
+    script: (o.jsonLd ?? []).map(j => ({ type: 'application/ld+json', innerHTML: JSON.stringify(j).replace(/</g, '\\u003c') })),
   })
 }
 
