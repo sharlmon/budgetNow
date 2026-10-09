@@ -56,5 +56,9 @@ Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `d
 - Set `NUXT_PUBLIC_SITE_URL` when you add a custom domain so every absolute URL follows it.
 - Settings has **Delete account**, which removes all of a user's rows and then their Clerk user (`DELETE /api/account`).
 
+## App lock
+
+Optional PIN lock (Settings → App lock). The PIN is hashed with PBKDF2 (150k iterations, random salt) and stored in this browser only, so it never syncs and each device sets its own. Wrong guesses are throttled (30s after the fifth, doubling to 15 min). It locks on open and after a chosen time away, and "Forgot PIN" signs out so Clerk re-verifies the user. It is a screen lock, not encryption of on-device data.
+
 ## Roadmap
 See GitHub Issues.
