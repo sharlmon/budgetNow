@@ -1,10 +1,10 @@
 <template>
   <div class="catrow">
-    <span class="ico" :style="{ background: c.color + '22' }">{{ c.emoji }}</span>
+    <CatIcon :cat="c.key" />
     <div class="grow">
-      <div class="row" style="justify-content:space-between"><strong>{{ c.label }}</strong><strong>{{ money(spent) }}</strong></div>
-      <div class="bar" style="margin:7px 0 5px"><i :style="{ width: fill + '%', background: over ? 'var(--bad)' : c.color }" /></div>
-      <div class="row sm" style="justify-content:space-between"><span :style="{ color: over ? 'var(--bad)' : c.color, fontWeight: 600 }">{{ Math.round(fill) }}%</span><span class="muted">of {{ money(budgeted) }}</span></div>
+      <div class="row" style="justify-content:space-between"><strong>{{ c.label }}</strong><strong><AnimatedNumber :value="spent" /></strong></div>
+      <div class="bar" style="margin:8px 0 6px"><i :style="{ width: fill + '%', background: over ? 'var(--bad)' : c.color }" /></div>
+      <div class="row sm" style="justify-content:space-between"><span :style="{ color: over ? 'var(--bad)' : c.color, fontWeight: 700 }">{{ Math.round(fill) }}%</span><span class="muted">of {{ money(budgeted) }}</span></div>
     </div>
   </div>
 </template>
@@ -16,5 +16,6 @@ const fill = computed(() => (props.budgeted > 0 ? Math.min(100, (props.spent / p
 </script>
 
 <style scoped>
-.catrow { display:flex; gap:12px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:18px; padding:12px; margin-bottom:10px; }
+.catrow { display:flex; gap:14px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:20px; padding:14px; margin-bottom:10px; box-shadow:0 1px 2px rgba(20,20,40,.03); transition:transform .25s var(--spring), box-shadow .25s; }
+.catrow:active { transform:scale(.985); }
 </style>

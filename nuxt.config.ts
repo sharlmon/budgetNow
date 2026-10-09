@@ -2,6 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   ssr: false, // data lives in the browser (localStorage), so ship as a static SPA
   app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
     baseURL: process.env.NUXT_APP_BASE_URL || '/',
     head: {
       title: 'BudgetNow',

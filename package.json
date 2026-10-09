@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "lucide-vue-next": "^1.0.0",
     "nuxt": "^4.6.0",
     "vue": "latest"
   }

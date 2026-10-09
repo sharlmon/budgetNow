@@ -1,30 +1,35 @@
 <template>
   <div class="wallet">
     <div class="c c3" />
-    <div class="c c2"><span>{{ second?.label || 'Next pay' }}</span><b>{{ second ? money(second.amount) : '' }}</b></div>
+    <div class="c c2" />
     <div class="c c1"><span>{{ first?.label || 'Latest income' }}</span><b>{{ first ? money(first.amount) : '' }}</b></div>
     <div class="front">
+      <div class="chipic"><Icon name="wallet" :size="18" /></div>
       <small>Total Balance</small>
-      <div class="amt">{{ money(balance) }}</div>
+      <div class="amt"><AnimatedNumber :value="balance" /></div>
+      <i class="sheen" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ balance: number; first?: { label: string; amount: number }; second?: { label: string; amount: number } }>()
+defineProps<{ balance: number; first?: { label: string; amount: number }; second?: unknown }>()
 </script>
 
 <style scoped>
-.wallet { position:relative; height:196px; }
-.c { position:absolute; left:0; right:0; border-radius:22px; padding:12px 18px; display:flex; justify-content:space-between; font-size:.78rem; }
-.c3 { top:0; transform:scale(.88); background:#d9d9de; height:80px; }
-.c2 { top:12px; transform:scale(.94); background:linear-gradient(#cfcfd4,#b9b9c1); color:#444; height:90px; }
-.c1 { top:26px; background:linear-gradient(#e4e4e9,#a9a9b3); color:#333; height:100px; }
-.front { position:absolute; left:0; right:0; bottom:0; height:130px; border-radius:24px; padding:18px 20px; color:#f7e7da; display:flex; flex-direction:column; justify-content:flex-end; background:
-  radial-gradient(circle at 20% 0%,rgba(255,255,255,.18),transparent 55%),
-  repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 5px),
-  linear-gradient(160deg,#9a5a34,#5f2f19); box-shadow:0 18px 30px -14px rgba(70,30,10,.7), inset 0 0 0 1.5px rgba(255,255,255,.1); }
-.front::after { content:''; position:absolute; inset:7px; border:1.5px dashed rgba(255,225,200,.35); border-radius:19px; pointer-events:none; }
-.amt { font-size:2rem; font-weight:700; letter-spacing:-.02em; color:#fff; line-height:1.15; }
-small { opacity:.8; }
+.wallet { position:relative; height:206px; }
+.c { position:absolute; left:0; right:0; border-radius:22px; padding:12px 20px; display:flex; justify-content:space-between; font-size:.78rem; font-weight:500; animation:slide .8s var(--ease) both; }
+.c3 { top:0; background:#d9d9e0; height:80px; transform:scale(.88); animation-delay:.05s; }
+.c2 { top:14px; background:linear-gradient(#d4d4db,#bdbdc6); color:#46464f; height:90px; transform:scale(.94); animation-delay:.12s; }
+.c1 { top:30px; background:linear-gradient(#e8e8ee,#aeaeb9); color:#33333b; height:100px; animation-delay:.2s; }
+.front { position:absolute; left:0; right:0; bottom:0; height:134px; border-radius:26px; padding:18px 22px; color:#f7e7da; display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; animation:slide .9s .3s var(--ease) both;
+  background: radial-gradient(circle at 18% 0%,rgba(255,255,255,.2),transparent 55%), repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 5px), linear-gradient(160deg,#9d5c36,#5c2d17);
+  box-shadow:0 22px 34px -16px rgba(70,30,10,.75), inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 0 1.5px rgba(255,255,255,.08); }
+.front::after { content:''; position:absolute; inset:8px; border:1.5px dashed rgba(255,225,200,.3); border-radius:19px; pointer-events:none; }
+.chipic { position:absolute; top:18px; right:20px; width:34px; height:34px; border-radius:11px; display:grid; place-items:center; background:rgba(255,255,255,.14); backdrop-filter:blur(4px); color:#ffe9d8; }
+.amt { font-size:2.1rem; font-weight:700; letter-spacing:-.03em; color:#fff; line-height:1.15; }
+small { opacity:.8; font-weight:500; }
+.sheen { position:absolute; top:-20%; bottom:-20%; width:40%; left:-60%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent); transform:skewX(-18deg); animation:sheen 1.6s 1.1s var(--ease) both; }
+@keyframes slide { from { opacity:0; transform:translateY(46px) scale(.9); } }
+@keyframes sheen { to { left:130%; } }
 </style>

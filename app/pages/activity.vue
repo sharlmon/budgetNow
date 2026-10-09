@@ -1,13 +1,15 @@
 <template>
   <div>
-    <h1 style="margin-bottom:14px">Activity</h1>
-    <div class="seg" style="margin-bottom:6px">
-      <button v-for="f in ['all', 'income', 'expense']" :key="f" :class="{ on: filter === f }" @click="filter = f">{{ f === 'all' ? 'All' : f === 'income' ? 'Money in' : 'Expenses' }}</button>
+    <h1 class="rise" style="margin-bottom:16px">Activity</h1>
+    <div class="rise" style="--i:1"><Seg v-model="filter" :options="[{ value: 'all', label: 'All' }, { value: 'income', label: 'Money in' }, { value: 'expense', label: 'Expenses' }]" /></div>
+    <div v-if="!shown.length" class="card empty rise" style="margin-top:20px;--i:2">
+      <div class="art"><Icon name="receipt" :size="28" /></div>
+      <h2 style="margin-bottom:4px">Nothing here yet</h2>
+      <p class="muted" style="margin:0">Tap the + button to add your first transaction.</p>
     </div>
-    <div v-if="!shown.length" class="card empty" style="margin-top:16px"><div class="em">🧾</div><p class="muted">Nothing here yet. Tap + to add something.</p></div>
-    <div v-for="[date, items] in groups" :key="date">
-      <div class="sec" style="margin-bottom:6px"><h2 class="muted" style="font-size:.8rem;font-weight:600">{{ nice(date) }}</h2></div>
-      <div class="card white" style="padding:2px 16px"><TxnItem v-for="t in items" :key="t.id" :t="t" removable /></div>
+    <div v-for="([date, items], gi) in groups" :key="date" class="rise" :style="{ '--i': 2 + gi }">
+      <div class="sec" style="margin:22px 0 8px"><h2 class="muted" style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">{{ nice(date) }}</h2></div>
+      <div class="card white" style="padding:2px 18px"><TxnItem v-for="t in items" :key="t.id" :t="t" removable /></div>
     </div>
   </div>
 </template>
