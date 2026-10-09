@@ -69,12 +69,12 @@ async function forgot() {
 </script>
 
 <style scoped>
-.lock { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:24px; background:linear-gradient(180deg,#fff7f2 0%,#fff 55%); }
+.lock { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:24px; background:linear-gradient(180deg,var(--tint-accent-soft) 0%, var(--bg) 55%); }
 .inner { width:100%; max-width:360px; text-align:center; }
 .logo { border-radius:18px; box-shadow:0 14px 28px -12px rgba(239,106,58,.8); margin-bottom:16px; }
 h1 { font-size:1.35rem; margin:0 0 6px; }
 .sub { margin:0 0 26px; color:var(--muted); min-height:1.4em; transition:color .2s; } .sub.bad { color:var(--bad); font-weight:600; }
-.bio { display:inline-flex; align-items:center; gap:8px; margin-top:22px; padding:12px 20px; border-radius:99px; border:1px solid var(--line); background:#fff; color:var(--ink); font:inherit; font-weight:600; font-size:.9rem; cursor:pointer; box-shadow:0 1px 2px rgba(20,20,40,.05); transition:transform .15s var(--spring); }
+.bio { display:inline-flex; align-items:center; gap:8px; margin-top:22px; padding:12px 20px; border-radius:99px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-weight:600; font-size:.9rem; cursor:pointer; box-shadow:0 1px 2px rgba(20,20,40,.05); transition:transform .15s var(--spring); }
 .bio:active { transform:scale(.96); } .bio:disabled { opacity:.5; }
 .forgot { margin-top:20px; background:none; border:0; color:var(--muted); font:inherit; font-size:.85rem; cursor:pointer; text-decoration:underline; }
 .lock-enter-active { transition:opacity .2s; } .lock-leave-active { transition:opacity .35s ease, transform .35s ease; }

@@ -13,6 +13,6 @@ const show = computed(() => syncStatus.value === 'offline' || syncStatus.value =
 </script>
 
 <style scoped>
-.badge { display:inline-flex; align-items:center; gap:5px; margin-top:4px; padding:3px 9px; border-radius:99px; font-size:.7rem; font-weight:600; text-decoration:none; background:#f1f1f5; color:var(--muted); }
-.badge.offline { background:#fff4e0; color:#b97800; } .badge.error { background:#fdecec; color:var(--bad); }
+.badge { display:inline-flex; align-items:center; gap:5px; margin-top:4px; padding:3px 9px; border-radius:99px; font-size:.7rem; font-weight:600; text-decoration:none; background:var(--soft); color:var(--muted); }
+.badge.offline { background:var(--warn-bg); color:var(--warn-ink); } .badge.error { background:var(--bad-bg); color:var(--bad); }
 </style>

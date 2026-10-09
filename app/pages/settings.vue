@@ -9,11 +9,12 @@
       </div>
       <div class="sync" :class="syncStatus"><Icon :name="syncStatus === 'synced' ? 'check' : syncStatus === 'error' ? 'x' : 'repeat'" :size="14" :stroke="2.6" /> {{ syncText }}</div>
       <div class="row" style="margin-top:12px">
-        <button class="btn soft sm" style="flex:1" @click="syncNow"><Icon name="repeat" :size="15" /> Sync</button>
-        <button class="btn soft sm" style="flex:1" @click="auth.manageAccount()"><Icon name="settings" :size="15" /> Account</button>
-        <button class="btn soft sm" style="flex:1" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
+        <button class="btn soft sm acct" @click="syncNow"><Icon name="repeat" :size="15" /> Sync</button>
+        <button class="btn soft sm acct" @click="auth.manageAccount()"><Icon name="settings" :size="15" /> Account</button>
+        <button class="btn soft sm acct" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
       </div>
     </div>
+    <div class="rise" style="--i:1"><ThemeCard /></div>
     <div class="rise" style="--i:1"><SplitRuleCard /></div>
     <div class="rise" style="--i:1"><AppLockCard /></div>
     <div class="rise" style="margin-bottom:12px;--i:1"><InstallCard always /></div>
@@ -39,7 +40,7 @@
       <p class="muted sm" style="margin:6px 0 14px">Permanently deletes all your income, expenses, debts, goals and bills from your account and every device.</p>
       <button class="btn soft" @click="erase"><Icon name="trash" :size="16" /> Erase all data</button>
     </div>
-    <div class="card white rise" style="margin-bottom:16px;--i:5;border-color:#f6c7ca">
+    <div class="card white rise" style="margin-bottom:16px;--i:5;border-color:var(--bad-line)">
       <h2 style="color:var(--bad)">Delete account</h2>
       <p class="muted sm" style="margin:6px 0 14px">Permanently deletes your account and everything stored with it. This cannot be undone. Export a backup first if you want to keep a copy.</p>
       <button class="btn soft" style="color:var(--bad)" :disabled="deleting" @click="deleteAccount"><Icon name="trash" :size="16" /> {{ deleting ? 'Deleting…' : 'Delete my account' }}</button>
@@ -100,11 +101,12 @@ async function signOut() {
 </script>
 
 <style scoped>
+.acct { flex:1; white-space:nowrap; padding-inline:10px; gap:6px; }
 .pic { border-radius:50%; flex:none; }
 .nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:#f1f1f5; color:var(--muted); }
-.sync.synced { background:var(--goodbg); color:#1f8f5f; } .sync.error { background:#fdecec; color:var(--bad); } .sync.offline { background:#fff4e0; color:#b97800; }
+.sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:var(--soft); color:var(--muted); }
+.sync.synced { background:var(--goodbg); color:var(--good-ink); } .sync.error { background:var(--bad-bg); color:var(--bad); } .sync.offline { background:var(--warn-bg); color:var(--warn-ink); }
 .legal { display:flex; justify-content:center; gap:10px; font-size:.82rem; color:var(--muted); }
 .legal a { color:var(--muted); }
-.bk { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
+.bk { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; flex:none; }
 </style>

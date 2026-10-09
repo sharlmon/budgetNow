@@ -49,7 +49,7 @@ const tip = computed(() => {
 .mpill svg { color:var(--accent); }
 .legend { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:center; font-size:.76rem; color:var(--muted); font-weight:500; }
 .legend i { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:7px; }
-.tip { width:100%; display:flex; gap:14px; align-items:center; text-align:left; font:inherit; color:var(--ink); background:linear-gradient(95deg,#fff0e8,#fff8f4); border:1px solid #fbdfd0; border-radius:20px; padding:14px; margin-top:16px; cursor:pointer; transition:transform .2s var(--spring); }
+.tip { width:100%; display:flex; gap:14px; align-items:center; text-align:left; font:inherit; color:var(--ink); background:linear-gradient(95deg,var(--tint-accent-soft),var(--tint-accent-soft)); border:1px solid var(--tint-accent-line); border-radius:20px; padding:14px; margin-top:16px; cursor:pointer; transition:transform .2s var(--spring); }
 .tip:active { transform:scale(.98); }
-.tipic { width:42px; height:42px; border-radius:14px; background:#fff; color:var(--accent); display:grid; place-items:center; box-shadow:0 4px 12px -6px rgba(239,106,58,.6); flex:none; }
+.tipic { width:42px; height:42px; border-radius:14px; background:var(--surface); color:var(--accent); display:grid; place-items:center; box-shadow:0 4px 12px -6px rgba(239,106,58,.6); flex:none; }
 </style>

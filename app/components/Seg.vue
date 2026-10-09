@@ -12,8 +12,8 @@ const index = computed(() => Math.max(0, props.options.findIndex(o => o.value ==
 </script>
 
 <style scoped>
-.seg { position:relative; display:grid; grid-template-columns:repeat(var(--n),1fr); background:#ececf1; border-radius:99px; padding:4px; }
-.thumb { position:absolute; top:4px; bottom:4px; left:4px; width:calc((100% - 8px) / var(--n)); border-radius:99px; background:#fff; box-shadow:0 2px 8px rgba(20,20,40,.12); transform:translateX(calc(var(--i) * 100%)); transition:transform .35s cubic-bezier(.3,1.3,.5,1); }
+.seg { position:relative; display:grid; grid-template-columns:repeat(var(--n),1fr); background:var(--track); border-radius:99px; padding:4px; }
+.thumb { position:absolute; top:4px; bottom:4px; left:4px; width:calc((100% - 8px) / var(--n)); border-radius:99px; background:var(--surface); box-shadow:0 2px 8px rgba(20,20,40,.12); transform:translateX(calc(var(--i) * 100%)); transition:transform .35s cubic-bezier(.3,1.3,.5,1); }
 button { position:relative; z-index:1; background:none; border:0; font:inherit; font-size:.85rem; font-weight:600; padding:10px 8px; border-radius:99px; cursor:pointer; color:var(--muted); transition:color .25s; }
 button.on { color:var(--ink); }
 .glass { background:rgba(255,255,255,.22); }

@@ -1,4 +1,5 @@
 import { buildCsp, clerkHostFromKey } from './shared/security'
+import { THEME_BOOT_SCRIPT } from './app/utils/theme'
 
 const base = process.env.NUXT_APP_BASE_URL || '/'
 // `DEV_AUTH_BYPASS=1 nuxt dev` runs the app without Clerk keys for local work. It is ignored in production builds.
@@ -53,6 +54,7 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-title', content: 'BudgetNow' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
+      script: [{ innerHTML: THEME_BOOT_SCRIPT, tagPosition: 'head' }],
       link: [
         { rel: 'manifest', href: `${base}manifest.webmanifest` },
         // Browser tab icon: a circle (SVG scales crisply; PNGs are the fallback). The home-screen icons below stay square, because phones round those themselves.

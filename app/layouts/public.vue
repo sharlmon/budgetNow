@@ -8,7 +8,7 @@
 </template>
 
 <style>
-.pub { min-height:100dvh; background:#fff; }
+.pub { min-height:100dvh; background:var(--bg); }
 .pub .skip { position:absolute; left:-9999px; top:8px; background:var(--ink); color:#fff; padding:8px 14px; border-radius:10px; z-index:50; }
 .pub .skip:focus { left:12px; }
 .pub main { padding:0; }
@@ -17,7 +17,7 @@
 .prose h1 { font-size:clamp(1.8rem,5vw,2.5rem); line-height:1.15; letter-spacing:-.03em; margin:0 0 12px; }
 .prose h2 { font-size:1.35rem; letter-spacing:-.02em; margin:36px 0 10px; }
 .prose h3 { font-size:1.05rem; margin:22px 0 6px; }
-.prose p, .prose li { color:#3c3f4a; line-height:1.7; }
+.prose p, .prose li { color:var(--ink2); line-height:1.7; }
 .prose ul, .prose ol { padding-left:1.2rem; }
 .prose a { color:var(--accent); font-weight:500; }
 .prose .meta { color:var(--muted); font-size:.9rem; margin:0 0 24px; }

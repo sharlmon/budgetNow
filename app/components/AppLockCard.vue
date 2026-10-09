@@ -115,14 +115,14 @@ async function submit(pin: string) {
 
 <style scoped>
 .lockcard { margin-bottom:12px; }
-.lk { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
+.lk { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; flex:none; }
 .note { margin:12px 0 14px; }
 .biorow { margin-top:14px; padding:12px 0 2px; border-top:1px solid var(--line); }
-.fp { background:#eef2ff; color:#5b8def; }
+.fp { background:var(--tint-blue); color:#5b8def; }
 label { display:block; margin-bottom:6px; }
 .scrim { position:fixed; inset:0; z-index:90; background:rgba(15,15,25,.5); display:flex; align-items:flex-end; justify-content:center; }
-.sheet { position:relative; width:100%; max-width:480px; background:#fff; border-radius:28px 28px 0 0; padding:26px 24px calc(28px + env(safe-area-inset-bottom)); text-align:center; }
-.x { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:0; background:#f1f1f5; color:var(--muted); display:grid; place-items:center; cursor:pointer; }
+.sheet { position:relative; width:100%; max-width:480px; background:var(--surface); border-radius:28px 28px 0 0; padding:26px 24px calc(28px + env(safe-area-inset-bottom)); text-align:center; }
+.x { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:0; background:var(--soft); color:var(--muted); display:grid; place-items:center; cursor:pointer; }
 h3 { margin:0 0 4px; font-size:1.2rem; }
 .sub { margin:0 0 20px; color:var(--muted); min-height:1.4em; } .sub.bad { color:var(--bad); font-weight:600; }
 .lenpick { max-width:240px; margin:0 auto 20px; }

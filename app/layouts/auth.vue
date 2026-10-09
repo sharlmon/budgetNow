@@ -23,7 +23,7 @@ const icon = `${useRuntimeConfig().app.baseURL}icons/icon-192.png`
 </script>
 
 <style>
-.authshell { background:linear-gradient(180deg,#fff7f2 0%,#fff 40%); }
+.authshell { background:linear-gradient(180deg,var(--tint-accent-soft) 0%, var(--bg) 40%); }
 .authmain { display:flex; flex-direction:column; justify-content:center; gap:22px; padding-top:32px; }
 .afoot { display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:6px; }
 .afoot nav { display:flex; gap:10px; font-size:.82rem; color:var(--muted); } .afoot nav a { color:var(--muted); }

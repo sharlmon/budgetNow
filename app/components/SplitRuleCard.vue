@@ -60,16 +60,16 @@ watch(splitRule, (r) => { Object.assign(draft, r); if (!custom.value) custom.val
 
 <style scoped>
 .rule { margin-bottom:12px; }
-.ic { width:42px; height:42px; border-radius:14px; background:#fff1ea; color:var(--accent); display:grid; place-items:center; flex:none; }
+.ic { width:42px; height:42px; border-radius:14px; background:var(--tint-accent); color:var(--accent); display:grid; place-items:center; flex:none; }
 .note { margin:12px 0 14px; }
 .chips { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.chips button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:11px 6px; border-radius:16px; border:1.5px solid var(--line); background:#fff; font:inherit; color:var(--ink); cursor:pointer; transition:transform .15s var(--spring), border-color .2s, background .2s; }
+.chips button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:11px 6px; border-radius:16px; border:1.5px solid var(--line); background:var(--surface); font:inherit; color:var(--ink); cursor:pointer; transition:transform .15s var(--spring), border-color .2s, background .2s; }
 .chips button:active { transform:scale(.95); }
-.chips button.on { border-color:var(--accent); background:#fff4ee; }
+.chips button.on { border-color:var(--accent); background:var(--tint-accent-soft); }
 .chips strong { font-size:.95rem; letter-spacing:-.01em; } .chips small { color:var(--muted); font-size:.72rem; }
 .custom { margin-top:16px; padding-top:16px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
 .trio { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 .trio label { display:flex; flex-direction:column; gap:6px; font-size:.82rem; font-weight:600; }
 .pct { position:relative; } .pct .field { padding-right:28px; } .pct i { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-style:normal; color:var(--muted); }
-.bar3 { display:flex; height:10px; border-radius:99px; overflow:hidden; background:#ececf1; gap:2px; } .bar3 i { display:block; transition:width .25s; }
+.bar3 { display:flex; height:10px; border-radius:99px; overflow:hidden; background:var(--track); gap:2px; } .bar3 i { display:block; transition:width .25s; }
 </style>

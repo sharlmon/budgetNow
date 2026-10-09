@@ -92,10 +92,10 @@ const secondInc = computed(() => mini(state.value.incomes[1]))
 <style scoped>
 .avimg { width:100%; height:100%; border-radius:50%; object-fit:cover; }
 .chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
-.chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
-.clash { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; background:linear-gradient(95deg,#fff,#fff4e8); border-color:#f6dcb9; }
-.cl { width:42px; height:42px; border-radius:14px; background:#fff1da; color:#d98a00; display:grid; place-items:center; flex:none; }
+.chip.ok { background:var(--goodbg); color:var(--good-ink); } .chip.meh { background:var(--soft); color:var(--muted); }
+.clash { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; background:linear-gradient(95deg,var(--surface),var(--tint-accent-soft)); border-color:var(--tint-accent-line); }
+.cl { width:42px; height:42px; border-radius:14px; background:var(--warn-bg); color:var(--warn-ink); display:grid; place-items:center; flex:none; }
 .glink { color:inherit; text-decoration:none; }
-.goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:#fff; padding:14px; }
-.gp { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; }
+.goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:var(--surface); padding:14px; }
+.gp { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; }
 </style>

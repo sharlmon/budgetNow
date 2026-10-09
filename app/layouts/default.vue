@@ -21,6 +21,6 @@ useSeoMeta({ robots: 'noindex, nofollow' })
 
 <style>
 .boot { display:grid; place-items:center; }
-.spin { width:34px; height:34px; border-radius:50%; border:4px solid #f0d9cf; border-top-color:var(--accent); animation:spin .8s linear infinite; }
+.spin { width:34px; height:34px; border-radius:50%; border:4px solid var(--tint-accent2); border-top-color:var(--accent); animation:spin .8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 </style>

@@ -54,16 +54,16 @@ watch(syncConflicts, (l) => { if (!l.length) setTimeout(() => { open.value = fal
 
 <style scoped>
 .scrim { position:fixed; inset:0; z-index:90; background:rgba(15,15,25,.5); display:flex; align-items:flex-end; justify-content:center; }
-.sheet { position:relative; width:100%; max-width:480px; max-height:86dvh; overflow:auto; background:#fff; border-radius:28px 28px 0 0; padding:26px 20px calc(24px + env(safe-area-inset-bottom)); }
-.x { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:0; background:#f1f1f5; color:var(--muted); display:grid; place-items:center; cursor:pointer; }
+.sheet { position:relative; width:100%; max-width:480px; max-height:86dvh; overflow:auto; background:var(--surface); border-radius:28px 28px 0 0; padding:26px 20px calc(24px + env(safe-area-inset-bottom)); }
+.x { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:0; background:var(--soft); color:var(--muted); display:grid; place-items:center; cursor:pointer; }
 h3 { margin:0 0 4px; font-size:1.2rem; } .lead { margin:0 0 16px; }
 .done { display:flex; align-items:center; gap:8px; justify-content:center; padding:24px 0; color:var(--good); font-weight:600; }
 .list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
 .item { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; }
-.ttl { display:block; margin-bottom:4px; } .why { margin:0 0 10px; color:#555968; font-size:.88rem; line-height:1.5; }
+.ttl { display:block; margin-bottom:4px; } .why { margin:0 0 10px; color:var(--ink3); font-size:.88rem; line-height:1.5; }
 .diff { list-style:none; margin:0 0 12px; padding:0; display:flex; flex-direction:column; gap:6px; }
-.diff li { display:grid; grid-template-columns:1fr; gap:2px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 10px; font-size:.82rem; }
-.f { font-weight:700; } .mine { color:var(--accent); } .theirs { color:#3c3f4a; }
+.diff li { display:grid; grid-template-columns:1fr; gap:2px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:8px 10px; font-size:.82rem; }
+.f { font-weight:700; } .mine { color:var(--accent); } .theirs { color:var(--ink2); }
 .acts { display:flex; gap:8px; } .acts .btn { flex:1; }
 .all { display:block; margin:14px auto 0; }
 .cf-enter-active { transition:opacity .2s; } .cf-enter-active .sheet { transition:transform .4s cubic-bezier(.2,1,.3,1); }

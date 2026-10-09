@@ -45,7 +45,7 @@ function dismiss() {
 </script>
 
 <style scoped>
-.inst { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; background:linear-gradient(95deg,#fff,#fff6f1); }
+.inst { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; background:linear-gradient(95deg,var(--surface),var(--tint-accent-soft)); }
 .appic { border-radius:13px; flex:none; box-shadow:0 6px 14px -6px rgba(239,106,58,.8); }
 .inl { display:inline-block; vertical-align:-2px; color:var(--accent); }
 .solo { margin-top:0; }

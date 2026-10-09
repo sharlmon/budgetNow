@@ -1,7 +1,7 @@
 <template>
   <div class="card white sts">
     <div class="rw"><svg class="ring" viewBox="0 0 80 80" aria-hidden="true">
-      <circle cx="40" cy="40" r="32" fill="none" stroke="#efeff3" stroke-width="9" />
+      <circle cx="40" cy="40" r="32" fill="none" style="stroke:var(--track)" stroke-width="9" />
       <circle cx="40" cy="40" r="32" fill="none" :stroke="tone" stroke-width="9" stroke-linecap="round" transform="rotate(-90 40 40)"
         :stroke-dasharray="`${Math.min(1, s.used) * C} ${C}`" class="arc" />
     </svg>

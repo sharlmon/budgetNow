@@ -30,7 +30,7 @@ const auth = useAppAuth()
 </script>
 
 <style scoped>
-.ph { position:sticky; top:0; z-index:20; background:rgba(255,255,255,.86); backdrop-filter:blur(16px) saturate(1.5); -webkit-backdrop-filter:blur(16px) saturate(1.5); border-bottom:1px solid var(--line); }
+.ph { position:sticky; top:0; z-index:20; background:var(--glass); backdrop-filter:blur(16px) saturate(1.5); -webkit-backdrop-filter:blur(16px) saturate(1.5); border-bottom:1px solid var(--line); }
 .in { max-width:1080px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:20px; }
 .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-.02em; color:var(--ink); text-decoration:none; }
 .brand img { border-radius:10px; }
