@@ -10,6 +10,11 @@
 
     <div v-if="state.incomes.length && safe.hasBudget" class="rise" style="margin-top:22px;--i:3"><SafeToSpend /></div>
     <div class="rise" style="--i:3"><InstallCard /></div>
+    <div v-if="needsBackup" class="card white nudge rise" style="--i:3">
+      <span class="nd"><Icon name="shield" :size="20" /></span>
+      <div class="grow"><strong>Back up your data</strong><div class="muted sm">It's only stored in this browser. Save a copy.</div></div>
+      <button class="btn sm" @click="exportBackup"><Icon name="download" :size="16" /> Save</button>
+    </div>
 
     <div v-if="!state.incomes.length" class="card empty rise" style="margin-top:22px;--i:3">
       <div class="art"><Icon name="coins" :size="28" /></div>
@@ -61,6 +66,7 @@ const txns = useTransactions()
 const month = computed(() => today().slice(0, 7))
 const stats = useMonthStats(month)
 const safe = useSafeToSpend()
+const { needsBackup, exportBackup } = useBackup()
 const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
 const initial = computed(() => (userName.value || 'B').trim()[0]?.toUpperCase())
 const h = new Date().getHours()
@@ -74,6 +80,8 @@ const secondInc = computed(() => mini(state.value.incomes[1]))
 <style scoped>
 .chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
 .chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
+.nudge { display:flex; align-items:center; gap:14px; margin-top:16px; padding:14px; }
+.nd { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; flex:none; }
 .glink { color:inherit; text-decoration:none; }
 .goalprompt { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--ink); background:#fff; padding:14px; }
 .gp { width:42px; height:42px; border-radius:14px; background:#e6f6ee; color:var(--good); display:grid; place-items:center; }
