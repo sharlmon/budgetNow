@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     }
     for (const rows of chunks(putsOf('debts'))) {
       await tx.insert(debts).values(rows.map((r: any) => ({ userId, ...r }))).onConflictDoUpdate({
-        target: [debts.userId, debts.id], set: { ...take(debts, ['name', 'balance', 'original', 'minPayment']), updatedAt: now },
+        target: [debts.userId, debts.id], set: { ...take(debts, ['name', 'balance', 'original', 'minPayment', 'apr']), updatedAt: now },
       })
     }
     for (const rows of chunks(putsOf('bills'))) {

@@ -37,6 +37,13 @@ describe('backup file parsing', () => {
     }
   })
 
+  it('keeps a debt interest rate and drops an invalid one', () => {
+    const withRate: any = { ...state, debts: [{ id: 'z', name: 'Card', balance: 100, minPayment: 5, apr: 19.9 }, { id: 'y', name: 'Bad', balance: 100, minPayment: 5, apr: 250 }, { id: 'x', name: 'Text', balance: 100, minPayment: 5, apr: '9' }] }
+    const r: any = parseBackup(JSON.stringify(buildBackup(withRate, 'USD', '')))
+    expect(r.data.debts.map((d: any) => d.apr)).toEqual([19.9, undefined, undefined])
+    expect(r.skipped).toBe(0) // an unreadable rate does not discard the whole debt
+  })
+
   it('rejects files that are not a BudgetNow backup', () => {
     expect(parseBackup('not json').ok).toBe(false)
     expect(parseBackup('{"hello":1}').ok).toBe(false)

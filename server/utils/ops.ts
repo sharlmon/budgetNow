@@ -10,7 +10,7 @@ const optId = id.nullish().transform(v => v ?? null)
 
 export const incomeRow = z.object({ id, label, amount: amt, date, split: z.object({ needs: amt, wants: amt, savings: amt, debt: amt }) })
 export const expenseRow = z.object({ id, label, amount: amt, category: cat, date, debtId: optId, billId: optId })
-export const debtRow = z.object({ id, name: z.string().min(1).max(120), balance: amt, original: amt.nullish().transform(v => v ?? null), minPayment: amt })
+export const debtRow = z.object({ id, name: z.string().min(1).max(120), balance: amt, original: amt.nullish().transform(v => v ?? null), minPayment: amt, apr: z.number().finite().min(0).max(100).nullish().transform(v => v ?? null) })
 export const goalRow = z.object({
   id, name: z.string().min(1).max(120), target: amt.refine(n => n > 0, 'target must be positive'),
   icon: z.string().min(1).max(20), color: z.string().regex(/^#[0-9a-fA-F]{6}$/), deadline: date.nullish().transform(v => v ?? null),

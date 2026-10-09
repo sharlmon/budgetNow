@@ -11,7 +11,7 @@ export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 
 export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number> }
 export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string; billId?: string }
-export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number }
+export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number; /** Annual percentage rate for the payoff planner. */ apr?: number }
 export interface Goal { id: string; name: string; target: number; icon: string; color: string; deadline?: string; contributions: { id: string; amount: number; date: string }[] }
 export const GOAL_STYLES = [
   { icon: 'target', color: '#ef6a3a' }, { icon: 'house', color: '#5b8def' }, { icon: 'car', color: '#8b5cf6' }, { icon: 'plane', color: '#14b8a6' },
@@ -76,8 +76,8 @@ export function useBudget() {
     const [inc] = state.value.incomes.splice(i, 1)
     return () => { if (inc) state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, inc) }
   }
-  function addDebt(name: string, balance: number, minPayment: number) {
-    state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment })
+  function addDebt(name: string, balance: number, minPayment: number, apr?: number) {
+    state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment, ...(apr && apr > 0 ? { apr } : {}) })
   }
   function removeDebt(id: string) {
     state.value.debts = state.value.debts.filter(d => d.id !== id)

@@ -73,6 +73,19 @@ const many = Array.from({ length: 450 }, (_, i) => ({ t: 'expenses', op: 'put', 
 const t0 = Date.now(); r = await sync(alice, many)
 ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk upsert in ${Date.now() - t0}ms`)
 
+// debt interest rate
+{
+  const erin = 'user_erin_' + Date.now()
+  const debt = (extra) => ({ t: 'debts', op: 'put', row: { id: 'dd', name: 'Card', balance: 1000, minPayment: 50, ...extra } })
+  ok((await sync(erin, [debt({ apr: 19.9 })])).s === 200 && (await state(erin)).debts[0].apr === 19.9, 'a debt interest rate round-trips exactly (19.9)')
+  ok((await sync(erin, [debt({ apr: 0 })])).s === 200 && (await state(erin)).debts[0].apr === 0, '0% is stored as 0, not dropped')
+  ok((await sync(erin, [debt({ apr: 100 })])).s === 200, '100% is the allowed maximum')
+  for (const [m, apr] of [['negative', -1], ['over 100', 100.01], ['text', '19.9'], ['an object', { rate: 5 }]]) ok((await sync(erin, [debt({ apr })])).s === 400, `interest rate that is ${m} is rejected`)
+  ok((await state(erin)).debts[0].apr === 100, 'rejected rates changed nothing')
+  ok((await sync(erin, [debt({})])).s === 200 && (await state(erin)).debts[0].apr === undefined, 'a debt with no rate has none (older clients still work)')
+  ok((await sync(erin, [debt({ apr: null })])).s === 200, 'an explicit null rate is accepted')
+}
+
 // split rule
 {
   const carol = 'user_carol_' + Date.now()

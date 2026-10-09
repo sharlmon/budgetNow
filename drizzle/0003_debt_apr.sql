@@ -1,0 +1,2 @@
+ALTER TABLE "debts" ADD COLUMN "apr" numeric(6, 3);--> statement-breakpoint
+ALTER TABLE "debts" ADD CONSTRAINT "debts_apr" CHECK ("debts"."apr" IS NULL OR ("debts"."apr" >= 0 AND "debts"."apr" <= 100));

@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   return {
     incomes: inc.map(r => ({ id: r.id, label: r.label, amount: r.amount, date: r.date, split: { needs: r.needs, wants: r.wants, savings: r.savings, debt: r.debt } })),
     expenses: exp.map(r => ({ id: r.id, label: r.label, amount: r.amount, category: r.category, date: r.date, debtId: r.debtId ?? undefined, billId: r.billId ?? undefined })),
-    debts: dbt.map(r => ({ id: r.id, name: r.name, balance: r.balance, original: r.original ?? undefined, minPayment: r.minPayment })),
+    debts: dbt.map(r => ({ id: r.id, name: r.name, balance: r.balance, original: r.original ?? undefined, minPayment: r.minPayment, apr: r.apr ?? undefined })),
     goals: gl.map(g => ({
       id: g.id, name: g.name, target: g.target, icon: g.icon, color: g.color, deadline: g.deadline ?? undefined,
       contributions: contribs.filter(c => c.goalId === g.id).map(c => ({ id: c.id, amount: c.amount, date: c.date })),

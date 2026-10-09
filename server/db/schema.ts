@@ -58,8 +58,10 @@ export const debts = pgTable('debts', {
   balance: money('balance'),
   original: numeric('original', { precision: 14, scale: 2, mode: 'number' }),
   minPayment: money('min_payment'),
+  // Annual percentage rate, used by the payoff planner. Optional: unknown means 0%.
+  apr: numeric('apr', { precision: 6, scale: 3, mode: 'number' }),
   ...stamps,
-}, t => [primaryKey({ columns: [t.userId, t.id] }), check('debts_nonneg', sql`${t.balance} >= 0 AND ${t.minPayment} >= 0`)])
+}, t => [primaryKey({ columns: [t.userId, t.id] }), check('debts_nonneg', sql`${t.balance} >= 0 AND ${t.minPayment} >= 0`), check('debts_apr', sql`${t.apr} IS NULL OR (${t.apr} >= 0 AND ${t.apr} <= 100)`)])
 
 export const goals = pgTable('goals', {
   userId: text('user_id').notNull(),

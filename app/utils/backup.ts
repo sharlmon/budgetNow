@@ -51,7 +51,7 @@ export function parseBackup(raw: string): ParseResult {
   const debts: State['debts'] = []
   for (const d of list(src.debts)) {
     if (!isObj(d) || !text(d.name).trim() || !isNum(d.balance) || d.balance < 0 || (d.minPayment !== undefined && !(isNum(d.minPayment) && d.minPayment >= 0))) { skipped++; continue }
-    debts.push({ id: uid(d.id), name: text(d.name), balance: r2(d.balance), original: isNum(d.original) && d.original >= 0 ? r2(d.original) : undefined, minPayment: r2(d.minPayment ?? 0) })
+    debts.push({ id: uid(d.id), name: text(d.name), balance: r2(d.balance), original: isNum(d.original) && d.original >= 0 ? r2(d.original) : undefined, minPayment: r2(d.minPayment ?? 0), apr: isNum(d.apr) && d.apr >= 0 && d.apr <= 100 ? Math.round(d.apr * 1000) / 1000 : undefined })
   }
   const debtIds = new Set(debts.map(d => d.id))
 
