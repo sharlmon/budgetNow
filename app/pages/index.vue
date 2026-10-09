@@ -2,7 +2,7 @@
   <div>
     <LegacyImport />
     <div class="hdr rise">
-      <NuxtLink to="/settings" class="avatar">{{ initial }}</NuxtLink>
+      <NuxtLink to="/settings" class="avatar" aria-label="Account and settings"><img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="avimg" width="44" height="44" /><template v-else>{{ initial }}</template></NuxtLink>
       <div class="grow"><strong>{{ greeting }}{{ display ? ', ' + display : '' }}</strong><div class="muted sm">{{ todayLabel }}</div><SyncBadge /></div>
       <NuxtLink to="/settings" class="circ" aria-label="Settings"><Icon name="settings" :size="20" /></NuxtLink>
     </div>
@@ -80,6 +80,7 @@ const secondInc = computed(() => mini(state.value.incomes[1]))
 </script>
 
 <style scoped>
+.avimg { width:100%; height:100%; border-radius:50%; object-fit:cover; }
 .chip { display:flex; align-items:center; gap:8px; margin-top:14px; padding:11px 14px; border-radius:14px; font-size:.8rem; font-weight:500; }
 .chip.ok { background:var(--goodbg); color:#1f8f5f; } .chip.meh { background:#f1f1f5; color:var(--muted); }
 .glink { color:inherit; text-decoration:none; }
