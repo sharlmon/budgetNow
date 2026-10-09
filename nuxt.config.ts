@@ -53,7 +53,10 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'manifest', href: `${base}manifest.webmanifest` },
-        { rel: 'icon', type: 'image/png', href: `${base}icons/icon-192.png` },
+        // Browser tab icon: a circle (SVG scales crisply; PNGs are the fallback). The home-screen icons below stay square, because phones round those themselves.
+        { rel: 'icon', type: 'image/svg+xml', href: `${base}icons/favicon.svg` },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: `${base}icons/favicon-32.png` },
+        { rel: 'icon', type: 'image/x-icon', sizes: '48x48', href: `${base}favicon.ico` },
         { rel: 'apple-touch-icon', href: `${base}icons/icon-180.png` },
       ],
     },
