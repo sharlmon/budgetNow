@@ -1,13 +1,18 @@
 <template>
-  <div class="shell">
-    <main><NuxtPage /></main>
-    <TabBar />
-    <AddSheet />
-    <Toast />
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
 
+<script setup lang="ts">
+// Start syncing as soon as we know who is signed in; stop (and clear the in-memory copy) when nobody is.
+const auth = useAppAuth()
+const { startSync, stopSync } = useSync()
+watch(() => auth.userId.value, (uid) => { if (uid) startSync(uid); else stopSync() }, { immediate: true })
+</script>
+
 <style>
+
 :root {
   --page:#e8e8ec; --bg:#fff; --card:#f6f6f9; --line:#ebebf0; --ink:#16171c; --muted:#8a8d9a;
   --accent:#ef6a3a; --accent2:#f7a04b; --good:#2fb67c; --goodbg:#e6f6ee; --bad:#e5484d;
