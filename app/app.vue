@@ -8,7 +8,7 @@
 // Start syncing as soon as we know who is signed in; stop (and clear the in-memory copy) when nobody is.
 const auth = useAppAuth()
 const { startSync, stopSync } = useSync()
-watch(() => auth.userId.value, (uid) => { if (uid) startSync(uid); else stopSync() }, { immediate: true })
+watch(() => auth.userId.value, (uid) => { if (!import.meta.client) return; if (uid) startSync(uid); else stopSync() }, { immediate: true })
 </script>
 
 <style>
@@ -23,7 +23,7 @@ watch(() => auth.userId.value, (uid) => { if (uid) startSync(uid); else stopSync
 }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html { background:var(--page); }
-body { margin:0; color:var(--ink); font:16px/1.45 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; -webkit-font-smoothing:antialiased; font-feature-settings:'cv11','ss01'; }
+body { margin:0; color:var(--ink); font:16px/1.45 'Inter Variable','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; -webkit-font-smoothing:antialiased; font-feature-settings:'cv11','ss01'; }
 .shell { max-width:480px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); position:relative; box-shadow:0 0 80px rgba(20,20,40,.1); }
 main { flex:1; padding:calc(20px + env(safe-area-inset-top)) 20px 32px; overflow-x:hidden; }
 h1 { font-size:1.5rem; margin:0; letter-spacing:-.025em; font-weight:700; } h2 { font-size:1rem; margin:0; font-weight:700; letter-spacing:-.01em; }

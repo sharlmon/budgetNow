@@ -71,4 +71,15 @@ const many = Array.from({ length: 450 }, (_, i) => ({ t: 'expenses', op: 'put', 
 const t0 = Date.now(); r = await sync(alice, many)
 ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk upsert in ${Date.now() - t0}ms`)
 
+// account deletion: removes everything for that user only
+const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u } }).then(r => r.status)
+await sync(bob, [{ t: 'incomes', op: 'put', row: { ...income, id: 'bob-i', split: { needs: 1, wants: 0, savings: 0, debt: 0 }, amount: 1 } }, { t: 'goals', op: 'put', row: { ...goal, id: 'bob-g' } }, { t: 'profile', op: 'put', row: { currency: 'EUR', name: 'Bob' } }])
+const before = await state(alice)
+ok((await del(bob)) === 200, 'DELETE /api/account succeeds')
+const sbDeleted = await state(bob)
+ok(sbDeleted.incomes.length + sbDeleted.expenses.length + sbDeleted.debts.length + sbDeleted.goals.length + sbDeleted.bills.length === 0 && sbDeleted.profile.name === '', 'deleted user has no rows left (incl. goal contributions and profile)')
+const after = await state(alice)
+ok(JSON.stringify(after) === JSON.stringify(before), "deleting one account never touches another user's data")
+ok((await del(bob)) === 200, 'deleting an already-empty account is harmless')
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed'); process.exit(fails ? 1 : 0)

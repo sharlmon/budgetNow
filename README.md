@@ -48,5 +48,13 @@ npm run test:api      # ...and this in another: API tests (isolation, validation
 
 Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `drizzle/`. It's applied on the next deploy.
 
+## SEO, answer engines and legal pages
+
+- Public pages (`/`, `/guides/50-30-20-rule`, `/privacy`, `/terms`) are pre-rendered to static HTML with titles, descriptions, canonical URLs, Open Graph/Twitter cards and JSON-LD (Organization, WebSite, WebApplication, FAQPage, Article, BreadcrumbList).
+- `/robots.txt`, `/sitemap.xml` and `/llms.txt` are generated from `shared/site.ts` and `shared/seo.ts`; the FAQ text there is the single source for the page, the structured data and `llms.txt`.
+- The signed-in app is client-only and sent `X-Robots-Tag: noindex`.
+- Set `NUXT_PUBLIC_SITE_URL` when you add a custom domain so every absolute URL follows it.
+- Settings has **Delete account**, which removes all of a user's rows and then their Clerk user (`DELETE /api/account`).
+
 ## Roadmap
 See GitHub Issues.
