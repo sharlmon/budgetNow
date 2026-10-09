@@ -27,7 +27,11 @@ describe('compareVersions', () => {
 describe('release tracking stays consistent', () => {
   it('package.json has a valid version', () => expect(isSemver(pkg.version)).toBe(true))
   it('the newest release entry is the version in package.json', () => expect(RELEASES[0]!.version).toBe(pkg.version))
-  it('CHANGELOG.md has a heading for the current version', () => expect(changelog).toMatch(new RegExp(`^## ${pkg.version.replace(/\./g, '\\.')} - \\d{4}-\\d{2}-\\d{2}$`, 'm')))
+  it('CHANGELOG.md has a heading for the current version', () => {
+    const heading = changelog.split('\n').find(l => l.startsWith(`## ${pkg.version} - `))
+    expect(heading, `CHANGELOG.md has no heading for ${pkg.version}`).toBeDefined()
+    expect(heading!.slice(`## ${pkg.version} - `.length)).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
   it('every release has a valid version, date, title and notes', () => {
     for (const r of RELEASES) {
       expect(isSemver(r.version), r.version).toBe(true)
