@@ -51,6 +51,8 @@ if (PROD) {
   ok((await req('/api/state', { headers: { authorization: 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEifQ.AAAA' }, dev: false })).status === 401, 'forged bearer token rejected')
   ok((await req('/api/state', { headers: { cookie: '__session=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEifQ.AAAA; __client_uat=1' }, dev: false })).status === 401, 'forged session cookie rejected')
   ok((await req('/api/state?userId=user_victim', { dev: false })).status === 401, 'userId in the query string grants nothing')
+  const wh = await req('/api/webhooks/clerk', { method: 'POST', headers: J, body: json({ type: 'user.deleted', data: { id: 'user_victim' } }), dev: false })
+  ok([400, 503].includes(wh.status), `unsigned webhook is refused (${wh.status}): it cannot be used to delete anyone's data`)
 }
 
 // ---------- CSRF / cross-site (dev bypass lets us reach the guarded path) ----------

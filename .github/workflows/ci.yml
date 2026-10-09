@@ -38,10 +38,11 @@ jobs:
 
       - name: API and security tests (dev server, in-process Postgres)
         run: |
-          DEV_AUTH_BYPASS=1 PGLITE_DIR="$RUNNER_TEMP/pglite" npx nuxt dev --port 3000 > "$RUNNER_TEMP/dev.log" 2>&1 &
+          NUXT_CLERK_WEBHOOK_SIGNING_SECRET=whsec_MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY= DEV_AUTH_BYPASS=1 PGLITE_DIR="$RUNNER_TEMP/pglite" npx nuxt dev --port 3000 > "$RUNNER_TEMP/dev.log" 2>&1 &
           for i in $(seq 1 120); do curl -sf http://localhost:3000/api/state > /dev/null && break; sleep 1; done
           API_URL=http://localhost:3000 npm run test:api
           API_URL=http://localhost:3000 npm run test:security
+          API_URL=http://localhost:3000 npm run test:webhook
           pkill -f "nuxt dev" || true
 
       - name: Production build

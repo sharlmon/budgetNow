@@ -54,6 +54,15 @@ npm run test:security # attack tests: CSRF, injection, oversized bodies, rate li
 - `unplugin` is listed as a direct dependency on purpose: it pins one consistent copy at the top of the tree. Without it npm 10.9 (used in CI) writes a lockfile that fails `npm ci` ("lock file's unplugin@2.3.11 does not satisfy unplugin@3.4.0"). If you change dependencies, regenerate the lockfile in a clean folder with CI's npm (`npx npm@10.9.2 install --package-lock-only --ignore-scripts`), because a lockfile created on one OS can omit the native binaries other platforms need.
 - `overrides` in `package.json` force a patched `simple-git`.
 
+## Clerk webhook (delete data when an account is deleted)
+
+The in-app **Delete account** removes a user's data and then their Clerk user. If someone deletes their Clerk account some other way (for example from Clerk's own profile screen), a webhook removes their data too:
+
+1. Clerk dashboard → **Webhooks** → **Add endpoint**: `https://<your-domain>/api/webhooks/clerk`, subscribe to **user.deleted**.
+2. Copy the endpoint's **signing secret** into the `NUXT_CLERK_WEBHOOK_SIGNING_SECRET` environment variable on Vercel and redeploy.
+
+Requests are verified with the Svix signature (HMAC over id, timestamp and body, with a 5 minute window against replays). Without the secret the endpoint refuses everything.
+
 ## Database changes
 
 Edit `server/db/schema.ts`, run `npm run db:generate`, commit the new file in `drizzle/`. It's applied on the next deploy.

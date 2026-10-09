@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:api": "node tests/api.mjs",
     "dev:local": "DEV_AUTH_BYPASS=1 nuxt dev",
-    "test:security": "node tests/security.mjs"
+    "test:security": "node tests/security.mjs",
+    "test:webhook": "node tests/webhook.mjs"
   },
   "dependencies": {
     "@clerk/nuxt": "^3.1.11",
