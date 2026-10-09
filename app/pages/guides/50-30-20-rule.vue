@@ -1,6 +1,6 @@
 <template>
   <article class="prose">
-    <nav aria-label="Breadcrumb" class="crumbs"><NuxtLink to="/">BudgetNow</NuxtLink> / Guides / 50/30/20 rule</nav>
+    <nav aria-label="Breadcrumb" class="crumbs"><NuxtLink to="/">Weka</NuxtLink> / Guides / 50/30/20 rule</nav>
     <h1>The 50/30/20 budget rule explained</h1>
     <p class="meta">By {{ SITE.maker }} · Updated {{ updated }}</p>
 
@@ -26,7 +26,7 @@
       <div class="out">
         <div v-for="r in rows" :key="r.n" class="o"><span class="sw" :style="{ background: r.c }" /><span class="on">{{ r.n }} <small>{{ r.p }}%</small></span><strong>{{ fmt(income * r.p / 100) }}</strong></div>
       </div>
-      <p class="muted sm" style="margin:12px 0 0">Want this applied to every pay automatically? <NuxtLink to="/sign-up">BudgetNow does it for you</NuxtLink>.</p>
+      <p class="muted sm" style="margin:12px 0 0">Want this applied to every pay automatically? <NuxtLink to="/sign-up">Weka does it for you</NuxtLink>.</p>
     </div>
 
     <h2>Example: a {{ fmtKes(100000) }} monthly income</h2>
@@ -49,8 +49,8 @@
       <li><strong>Your income is irregular.</strong> Base it on your lowest typical month, and split any extra when it arrives.</li>
     </ul>
 
-    <h2>How BudgetNow uses the rule</h2>
-    <p>When you enter a pay, BudgetNow first reserves the minimum payments on your debts, then divides what is left 50/30/20. You can drag any slider or type an amount, and the other categories rebalance so the total always matches. Nothing is saved until you confirm.</p>
+    <h2>How Weka uses the rule</h2>
+    <p>When you enter a pay, Weka first reserves the minimum payments on your debts, then divides what is left 50/30/20. You can drag any slider or type an amount, and the other categories rebalance so the total always matches. Nothing is saved until you confirm.</p>
 
     <h2>Common questions</h2>
     <details v-for="f in faqs" :key="f.q"><summary>{{ f.q }}</summary><p>{{ f.a }}</p></details>
@@ -75,7 +75,7 @@ const faqs = [
 const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 const url = `${site}/guides/50-30-20-rule`
 useSeo({
-  title: 'The 50/30/20 budget rule explained (with a calculator) | BudgetNow',
+  title: 'The 50/30/20 budget rule explained (with a calculator) | Weka',
   description: 'The 50/30/20 rule: 50% of after-tax income to needs, 30% to wants, 20% to savings and debt. See examples, a free calculator, and when to change the percentages.',
   path: '/guides/50-30-20-rule',
   type: 'article',
@@ -85,7 +85,7 @@ useSeo({
       author: { '@id': `${site}/#maker` }, publisher: { '@id': `${site}/#maker` }, datePublished: '2026-10-09', dateModified: '2026-10-09', mainEntityOfPage: url, image: `${site}/og.png`, inLanguage: 'en' },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'BudgetNow', item: `${site}/` }, { '@type': 'ListItem', position: 2, name: 'The 50/30/20 rule', item: url } ] },
+      { '@type': 'ListItem', position: 1, name: 'Weka', item: `${site}/` }, { '@type': 'ListItem', position: 2, name: 'The 50/30/20 rule', item: url } ] },
   ],
 })
 

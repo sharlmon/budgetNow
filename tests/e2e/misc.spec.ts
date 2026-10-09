@@ -58,7 +58,7 @@ test('hostile text in a label is shown as plain text and never runs', async ({ p
 })
 
 test('public pages are real HTML for search engines and AI crawlers (no JavaScript needed)', async ({ request }) => {
-  for (const [path, h1] of [['/', 'Split every pay in seconds'], ['/privacy', 'Privacy Policy'], ['/terms', 'Terms of Service'], ['/guides/50-30-20-rule', '50/30/20']] as const) {
+  for (const [path, h1] of [['/', 'Bills on autopilot'], ['/privacy', 'Privacy Policy'], ['/terms', 'Terms of Service'], ['/guides/50-30-20-rule', '50/30/20']] as const) {
     const html = await (await request.get(path)).text()
     expect(html, path).toContain(h1)
     expect(html, path).toMatch(/<link rel="canonical"/)

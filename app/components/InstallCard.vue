@@ -2,7 +2,7 @@
   <div v-if="show" class="card white inst" :class="{ solo: always }">
     <img :src="icon" alt="" class="appic" width="48" height="48" />
     <div class="grow">
-      <strong>Install BudgetNow</strong>
+      <strong>Install Weka</strong>
       <div class="muted sm" v-if="deferred">Open it like a real app, full screen and offline.</div>
       <div class="muted sm" v-else>Tap <Icon name="share" :size="14" class="inl" /> Share, then <b>Add to Home Screen</b> <Icon name="addsquare" :size="14" class="inl" /></div>
     </div>
@@ -36,7 +36,7 @@ async function install() {
   e.prompt()
   const { outcome } = await e.userChoice
   deferred.value = null
-  if (outcome === 'accepted') showToast('BudgetNow installed')
+  if (outcome === 'accepted') showToast('Weka installed')
 }
 function dismiss() {
   dismissed.value = true

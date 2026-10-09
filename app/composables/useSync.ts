@@ -162,7 +162,7 @@ export function useSync() {
     synced = read(key('synced', userId)) ?? emptySnap()
     try { syncConflicts.value = JSON.parse(localStorage.getItem(`bn:conflicts:${userId}`) || '[]') } catch { syncConflicts.value = [] }
     apply(cached ?? emptySnap())
-    try { localStorage.setItem('bn:lastUser', userId) } catch { /* ignore */ }
+    try { localStorage.setItem(LAST_USER_KEY, userId) } catch { /* ignore */ }
     wire()
     initLock(userId)
     syncReady.value = true
@@ -191,7 +191,7 @@ export function useSync() {
     if (uid) {
       await push()
       if (syncPending.value > 0 && !confirm(`${syncPending.value} change${syncPending.value === 1 ? '' : 's'} haven't synced yet and will be lost if you sign out. Sign out anyway?`)) return false
-      try { localStorage.removeItem(key('cache', uid)); localStorage.removeItem(key('synced', uid)); localStorage.removeItem(`bn:conflicts:${uid}`); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+      try { localStorage.removeItem(key('cache', uid)); localStorage.removeItem(key('synced', uid)); localStorage.removeItem(`bn:conflicts:${uid}`); localStorage.removeItem(LAST_USER_KEY) } catch { /* ignore */ }
       clearLock(uid)
     }
     stopSync()
@@ -211,7 +211,7 @@ export function useSync() {
       uid = owner
       throw e
     }
-    try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem(`bn:conflicts:${owner}`); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+    try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem(`bn:conflicts:${owner}`); localStorage.removeItem(LAST_USER_KEY) } catch { /* ignore */ }
     clearLock(owner)
     stopSync()
   }

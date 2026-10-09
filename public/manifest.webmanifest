@@ -1,6 +1,6 @@
 {
-  "name": "BudgetNow",
-  "short_name": "BudgetNow",
+  "name": "Weka",
+  "short_name": "Weka",
   "description": "Split your income instantly and track every spend and debt.",
   "start_url": "./home",
   "scope": "./",

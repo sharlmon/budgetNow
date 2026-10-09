@@ -21,5 +21,8 @@ function remove() {
 </script>
 
 <style scoped>
-.ttl { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ttl { font-weight:600; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+small { white-space:nowrap; }
+strong { flex:none; white-space:nowrap; }
+@media (max-width:380px) { .item { gap:10px; } }
 </style>

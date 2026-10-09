@@ -1,9 +1,9 @@
 <template>
   <Transition name="lock">
-    <div v-if="locked" class="lock" role="dialog" aria-modal="true" aria-label="BudgetNow is locked">
+    <div v-if="locked" class="lock" role="dialog" aria-modal="true" aria-label="Weka is locked">
       <div class="inner">
         <img :src="icon" alt="" width="64" height="64" class="logo" />
-        <h1>BudgetNow is locked</h1>
+        <h1>Weka is locked</h1>
         <p class="sub" :class="{ bad: !!message }" aria-live="polite">{{ message || `Enter your ${lockLength}-digit PIN` }}</p>
         <PinPad ref="pad" :length="lockLength" :disabled="busy || waiting > 0" @complete="submit" />
         <button v-if="bioEnabled && bioSupported" class="bio" :disabled="busy" @click="tryBio(false)"><Icon name="fingerprint" :size="20" /> Use Face ID or fingerprint</button>

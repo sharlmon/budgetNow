@@ -18,7 +18,7 @@ export function useBackup() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `budgetnow-backup-${today()}.json`
+    a.download = `weka-backup-${today()}.json`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -29,7 +29,7 @@ export function useBackup() {
   }
 
   async function importFile(file: File) {
-    if (file.size > MAX_BACKUP_BYTES) { alert('That file is too large to be a BudgetNow backup.'); return }
+    if (file.size > MAX_BACKUP_BYTES) { alert('That file is too large to be a Weka backup.'); return }
     const res = parseBackup(await file.text())
     if (!res.ok) { alert(res.error); return }
     const d = res.data

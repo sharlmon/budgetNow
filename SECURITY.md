@@ -11,7 +11,7 @@ Include what you found, how to reproduce it, and the impact. We will acknowledge
 
 ## What is in scope
 
-The deployed BudgetNow app and this repository's code: authentication and session handling, the `/api` routes, data isolation between accounts, injection and cross-site scripting, and the CSRF protections.
+The deployed Weka app and this repository's code: authentication and session handling, the `/api` routes, data isolation between accounts, injection and cross-site scripting, and the CSRF protections.
 
 ## How the app is protected
 

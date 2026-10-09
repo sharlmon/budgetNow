@@ -108,6 +108,6 @@ async function signOut() {
 .sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:var(--soft); color:var(--muted); }
 .sync.synced { background:var(--goodbg); color:var(--good-ink); } .sync.error { background:var(--bad-bg); color:var(--bad); } .sync.offline { background:var(--warn-bg); color:var(--warn-ink); }
 .legal { display:flex; justify-content:center; gap:10px; font-size:.82rem; color:var(--muted); }
-.legal a { color:var(--muted); }
+.legal a { color:var(--muted); padding:12px 6px; }
 .bk { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; flex:none; }
 </style>

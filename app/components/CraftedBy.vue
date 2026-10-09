@@ -8,6 +8,6 @@ import { SITE } from '#shared/site'
 
 <style scoped>
 .crafted { margin:0; font-size:.8rem; color:var(--muted); text-align:center; }
-.crafted a { color:var(--accent); font-weight:600; text-decoration:none; }
+.crafted a { color:var(--accent); font-weight:600; text-decoration:none; display:inline-block; padding:12px 4px; }
 .crafted a:hover { text-decoration:underline; }
 </style>

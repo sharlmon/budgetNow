@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { buildCsp, clerkHostFromKey } from './shared/security'
 import { THEME_BOOT_SCRIPT } from './app/utils/theme'
+import { ENTRY_BOOT_SCRIPT } from './app/utils/entry'
 
 const base = process.env.NUXT_APP_BASE_URL || '/'
 // The version people see (package.json) and the exact build, so a redeploy is noticed even without a version bump.
@@ -49,16 +50,16 @@ export default defineNuxtConfig({
     baseURL: base,
     head: {
       htmlAttrs: { lang: 'en' },
-      title: 'BudgetNow',
+      title: 'Weka',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'theme-color', content: '#ef6a3a' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-title', content: 'BudgetNow' },
+        { name: 'apple-mobile-web-app-title', content: 'Weka' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
-      script: [{ innerHTML: THEME_BOOT_SCRIPT, tagPosition: 'head' }],
+      script: [{ innerHTML: THEME_BOOT_SCRIPT, tagPosition: 'head' }, { innerHTML: ENTRY_BOOT_SCRIPT, tagPosition: 'head' }],
       link: [
         { rel: 'manifest', href: `${base}manifest.webmanifest` },
         // Browser tab icon: a circle (SVG scales crisply; PNGs are the fallback). The home-screen icons below stay square, because phones round those themselves.

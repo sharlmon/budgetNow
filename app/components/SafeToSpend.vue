@@ -10,9 +10,9 @@
     <div class="grow">
       <div class="muted sm" style="font-weight:600">Safe to spend today</div>
       <div class="big" :class="{ neg: s.leftToday < 0 }"><AnimatedNumber :value="Math.max(0, s.leftToday)" /></div>
-      <div class="muted sm" v-if="s.pool < 0">Needs and Wants are {{ money(-s.pool) }} over for the month.</div>
-      <div class="muted sm" v-else-if="s.leftToday < 0">{{ money(-s.leftToday) }} over today's allowance.<template v-if="s.daysLeft > 1"> Tomorrow: {{ money(s.tomorrow) }}/day.</template></div>
-      <div class="muted sm" v-else>of {{ money(s.allowance) }} a day · {{ s.daysLeft }} {{ s.daysLeft === 1 ? 'day' : 'days' }} left<template v-if="s.upcomingBills > 0"> · after {{ money(s.upcomingBills) }} of bills</template></div>
+      <div class="muted sm" v-if="s.pool < 0">Needs and Wants are {{ money(Math.round(-s.pool)) }} over for the month.</div>
+      <div class="muted sm" v-else-if="s.leftToday < 0">{{ money(Math.round(-s.leftToday)) }} over today's allowance.<template v-if="s.daysLeft > 1"> Tomorrow: {{ money(Math.round(s.tomorrow)) }}/day.</template></div>
+      <div class="muted sm" v-else>of {{ money(Math.round(s.allowance)) }} a day · {{ s.daysLeft }} {{ s.daysLeft === 1 ? 'day' : 'days' }} left<template v-if="s.upcomingBills > 0"> · after {{ money(s.upcomingBills) }} of bills</template></div>
     </div>
     <button class="icon-btn add" aria-label="Add expense" @click="sheet = { open: true, mode: 'expense' }"><Icon name="plus" :size="18" :stroke="2.6" /></button>
   </div>

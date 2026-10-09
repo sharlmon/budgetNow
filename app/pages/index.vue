@@ -3,9 +3,9 @@
     <section class="hero">
       <div class="wrap grid">
         <div class="copy">
-          <p class="eyebrow">Free budgeting app</p>
-          <h1>Split every pay in seconds. Know what's safe to spend.</h1>
-          <p class="lead">Enter your salary or any money in. BudgetNow instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>. Adjust it if you like, then confirm. Track spending, debts, goals and bills in one calm place.</p>
+          <p class="eyebrow">Free money app for Kenya</p>
+          <h1>Bills on autopilot. Know what's safe to spend.</h1>
+          <p class="lead">Add your bills once and Weka keeps track of what is due. Then enter your pay and it instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>, so you always know what is left after the bills.</p>
           <div class="actions">
             <NuxtLink to="/sign-up" class="btn">Get started free</NuxtLink>
             <NuxtLink to="/#how" class="btn soft">See how it works</NuxtLink>
@@ -31,8 +31,8 @@
     </section>
 
     <section class="wrap answer" aria-labelledby="what">
-      <h2 id="what">What is BudgetNow?</h2>
-      <p>BudgetNow is a free budgeting app that automatically splits each pay into Needs, Wants, Savings and Debt, then tracks your spending, debts, savings goals and recurring bills. It shows how much is safe to spend today, works offline, and never asks for your bank login.</p>
+      <h2 id="what">What is Weka?</h2>
+      <p>Weka (Swahili for "put aside") is a free money app for Kenya. It tracks your recurring bills and logs them on their due dates, splits each pay into Needs, Wants, Savings and Debt, and shows how much is safe to spend today. It works offline and never asks for your bank login.</p>
     </section>
 
     <section class="wrap" aria-labelledby="features">
@@ -49,7 +49,7 @@
     <section id="how" class="wrap" aria-labelledby="how-h">
       <h2 id="how-h" class="sh">How it works</h2>
       <ol class="steps">
-        <li><span class="n">1</span><div><h3>Add your pay</h3><p>Type in your salary or any money that came in, using a simple keypad.</p></div></li>
+        <li><span class="n">1</span><div><h3>Add your bills and your pay</h3><p>Save your recurring bills once, then type in your salary or any money that came in, using a simple keypad.</p></div></li>
         <li><span class="n">2</span><div><h3>See the instant split</h3><p>Debt minimums come first, then 50% Needs, 30% Wants and 20% Savings of the rest. Drag any slider to change it. The others rebalance for you.</p></div></li>
         <li><span class="n">3</span><div><h3>Confirm and track</h3><p>Log expenses, pay debts and bills, and add to goals. The home screen shows what is left and what is safe to spend today.</p></div></li>
       </ol>
@@ -81,8 +81,8 @@ definePageMeta({ layout: 'public' })
 
 const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 useSeo({
-  title: 'BudgetNow: free budget app that splits your pay instantly',
-  description: 'Enter your pay and BudgetNow instantly splits it into Needs, Wants, Savings and Debt. Track spending, debts, goals and bills, see what is safe to spend today, and use it offline. Free.',
+  title: 'Weka: bills on autopilot and a budget that splits your pay',
+  description: 'Weka is a free money app for Kenya. Track recurring bills and log them on their due dates, split every pay into Needs, Wants, Savings and Debt, and see what is safe to spend today. Works offline.',
   path: '/',
   jsonLd: [
     ...siteGraph(site),
@@ -92,7 +92,7 @@ useSeo({
       browserRequirements: 'Requires JavaScript', inLanguage: 'en', isAccessibleForFree: true,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'KES' },
       creator: { '@id': `${site}/#maker` }, publisher: { '@id': `${site}/#maker` },
-      featureList: ['Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
+      featureList: ['Recurring bills tracked and logged on their due dates', 'Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
     },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   ],
@@ -105,11 +105,11 @@ const demo = [
   { n: 'Debt', c: '#5b8def', p: 100, v: 'KSh 8,000' },
 ]
 const features = [
+  { i: 'bill', t: 'Bills on autopilot', d: 'Add rent, subscriptions and loan payments once. Weka tracks what is due, lets you mark one paid with a tap, and can log each bill automatically on its due date.' },
   { i: 'wallet', t: 'Instant income split', d: 'Your pay is divided into Needs, Wants, Savings and Debt the moment you enter it, with sliders to adjust before you confirm.' },
   { i: 'shield', t: 'Safe to spend today', d: 'One daily number worked out from what is left in your budget and the bills still due this month.' },
   { i: 'card', t: 'Debt tracking', d: 'Add what you owe, reserve the minimum from every pay, record payments and watch the balance fall.' },
   { i: 'target', t: 'Savings goals', d: 'Set a target and a date, assign savings to it, and see how much to put aside each month.' },
-  { i: 'bill', t: 'Recurring bills', d: 'Rent, subscriptions and loan payments with due dates, one-tap paying and optional auto-logging.' },
   { i: 'phone', t: 'Works offline, installs like an app', d: 'Add it to your home screen. Keep logging with no connection and it syncs when you are back online.' },
 ]
 </script>
