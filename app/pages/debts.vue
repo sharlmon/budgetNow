@@ -42,7 +42,7 @@
         <div class="aprin"><AmountInput :id="'apr-' + d.id" :model-value="d.apr ?? 0" placeholder="0" @update:model-value="v => setApr(d, v)" /></div>
       </div>
       <div v-if="d.balance > 0" class="row" style="margin-top:12px">
-        <AmountInput v-model="pay[d.id]" placeholder="Payment" />
+        <AmountInput :model-value="pay[d.id] ?? 0" placeholder="Payment" @update:model-value="v => (pay[d.id] = v)" />
         <button class="btn soft sm" @click="pay[d.id] = Math.min(d.minPayment || d.balance, d.balance)">Min</button>
         <button class="btn sm" :disabled="!(pay[d.id] > 0)" @click="payDebt(d)">Pay</button>
       </div>
