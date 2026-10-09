@@ -4,6 +4,7 @@
     <div class="hdr rise">
       <NuxtLink to="/settings" class="avatar" aria-label="Account and settings"><img v-if="auth.imageUrl.value" :src="auth.imageUrl.value" alt="" class="avimg" width="44" height="44" /><template v-else>{{ initial }}</template></NuxtLink>
       <div class="grow"><strong>{{ greeting }}{{ display ? ', ' + display : '' }}</strong><div class="muted sm">{{ todayLabel }}</div><SyncBadge /></div>
+      <button v-if="lockEnabled" class="circ" aria-label="Lock the app now" @click="lockNow"><Icon name="lock" :size="19" /></button>
       <NuxtLink to="/settings" class="circ" aria-label="Settings"><Icon name="settings" :size="20" /></NuxtLink>
     </div>
 
@@ -67,6 +68,7 @@ const txns = useTransactions()
 const month = computed(() => today().slice(0, 7))
 const stats = useMonthStats(month)
 const safe = useSafeToSpend()
+const { lockNow } = useAppLock()
 const dueSoon = computed(() => state.value.bills.filter(b => daysBetween(today(), b.nextDue) <= 7).sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
 const spendPct = computed(() => (stats.value.spendBudget > 0 ? (stats.value.spentTotal / stats.value.spendBudget) * 100 : 0))
 const auth = useAppAuth()
