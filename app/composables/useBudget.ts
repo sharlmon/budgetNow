@@ -1,14 +1,15 @@
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
-export const CATEGORIES: { key: Category; label: string; hint: string }[] = [
-  { key: 'needs', label: 'Needs', hint: 'Rent, food, transport, utilities' },
-  { key: 'wants', label: 'Wants', hint: 'Eating out, fun, subscriptions' },
-  { key: 'savings', label: 'Savings', hint: 'Emergency fund, goals' },
-  { key: 'debt', label: 'Debt', hint: 'Loan and card repayments' },
+export const CATEGORIES: { key: Category; label: string; hint: string; color: string; emoji: string }[] = [
+  { key: 'needs', label: 'Needs', hint: 'Rent, food, transport', color: '#5b8cff', emoji: '🏠' },
+  { key: 'wants', label: 'Wants', hint: 'Fun, eating out, subs', color: '#ffb84d', emoji: '🎉' },
+  { key: 'savings', label: 'Savings', hint: 'Emergency fund, goals', color: '#35d399', emoji: '🐷' },
+  { key: 'debt', label: 'Debt', hint: 'Loans and cards', color: '#ff6b81', emoji: '💳' },
 ]
+export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 
 export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number> }
 export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string }
-export interface Debt { id: string; name: string; balance: number; minPayment: number }
+export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number }
 interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[] }
 
 const KEY = 'budgetnow:v1'
@@ -79,13 +80,35 @@ export function useBudget() {
     state.value.incomes = state.value.incomes.filter(i => i.id !== id)
   }
   function addDebt(name: string, balance: number, minPayment: number) {
-    state.value.debts.push({ id: uid(), name, balance, minPayment })
+    state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment })
   }
   function removeDebt(id: string) {
     state.value.debts = state.value.debts.filter(d => d.id !== id)
   }
 
-  return { state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  function resetAll() {
+    state.value = { incomes: [], expenses: [], debts: [] }
+  }
+
+  return { resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
-export const money = (n: number) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n)
+const CUR_KEY = 'budgetnow:currency'
+export const currency = ref('USD')
+if (import.meta.client) {
+  try { currency.value = localStorage.getItem(CUR_KEY) || 'USD' } catch { /* ignore */ }
+  watch(currency, v => { try { localStorage.setItem(CUR_KEY, v) } catch { /* ignore */ } })
+}
+export const money = (n: number) =>
+  new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.value, maximumFractionDigits: Math.abs(n) >= 1000 ? 0 : 2 }).format(n)
+
+export const useSheet = () => useState('sheet', () => ({ open: false, mode: 'income' as 'income' | 'expense' }))
+
+export interface Txn { id: string; kind: 'income' | 'expense'; title: string; amount: number; date: string; category?: Category }
+export function useTransactions() {
+  const { state } = useBudget()
+  return computed<Txn[]>(() => [
+    ...state.value.incomes.map(i => ({ id: i.id, kind: 'income' as const, title: i.label || 'Income', amount: i.amount, date: i.date })),
+    ...state.value.expenses.map(e => ({ id: e.id, kind: 'expense' as const, title: e.label || catMeta(e.category).label, amount: e.amount, date: e.date, category: e.category })),
+  ].sort((a, b) => b.date.localeCompare(a.date)))
+}
