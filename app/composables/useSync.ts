@@ -134,6 +134,7 @@ export function useSync() {
     apply(cached ?? emptySnap())
     try { localStorage.setItem('bn:lastUser', userId) } catch { /* ignore */ }
     wire()
+    initLock(userId)
     syncReady.value = true
     refreshPending()
     autoBills()
@@ -147,6 +148,7 @@ export function useSync() {
     syncReady.value = false
     syncStatus.value = 'idle'
     syncPending.value = 0
+    locked.value = false
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
     currency.value = 'USD'
     userName.value = ''
@@ -158,6 +160,7 @@ export function useSync() {
       await push()
       if (syncPending.value > 0 && !confirm(`${syncPending.value} change${syncPending.value === 1 ? '' : 's'} haven't synced yet and will be lost if you sign out. Sign out anyway?`)) return false
       try { localStorage.removeItem(key('cache', uid)); localStorage.removeItem(key('synced', uid)); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+      clearLock(uid)
     }
     stopSync()
     return true
@@ -177,6 +180,7 @@ export function useSync() {
       throw e
     }
     try { localStorage.removeItem(key('cache', owner)); localStorage.removeItem(key('synced', owner)); localStorage.removeItem('bn:lastUser') } catch { /* ignore */ }
+    clearLock(owner)
     stopSync()
   }
 
