@@ -1,54 +1,71 @@
 <template>
-  <Transition name="fade">
-    <div v-if="sheet.open" class="scrim" @click.self="close">
-      <div class="sheet">
-        <div class="grab" />
-        <div class="seg" style="margin-bottom:14px">
-          <button :class="{ on: sheet.mode === 'income' }" @click="sheet.mode = 'income'; step = 1">Money in</button>
-          <button :class="{ on: sheet.mode === 'expense' }" @click="sheet.mode = 'expense'">Expense</button>
+  <Transition name="slide">
+    <div v-if="sheet.open" class="screen">
+      <div class="top">
+        <div class="bar-row">
+          <button class="circ" aria-label="Back" @click="back"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg></button>
+          <strong>{{ step === 2 ? 'Your breakdown' : 'New Transaction' }}</strong>
+          <span style="width:40px" />
         </div>
 
-        <!-- INCOME: step 1 amount -->
-        <template v-if="sheet.mode === 'income' && step === 1">
-          <p class="muted center">How much came in?</p>
-          <div class="cur-wrap"><span class="cur muted">{{ symbol }}</span><AmountInput v-model="amount" big /></div>
-          <input v-model="label" class="field" placeholder="Label (e.g. October salary)" style="margin:10px 0 16px" />
-          <button class="btn" :disabled="!(amount > 0)" @click="toBreakdown">See my breakdown →</button>
+        <template v-if="step === 1">
+          <div class="seg2">
+            <button :class="{ on: sheet.mode === 'income' }" @click="sheet.mode = 'income'">Money in</button>
+            <button :class="{ on: sheet.mode === 'expense' }" @click="sheet.mode = 'expense'">Expense</button>
+          </div>
+          <div class="amount" :class="{ empty: !str }">{{ display }}</div>
+          <input v-model="label" class="lbl" :placeholder="sheet.mode === 'income' ? 'Label, e.g. October salary' : 'What was it for?'" />
+        </template>
+        <template v-else>
+          <div class="amount">{{ money(amount) }}</div>
+          <div class="sub">Drag to adjust. The rest rebalances automatically.</div>
+        </template>
+      </div>
+
+      <div class="panel">
+        <!-- step 1: keypad -->
+        <template v-if="step === 1">
+          <div class="pills">
+            <label v-if="sheet.mode === 'expense'" class="pill">
+              <span>{{ catMeta(eCat).emoji }} {{ catMeta(eCat).label }}</span><i>▾</i>
+              <select v-model="eCat"><option v-for="c in spendCats" :key="c.key" :value="c.key">{{ c.label }}</option></select>
+            </label>
+            <span v-else class="pill static">💰 Income</span>
+            <label class="pill">
+              <span>📅 {{ prettyDate }}</span><i>▾</i>
+              <input v-model="date" type="date" />
+            </label>
+          </div>
+          <p v-if="sheet.mode === 'expense' && amount > 0" class="hint" :class="{ bad: over > 0 }">
+            <template v-if="over > 0">That's {{ money(over) }} over your {{ catMeta(eCat).label }} budget.</template>
+            <template v-else>{{ money(left - amount) }} will be left in {{ catMeta(eCat).label }}.</template>
+          </p>
+          <p v-else-if="sheet.mode === 'income'" class="hint">Next, you'll see how it gets divided.</p>
+          <div class="keys">
+            <button v-for="k in keys" :key="k" @click="press(k)">
+              <svg v-if="k === 'back'" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z" /><path d="M13 9.5l5 5M18 9.5l-5 5" /></svg>
+              <template v-else>{{ k }}</template>
+            </button>
+          </div>
+          <button class="btn" :disabled="!(amount > 0)" @click="sheet.mode === 'income' ? toBreakdown() : addExp()">{{ sheet.mode === 'income' ? 'See my breakdown' : 'Add Transaction' }}</button>
         </template>
 
-        <!-- INCOME: step 2 breakdown -->
-        <template v-else-if="sheet.mode === 'income'">
-          <div class="row" style="justify-content:space-between">
-            <div><div class="muted" style="font-size:.8rem">Breakdown of</div><strong style="font-size:1.4rem">{{ money(amount) }}</strong></div>
-            <button class="link" @click="step = 1">Edit amount</button>
-          </div>
-          <div class="stack">
-            <i v-for="c in CATEGORIES" :key="c.key" :style="{ width: pct(c.key) + '%', background: c.color }" />
-          </div>
-          <p v-if="totalMinDebt > 0" class="muted" style="font-size:.8rem;margin:0 0 8px">💳 Debt minimums ({{ money(totalMinDebt) }}) are covered first; the rest follows 50/30/20.</p>
+        <!-- step 2: breakdown -->
+        <template v-else>
+          <Donut :segments="segments" :size="190">
+            <small class="muted">Total</small><strong style="font-size:1.25rem">{{ money(amount) }}</strong>
+          </Donut>
+          <p v-if="totalMinDebt > 0" class="hint" style="margin-top:10px">💳 Debt minimums ({{ money(totalMinDebt) }}) are covered first, then 50/30/20.</p>
           <div v-for="c in CATEGORIES" :key="c.key" class="cat">
             <div class="row">
               <span class="ico" :style="{ background: c.color + '22' }">{{ c.emoji }}</span>
-              <div class="grow"><strong>{{ c.label }}</strong> <small class="muted">{{ pct(c.key).toFixed(0) }}%</small></div>
-              <div style="width:110px"><AmountInput :model-value="split[c.key]" @update:model-value="v => setCat(c.key, v)" /></div>
+              <div class="grow"><strong>{{ c.label }}</strong><br><small :style="{ color: c.color, fontWeight: 700 }">{{ pct(c.key).toFixed(0) }}%</small></div>
+              <div style="width:120px"><AmountInput :model-value="split[c.key]" @update:model-value="v => setCat(c.key, v)" /></div>
             </div>
-            <input type="range" min="0" :max="amount" step="1" :value="split[c.key]" :style="{ accentColor: c.color }" @input="e => setCat(c.key, +(e.target as HTMLInputElement).value)" />
+            <input type="range" min="0" :max="amount" step="1" :value="split[c.key]" :style="{ '--c': c.color, '--p': pct(c.key) + '%' }" @input="e => setCat(c.key, +(e.target as HTMLInputElement).value)" />
           </div>
-          <button class="btn" style="margin-top:12px" @click="confirm">Looks good — confirm</button>
-          <button class="link" style="display:block;margin:12px auto 0" @click="resetSplit">Reset to suggestion</button>
-        </template>
-
-        <!-- EXPENSE -->
-        <template v-else>
-          <p class="muted center">How much did you spend?</p>
-          <div class="cur-wrap"><span class="cur muted">{{ symbol }}</span><AmountInput v-model="eAmount" big /></div>
-          <div class="chips">
-            <button v-for="c in spendCats" :key="c.key" :class="{ on: eCat === c.key }" :style="eCat === c.key ? { borderColor: c.color, background: c.color + '22' } : {}" @click="eCat = c.key">{{ c.emoji }} {{ c.label }}</button>
-          </div>
-          <p class="muted center" style="font-size:.85rem">{{ money(Math.max(0, left)) }} left in {{ catMeta(eCat).label }}</p>
-          <p v-if="over > 0" class="bad center" style="font-size:.85rem;margin-top:-6px">This puts you {{ money(over) }} over budget.</p>
-          <input v-model="eLabel" class="field" placeholder="What was it for?" style="margin:6px 0 16px" />
-          <button class="btn" :disabled="!(eAmount > 0)" @click="addExp">Add expense</button>
+          <button class="btn" style="margin-top:14px" @click="confirm">Looks good, confirm</button>
+          <button class="link" style="display:block;margin:14px auto 0" @click="resetSplit">Reset to suggestion</button>
         </template>
       </div>
     </div>
@@ -57,16 +74,34 @@
 
 <script setup lang="ts">
 const sheet = useSheet()
-const { budgeted, spent, totalMinDebt, addIncome, addExpense } = useBudget()
-const symbol = computed(() => (0).toLocaleString(undefined, { style: 'currency', currency: currency.value, minimumFractionDigits: 0 }).replace(/[\d\s.,]/g, ''))
+const { totalMinDebt, addIncome, addExpense } = useBudget()
+const symbol = computed(() => (0).toLocaleString(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: 0 }).replace(/[\d\s.,]/g, ''))
 
 const step = ref(1)
-const amount = ref(0)
+const str = ref('')
 const label = ref('')
+const date = ref(today())
+const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'back']
+const amount = computed(() => parseFloat(str.value) || 0)
+const display = computed(() => {
+  const [i = '0', d] = (str.value || '0').split('.')
+  const grouped = Number(i || 0).toLocaleString('en-US')
+  return `${symbol.value}${grouped}${d !== undefined ? '.' + d : str.value.endsWith('.') ? '.' : ''}`
+})
+const prettyDate = computed(() => new Date(date.value + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }))
+
+function press(k: string) {
+  if (k === 'back') { str.value = str.value.slice(0, -1); return }
+  if (k === '.') { if (!str.value.includes('.')) str.value = (str.value || '0') + '.'; return }
+  const dec = str.value.split('.')[1]
+  if ((dec !== undefined && dec.length >= 2) || str.value.replace('.', '').length >= 10) return
+  str.value = str.value === '0' ? k : str.value + k
+}
+
 const split = reactive<Record<Category, number>>({ needs: 0, wants: 0, savings: 0, debt: 0 })
 const r2 = (n: number) => Math.round(n * 100) / 100
 const pct = (k: Category) => (amount.value > 0 ? (split[k] / amount.value) * 100 : 0)
-
+const segments = computed(() => CATEGORIES.map(c => ({ value: split[c.key], color: c.color })))
 function resetSplit() { Object.assign(split, suggestSplit(amount.value, totalMinDebt.value)) }
 function toBreakdown() { resetSplit(); step.value = 2 }
 /** Set one category and spread the change across the others so the total always matches. */
@@ -83,42 +118,50 @@ function setCat(k: Category, v: number) {
   })
   split[k] = r2(total - others.reduce((s, x) => s + split[x], 0))
 }
-function confirm() {
-  addIncome(label.value.trim(), amount.value, { ...split })
-  close()
-}
+function confirm() { addIncome(label.value.trim(), amount.value, { ...split }, date.value); close() }
 
 const spendCats = CATEGORIES.filter(c => c.key !== 'debt')
-const eAmount = ref(0)
-const eLabel = ref('')
 const eCat = ref<Category>('needs')
-const left = computed(() => budgeted.value[eCat.value] - spent.value[eCat.value])
-const over = computed(() => eAmount.value - left.value)
-function addExp() {
-  addExpense(eLabel.value.trim(), eAmount.value, eCat.value)
-  close()
-}
+const month = computed(() => ym(date.value))
+const stats = useMonthStats(month)
+const left = computed(() => stats.value.budgeted[eCat.value] - stats.value.spent[eCat.value])
+const over = computed(() => amount.value - left.value)
+function addExp() { addExpense(label.value.trim(), amount.value, eCat.value, undefined, date.value); close() }
 
+function back() { if (step.value === 2) step.value = 1; else close() }
 function close() {
   sheet.value.open = false
-  step.value = 1; amount.value = 0; label.value = ''; eAmount.value = 0; eLabel.value = ''
+  step.value = 1; str.value = ''; label.value = ''; date.value = today()
 }
 </script>
 
 <style scoped>
-.scrim { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50; display:flex; justify-content:center; align-items:flex-end; }
-.sheet { width:100%; max-width:480px; max-height:92dvh; overflow:auto; background:var(--surface); border-radius:26px 26px 0 0; padding:10px 18px calc(22px + env(safe-area-inset-bottom)); animation:up .25s ease; }
-.grab { width:40px; height:4px; border-radius:9px; background:var(--line); margin:0 auto 14px; }
-.center { text-align:center; margin:4px 0; }
-.cur-wrap { display:flex; align-items:center; justify-content:center; gap:4px; }
-.cur { font-size:1.8rem; font-weight:600; }
-.cur-wrap > :deep(input) { width:auto; min-width:0; flex:0 1 220px; }
-.stack { display:flex; height:12px; border-radius:99px; overflow:hidden; gap:2px; margin:14px 0; }
-.stack i { display:block; transition:width .25s; }
-.cat { padding:8px 0; } .cat + .cat { border-top:1px solid var(--line); }
-.cat input[type=range] { width:100%; margin:6px 0 0; }
-.chips { display:flex; gap:8px; margin:12px 0 8px; flex-wrap:wrap; justify-content:center; }
-.chips button { background:var(--surface2); color:var(--ink); border:1.5px solid transparent; border-radius:99px; padding:9px 14px; font:inherit; cursor:pointer; }
-.fade-enter-active,.fade-leave-active { transition:opacity .2s; } .fade-enter-from,.fade-leave-to { opacity:0; }
-@keyframes up { from { transform:translateY(40px); opacity:.6; } }
+.screen { position:fixed; top:0; bottom:0; left:0; right:0; margin:0 auto; max-width:480px; z-index:50; background:var(--accent); display:flex; flex-direction:column; }
+.top { background:var(--grad); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 18px 40px; }
+.bar-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.bar-row .circ { background:rgba(255,255,255,.22); border:0; color:#fff; }
+.seg2 { display:flex; background:rgba(255,255,255,.22); border-radius:99px; padding:4px; }
+.seg2 button { flex:1; background:none; border:0; color:rgba(255,255,255,.85); font:inherit; font-size:.85rem; font-weight:600; padding:9px; border-radius:99px; cursor:pointer; }
+.seg2 button.on { background:#fff; color:var(--ink); }
+.amount { text-align:center; font-size:3rem; font-weight:700; letter-spacing:-.03em; margin:22px 0 10px; line-height:1.1; }
+.amount.empty { opacity:.55; }
+.sub { text-align:center; opacity:.85; font-size:.85rem; }
+.lbl { display:block; margin:0 auto; width:80%; text-align:center; background:rgba(255,255,255,.2); border:0; color:#fff; border-radius:99px; padding:10px 14px; font:inherit; font-size:.9rem; outline:none; }
+.lbl::placeholder { color:rgba(255,255,255,.8); }
+.panel { flex:1; overflow:auto; background:#fff; border-radius:28px 28px 0 0; margin-top:-24px; padding:20px 18px calc(18px + env(safe-area-inset-bottom)); }
+.pills { display:flex; gap:10px; }
+.pill { flex:1; position:relative; display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line); border-radius:99px; padding:11px 16px; font-size:.85rem; font-weight:500; cursor:pointer; }
+.pill i { font-style:normal; color:var(--muted); font-size:.7rem; }
+.pill.static { cursor:default; }
+.pill select, .pill input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+.hint { text-align:center; font-size:.8rem; color:var(--muted); margin:10px 0 0; } .hint.bad { color:var(--bad); }
+.keys { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin:6px 0 12px; }
+.keys button { background:none; border:0; font:inherit; font-size:1.7rem; font-weight:500; padding:14px 0; cursor:pointer; color:var(--ink); border-radius:16px; }
+.keys button:active { background:var(--card); }
+.cat { padding:10px 0; } .cat + .cat { border-top:1px solid var(--line); }
+.cat input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:99px; margin:12px 0 4px; outline:none; background:linear-gradient(to right,var(--c) var(--p),#ebebef var(--p)); }
+.cat input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:3px solid var(--c); box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; }
+.cat input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--c); cursor:pointer; }
+.slide-enter-active,.slide-leave-active { transition:transform .28s ease, opacity .28s; }
+.slide-enter-from,.slide-leave-to { transform:translateY(100%); opacity:.6; }
 </style>
