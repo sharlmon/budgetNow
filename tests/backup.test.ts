@@ -27,6 +27,16 @@ describe('backup file parsing', () => {
     expect(r.name).toBe('Sharl')
   })
 
+  it('carries the split rule and drops an invalid one', () => {
+    const good: any = parseBackup(JSON.stringify(buildBackup(state, 'USD', '', { needs: 60, wants: 20, savings: 20 })))
+    expect(good.split).toEqual({ needs: 60, wants: 20, savings: 20 })
+    const noSplit: any = parseBackup(JSON.stringify(buildBackup(state, 'USD', '')))
+    expect(noSplit.split).toBeUndefined()
+    for (const bad of [{ needs: 60, wants: 60, savings: 60 }, { needs: 'a', wants: 1, savings: 1 }, { needs: 50.5, wants: 29.5, savings: 20 }]) {
+      expect(parseBackup(wrap(state, { split: bad }) ).ok && (parseBackup(wrap(state, { split: bad })) as any).split).toBeUndefined()
+    }
+  })
+
   it('rejects files that are not a BudgetNow backup', () => {
     expect(parseBackup('not json').ok).toBe(false)
     expect(parseBackup('{"hello":1}').ok).toBe(false)

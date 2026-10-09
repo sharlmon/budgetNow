@@ -20,7 +20,9 @@ export const billRow = z.object({
   id, name: z.string().min(1).max(120), amount: amt, category: z.enum(['needs', 'wants', 'debt']), every: z.enum(['week', 'month', 'year']),
   nextDue: date, anchorDay: z.number().int().min(1).max(31), auto: z.boolean(), debtId: optId,
 })
-export const profileRow = z.object({ currency: z.string().regex(/^[A-Z]{3}$/), name: z.string().max(40) })
+const pct = z.number().int().min(0).max(100)
+export const splitRow = z.object({ needs: pct, wants: pct, savings: pct }).refine(r => r.needs + r.wants + r.savings === 100, 'split must total 100')
+export const profileRow = z.object({ currency: z.string().regex(/^[A-Z]{3}$/), name: z.string().max(40), split: splitRow.optional() })
 
 const put = <T extends string, R extends z.ZodTypeAny>(t: T, row: R) => z.object({ t: z.literal(t), op: z.literal('put'), row })
 const del = <T extends string>(t: T) => z.object({ t: z.literal(t), op: z.literal('del'), id })

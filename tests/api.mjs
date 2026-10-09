@@ -73,6 +73,27 @@ const many = Array.from({ length: 450 }, (_, i) => ({ t: 'expenses', op: 'put', 
 const t0 = Date.now(); r = await sync(alice, many)
 ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk upsert in ${Date.now() - t0}ms`)
 
+// split rule
+{
+  const carol = 'user_carol_' + Date.now()
+  const put = (split, extra = {}) => sync(carol, [{ t: 'profile', op: 'put', row: { currency: 'USD', name: 'C', ...(split ? { split } : {}), ...extra } }])
+  ok((await state(carol)).profile.split.needs === 50 && (await state(carol)).profile.split.savings === 20, 'new account starts on 50/30/20')
+  ok((await put({ needs: 60, wants: 20, savings: 20 })).s === 200, 'a valid split rule is saved')
+  let sp = (await state(carol)).profile.split
+  ok(sp.needs === 60 && sp.wants === 20 && sp.savings === 20, 'and read back exactly')
+  for (const [m, bad] of [['totals 90', { needs: 50, wants: 20, savings: 20 }], ['totals 110', { needs: 60, wants: 30, savings: 20 }], ['negative share', { needs: -10, wants: 60, savings: 50 }], ['fractional', { needs: 50.5, wants: 29.5, savings: 20 }], ['over 100', { needs: 101, wants: 0, savings: -1 }], ['text', { needs: '60', wants: 20, savings: 20 }], ['missing field', { needs: 60, wants: 40 }]]) {
+    ok((await put(bad)).s === 400, `split that ${m} is rejected`)
+  }
+  sp = (await state(carol)).profile.split
+  ok(sp.needs === 60 && sp.wants === 20 && sp.savings === 20, 'rejected rules changed nothing')
+  ok((await put(null, { name: 'Renamed' })).s === 200, 'a client that sends no split (older cached copy) is accepted')
+  sp = (await state(carol)).profile.split
+  ok(sp.needs === 60 && (await state(carol)).profile.name === 'Renamed', 'and does not reset the saved rule')
+  ok((await put({ needs: 100, wants: 0, savings: 0 })).s === 200, 'an all-needs rule is allowed')
+  await sync(carol, [{ t: 'profile', op: 'put', row: { currency: 'USD', name: '', split: { needs: 40, wants: 30, savings: 30 } } }])
+  ok((await state('someone_else_' + Date.now())).profile.split.needs === 50, "one user's rule never leaks to another")
+}
+
 // account deletion: removes everything for that user only
 const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u, 'x-requested-with': 'budgetnow', 'x-confirm': 'delete-my-account', 'x-forwarded-for': RUN_IP } }).then(r => r.status)
 await sync(bob, [{ t: 'incomes', op: 'put', row: { ...income, id: 'bob-i', split: { needs: 1, wants: 0, savings: 0, debt: 0 }, amount: 1 } }, { t: 'goals', op: 'put', row: { ...goal, id: 'bob-g' } }, { t: 'profile', op: 'put', row: { currency: 'EUR', name: 'Bob' } }])

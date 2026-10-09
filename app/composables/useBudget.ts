@@ -1,3 +1,5 @@
+import { DEFAULT_SPLIT, type SplitRule } from '../utils/split'
+
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
 export const CATEGORIES: { key: Category; label: string; hint: string; color: string; icon: string }[] = [
   { key: 'needs', label: 'Needs', hint: 'Rent, food, transport', color: '#ef6a3a', icon: 'house' },
@@ -22,16 +24,6 @@ export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; 
 const uid = () => Math.random().toString(36).slice(2, 10)
 export const today = () => new Date().toLocaleDateString('sv')
 const round = (n: number) => Math.round(n * 100) / 100
-
-/** Default rule: min debt payments first, then 50/30/20 across what's left (percentages of the whole income). */
-export function suggestSplit(amount: number, minDebt: number): Record<Category, number> {
-  const debt = Math.min(round(minDebt), amount)
-  const rest = amount - debt
-  const needs = round(rest * 0.5)
-  const wants = round(rest * 0.3)
-  const savings = round(rest - needs - wants)
-  return { needs, wants, savings, debt }
-}
 
 export function useBudget() {
   // Loading and saving is handled by the sync engine (useSync), which owns persistence per signed-in user.
@@ -156,6 +148,8 @@ export function useBudget() {
 // Profile values live in the synced snapshot, not in their own storage keys.
 export const currency = ref('USD')
 export const userName = ref('')
+/** How each pay is divided after debt minimums. Saved with the profile, so it follows the user across devices. */
+export const splitRule = ref<SplitRule>({ ...DEFAULT_SPLIT })
 export const money = (n: number) =>
   new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.value, currencyDisplay: 'narrowSymbol', minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }).format(n)
 export const ym = (d: string) => d.slice(0, 7)

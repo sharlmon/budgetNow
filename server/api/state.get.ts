@@ -25,6 +25,10 @@ export default defineEventHandler(async (event) => {
       contributions: contribs.filter(c => c.goalId === g.id).map(c => ({ id: c.id, amount: c.amount, date: c.date })),
     })),
     bills: bl.map(b => ({ id: b.id, name: b.name, amount: b.amount, category: b.category, every: b.frequency, nextDue: b.nextDue, anchorDay: b.anchorDay, auto: b.auto, debtId: b.debtId ?? undefined })),
-    profile: { currency: prof[0]?.currency ?? 'USD', name: prof[0]?.name ?? '' },
+    profile: {
+      currency: prof[0]?.currency ?? 'USD',
+      name: prof[0]?.name ?? '',
+      split: { needs: prof[0]?.splitNeeds ?? 50, wants: prof[0]?.splitWants ?? 30, savings: prof[0]?.splitSavings ?? 20 },
+    },
   }
 })

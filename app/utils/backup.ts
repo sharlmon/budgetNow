@@ -1,5 +1,6 @@
 import type { State } from '../composables/useBudget'
 import { anchorOf } from './bills'
+import { isValidSplit, type SplitRule } from './split'
 
 export const BACKUP_VERSION = 1
 export const MAX_BACKUP_BYTES = 5 * 1024 * 1024
@@ -12,14 +13,14 @@ const text = (v: unknown, max = 120) => (typeof v === 'string' ? v.slice(0, max)
 const r2 = (n: number) => Math.round(n * 100) / 100
 const rid = () => Math.random().toString(36).slice(2, 10)
 
-export interface Backup { app: 'budgetnow'; version: number; exportedAt: string; currency: string; name: string; data: State }
+export interface Backup { app: 'budgetnow'; version: number; exportedAt: string; currency: string; name: string; split?: SplitRule; data: State }
 
-export function buildBackup(data: State, currency: string, name: string): Backup {
-  return { app: 'budgetnow', version: BACKUP_VERSION, exportedAt: new Date().toISOString(), currency, name, data }
+export function buildBackup(data: State, currency: string, name: string, split?: SplitRule): Backup {
+  return { app: 'budgetnow', version: BACKUP_VERSION, exportedAt: new Date().toISOString(), currency, name, ...(split ? { split } : {}), data }
 }
 
 export type ParseResult =
-  | { ok: true; data: State; currency?: string; name?: string; exportedAt?: string; skipped: number }
+  | { ok: true; data: State; currency?: string; name?: string; split?: SplitRule; exportedAt?: string; skipped: number }
   | { ok: false; error: string }
 
 /** Parses and sanitises a backup file. Bad records are skipped (and counted) rather than trusted. */
@@ -85,6 +86,7 @@ export function parseBackup(raw: string): ParseResult {
   return {
     ok: true, data: { incomes, expenses, debts, goals, bills }, currency,
     name: wrapped ? text(json.name, 40) : undefined,
+    split: wrapped && isValidSplit(json.split) ? { needs: json.split.needs, wants: json.split.wants, savings: json.split.savings } : undefined,
     exportedAt: wrapped && typeof json.exportedAt === 'string' ? json.exportedAt : undefined,
     skipped,
   }

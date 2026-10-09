@@ -52,7 +52,8 @@
           <Donut :segments="segments" :size="190">
             <small class="muted">Total</small><strong style="font-size:1.25rem">{{ money(amount) }}</strong>
           </Donut>
-          <p v-if="totalMinDebt > 0" class="hint" style="margin-top:10px">Debt minimums ({{ money(totalMinDebt) }}) are covered first, then 50/30/20.</p>
+          <p v-if="totalMinDebt > 0" class="hint" style="margin-top:10px">Debt minimums ({{ money(totalMinDebt) }}) are covered first, then {{ splitLabel(splitRule) }} (change it in Settings).</p>
+          <p v-else class="hint" style="margin-top:10px">Split {{ splitLabel(splitRule) }} between Needs, Wants and Savings (change it in Settings).</p>
           <div v-for="c in CATEGORIES" :key="c.key" class="cat">
             <div class="row">
               <CatIcon :cat="c.key" :size="40" />
@@ -70,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+import { splitLabel, suggestSplit } from '../utils/split'
 const sheet = useSheet()
 const mode = computed({ get: () => sheet.value.mode, set: (v: string) => { sheet.value.mode = v as 'income' | 'expense' } })
 const { totalMinDebt, addIncome, addExpense } = useBudget()
@@ -101,7 +103,7 @@ const split = reactive<Record<Category, number>>({ needs: 0, wants: 0, savings: 
 const r2 = (n: number) => Math.round(n * 100) / 100
 const pct = (k: Category) => (amount.value > 0 ? (split[k] / amount.value) * 100 : 0)
 const segments = computed(() => CATEGORIES.map(c => ({ value: split[c.key], color: c.color })))
-function resetSplit() { Object.assign(split, suggestSplit(amount.value, totalMinDebt.value)) }
+function resetSplit() { Object.assign(split, suggestSplit(amount.value, totalMinDebt.value, splitRule.value)) }
 function toBreakdown() { resetSplit(); step.value = 2 }
 /** Set one category and spread the change across the others so the total always matches. */
 function setCat(k: Category, v: number) {

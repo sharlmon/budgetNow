@@ -14,6 +14,7 @@
         <button class="btn soft sm" style="flex:1" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
       </div>
     </div>
+    <div class="rise" style="--i:1"><SplitRuleCard /></div>
     <div class="rise" style="--i:1"><AppLockCard /></div>
     <div class="rise" style="margin-bottom:12px;--i:1"><InstallCard always /></div>
     <div class="card white rise" style="margin-bottom:12px;--i:1">

@@ -1,5 +1,6 @@
 import { diffSnaps, emptySnap, type Snap } from '#shared/sync'
 import { API_MARKER, DELETE_CONFIRM } from '#shared/security'
+import { DEFAULT_SPLIT, isValidSplit } from '../utils/split'
 
 type Status = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -18,18 +19,27 @@ let pushTimer: ReturnType<typeof setTimeout> | undefined, cacheTimer: ReturnType
 let retries = 0
 
 const key = (kind: 'cache' | 'synced', id: string) => `bn:${kind}:${id}`
-const read = (k: string): Snap | null => { try { const r = localStorage.getItem(k); return r ? { ...emptySnap(), ...JSON.parse(r) } : null } catch { return null } }
+const read = (k: string): Snap | null => {
+  try {
+    const r = localStorage.getItem(k)
+    if (!r) return null
+    const parsed = JSON.parse(r)
+    // Copies saved by older versions have no split rule yet.
+    return { ...emptySnap(), ...parsed, profile: { ...emptySnap().profile, ...(parsed.profile ?? {}) } }
+  } catch { return null }
+}
 const write = (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch { /* storage full or blocked */ } }
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
 
 export function useSync() {
   const { state, runAutoBills } = useBudget()
 
-  const snapshot = (): Snap => clone({ ...state.value, profile: { currency: currency.value, name: userName.value } })
+  const snapshot = (): Snap => clone({ ...state.value, profile: { currency: currency.value, name: userName.value, split: { ...splitRule.value } } })
   const apply = (s: Snap) => {
     state.value = { incomes: s.incomes, expenses: s.expenses, debts: s.debts, goals: s.goals, bills: s.bills }
     currency.value = s.profile.currency
     userName.value = s.profile.name
+    splitRule.value = isValidSplit(s.profile.split) ? { ...s.profile.split } : { ...DEFAULT_SPLIT }
   }
   const persist = () => { if (uid) { write(key('cache', uid), snapshot()); write(key('synced', uid), synced) } }
   const refreshPending = () => { syncPending.value = diffSnaps(synced, snapshot()).length }
@@ -112,7 +122,7 @@ export function useSync() {
   function wire() {
     if (wired) return
     wired = true
-    watch([state, currency, userName], () => {
+    watch([state, currency, userName, splitRule], () => {
       if (!uid) return
       refreshPending()
       clearTimeout(cacheTimer)
@@ -153,6 +163,7 @@ export function useSync() {
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
     currency.value = 'USD'
     userName.value = ''
+    splitRule.value = { ...DEFAULT_SPLIT }
   }
 
   /** Tries to upload pending changes, then wipes this device's copy. Returns false if the user chose to stay. */

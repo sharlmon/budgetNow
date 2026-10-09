@@ -82,8 +82,10 @@ export default defineEventHandler(async (event) => {
 
     const prof = putsOf('profile')[0]
     if (prof) {
-      await tx.insert(profiles).values({ userId, currency: prof.currency, name: prof.name }).onConflictDoUpdate({
-        target: profiles.userId, set: { currency: prof.currency, name: prof.name, updatedAt: now },
+      // A client that does not send a split (an older cached copy) must not reset the saved one.
+      const split = prof.split ? { splitNeeds: prof.split.needs, splitWants: prof.split.wants, splitSavings: prof.split.savings } : {}
+      await tx.insert(profiles).values({ userId, currency: prof.currency, name: prof.name, ...split }).onConflictDoUpdate({
+        target: profiles.userId, set: { currency: prof.currency, name: prof.name, ...split, updatedAt: now },
       })
     }
   })

@@ -13,8 +13,12 @@ export const profiles = pgTable('profiles', {
   userId: text('user_id').primaryKey(),
   currency: text('currency').notNull().default('USD'),
   name: text('name').notNull().default(''),
+  // How each pay is divided after debt minimums, as whole percentages that total 100.
+  splitNeeds: integer('split_needs').notNull().default(50),
+  splitWants: integer('split_wants').notNull().default(30),
+  splitSavings: integer('split_savings').notNull().default(20),
   ...stamps,
-})
+}, t => [check('profiles_split', sql`${t.splitNeeds} >= 0 AND ${t.splitWants} >= 0 AND ${t.splitSavings} >= 0 AND ${t.splitNeeds} + ${t.splitWants} + ${t.splitSavings} = 100`)])
 
 export const incomes = pgTable('incomes', {
   userId: text('user_id').notNull(),
