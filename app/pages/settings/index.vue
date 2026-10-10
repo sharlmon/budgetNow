@@ -27,6 +27,7 @@
 
     <h2 class="gh rise" style="--i:4">Weka</h2>
     <div class="card white group rise" style="--i:5">
+      <SettingsRow v-if="guide.dismissed.value && guide.progress.value.done < guide.progress.value.total" to="/home" icon="flag" tone="good" title="Setup guide" :summary="`${guide.progress.value.done} of ${guide.progress.value.total} done · tap to show it again`" @click="guide.show()" />
       <SettingsRow to="/settings/about" icon="sparkles" tone="accent" title="About and what's new" :summary="`Version ${version.current.version}`" :dot="updateAvailable ? 'An update is available' : undefined" />
     </div>
 
@@ -42,6 +43,7 @@ const auth = useAppAuth()
 const { state } = useBudget()
 const { daysSince } = useBackup()
 const version = useVersion()
+const guide = useGuide()
 
 const accountsSummary = computed(() => { const n = state.value.accounts.length; return n ? `${n} account${n === 1 ? '' : 's'} · ${money(state.value.accounts.reduce((s, a) => s + a.balance, 0))}` : 'Add where you keep money' })
 const themeSummary = computed(() => (themeChoice.value === 'system' ? `Follows your device (${activeTheme.value})` : themeChoice.value === 'dark' ? 'Dark' : 'Light'))
