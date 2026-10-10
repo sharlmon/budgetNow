@@ -5,7 +5,7 @@ export const SITE = {
   description: 'Weka is a free money app for Kenya. Add your bills once and Weka tracks them and logs them when they are due. It also splits each pay into Needs, Wants, Savings and Debt and shows what is safe to spend today.',
   maker: 'SharlTech',
   makerUrl: 'https://sharl-tech.co.ke/',
-  privacyUpdated: '9 October 2026',
+  privacyUpdated: '10 October 2026',
   currencies: ['KES', 'USD', 'EUR', 'GBP', 'ZAR', 'NGN', 'GHS', 'TZS', 'UGX', 'INR', 'CAD', 'AUD', 'JPY', 'AED'],
 } as const
 
