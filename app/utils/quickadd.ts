@@ -61,7 +61,7 @@ export type AddTheme = 'income' | 'needs' | 'wants' | 'savings' | 'debt'
 export const ADD_THEMES: Record<AddTheme, [string, string]> = {
   income: ['#13a186', '#0c7d68'],
   needs: ['#ea6f2b', '#d44412'],
-  wants: ['#c97a0a', '#a85d00'],
+  wants: ['#cf7f00', '#ad5f00'],
   savings: ['#1a9b6e', '#0f7a55'],
   debt: ['#4f7de0', '#3b5fc0'],
 }
