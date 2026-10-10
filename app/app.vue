@@ -10,6 +10,12 @@ const auth = useAppAuth()
 const { startSync, stopSync } = useSync()
 startTheme() // client only; the head script already applied an explicit choice before first paint
 watch(() => auth.userId.value, (uid) => { if (!import.meta.client) return; if (uid) startSync(uid); else stopSync() }, { immediate: true })
+// The app may have opened from this device's saved copy before Clerk answered. If the answer is "nobody is signed in" (for
+// example the session expired), leave the private screen.
+const route = useRoute()
+watch(() => [auth.isVerified.value, auth.isSignedIn.value] as const, ([verified, signedIn]) => {
+  if (import.meta.client && verified && !signedIn && !isOpenPath(route.path)) navigateTo('/sign-in')
+}, { immediate: true })
 </script>
 
 <style>
