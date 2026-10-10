@@ -38,6 +38,16 @@ describe('mergeRow', () => {
     expect(r.merged.balance).toBe(850)
     expect(mergeRow('debts', d(100), d(0), d(30, 2)).merged.balance).toBe(0) // never below zero
   })
+  it('combines two changes to the same account balance instead of losing one', () => {
+    const a = (balance: number, rev = 1, extra: any = {}) => ({ id: 'a', rev, name: 'M-Pesa', kind: 'mobile', balance, color: '#2fa05a', ...extra })
+    const r = mergeRow('accounts', a(10000), a(9000), a(10500, 2)) // I paid 1,000 here; another device received 500
+    expect(r.conflicts).toEqual([])
+    expect(r.merged.balance).toBe(9500)
+    expect(mergeRow('accounts', a(1000), a(0), a(200, 2)).merged.balance).toBe(0) // never below zero
+    // a rename on one side and a payment on the other both survive
+    const m = mergeRow('accounts', a(10000), a(9000), a(10000, 2, { name: 'M-Pesa Lipa' }))
+    expect(m.conflicts).toEqual([]); expect(m.merged).toMatchObject({ balance: 9000, name: 'M-Pesa Lipa' })
+  })
   it('still flags other debt fields changed on both sides', () => {
     const d = (over: any) => ({ id: 'd', rev: 1, name: 'Card', balance: 100, minPayment: 20, ...over })
     expect(mergeRow('debts', d({}), d({ name: 'A' }), d({ rev: 2, name: 'B' })).conflicts).toEqual(['name'])

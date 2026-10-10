@@ -12,7 +12,7 @@ const cents = (n: number) => Math.round(n * 100) / 100
  *   theirs what the server has now (the other device's version)
  * A field only one side changed takes that side's value. A field both sides changed to the same value is fine.
  * Fields both sides changed differently are conflicts (the merged row keeps the server's value for them), except:
- *  - a debt balance, where each side's payment is a change relative to the base, so both are applied
+ *  - a debt or account balance, where each side's payment or deposit is a change relative to the base, so both are applied
  *  - goal contributions, which only ever grow (a withdrawal is a negative entry), so the two lists are combined
  */
 export function mergeRow(table: TableName, base: any | undefined, mine: any, theirs: any): MergeResult {
@@ -39,7 +39,7 @@ export function mergeRow(table: TableName, base: any | undefined, mine: any, the
     if (mineSame) merged[f] = theirs[f]
     else if (theirsSame) merged[f] = mine[f]
     else if (same(mine[f], theirs[f])) merged[f] = mine[f]
-    else if (table === 'debts' && f === 'balance' && typeof mine[f] === 'number' && typeof theirs[f] === 'number' && typeof b[f] === 'number') {
+    else if ((table === 'debts' || table === 'accounts') && f === 'balance' && typeof mine[f] === 'number' && typeof theirs[f] === 'number' && typeof b[f] === 'number') {
       merged[f] = Math.max(0, cents(theirs[f] + (mine[f] - b[f])))
     } else { merged[f] = theirs[f]; conflicts.push(f) }
   }
