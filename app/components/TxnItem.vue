@@ -29,7 +29,7 @@ function remove() {
 .open { flex:1; min-width:0; display:flex; align-items:center; gap:12px; background:none; border:0; padding:0; font:inherit; color:inherit; text-align:left; cursor:pointer; min-height:44px; }
 .open:active { opacity:.7; }
 .grow { display:block; min-width:0; }
-.grow small { display:block; }
+.grow small { display:block; overflow:hidden; text-overflow:ellipsis; } /* a long detail line is cut with an ellipsis instead of running under the amount */
 .ttl { font-weight:600; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
 small { white-space:nowrap; }
 strong { flex:none; white-space:nowrap; }
