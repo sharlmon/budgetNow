@@ -69,7 +69,7 @@ watch(() => [auth.isVerified.value, auth.isSignedIn.value] as const, ([verified,
 html { background:var(--page); }
 body { margin:0; color:var(--ink); font:16px/1.45 'Inter Variable','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; -webkit-font-smoothing:antialiased; font-feature-settings:'cv11','ss01'; }
 .shell { max-width:480px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); position:relative; box-shadow:0 0 80px rgba(20,20,40,.1); }
-main { flex:1; padding:calc(20px + env(safe-area-inset-top)) 20px 32px; overflow-x:hidden; }
+main { flex:1; padding:calc(20px + env(safe-area-inset-top)) 20px 32px; overflow-x:hidden; overflow-x:clip; } /* clip keeps position:sticky working inside; browsers without it fall back to hidden */
 h1 { font-size:1.5rem; margin:0; letter-spacing:-.025em; font-weight:700; } h2 { font-size:1rem; margin:0; font-weight:700; letter-spacing:-.01em; }
 .muted { color:var(--muted); } .good { color:var(--good-ink); } .bad { color:var(--bad); } .sm { font-size:.8rem; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
