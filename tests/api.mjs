@@ -210,6 +210,18 @@ const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-u
   await badAcct('a rate over 100', { ...fund, id: 'x3', rate: 101 })
   await badAcct('a bad colour', { ...acct, id: 'x4', color: 'red' })
   await badAcct('an empty name', { ...acct, id: 'x5', name: '' })
+  // which account an income, expense or bill is tied to
+  const link = { accountId: 'ac1' }
+  x = await sync(carol, [
+    { t: 'incomes', op: 'put', row: { ...income, id: 'li', ...link } }, { t: 'expenses', op: 'put', row: { ...expense, id: 'le', ...link } }, { t: 'bills', op: 'put', row: { ...bill, id: 'lb', ...link } },
+    { t: 'incomes', op: 'put', row: { ...income, id: 'ni' } },
+  ])
+  cs = await state(carol)
+  ok(x.s === 200 && cs.incomes.find(i => i.id === 'li').accountId === 'ac1' && cs.expenses[0].accountId === 'ac1' && cs.bills[0].accountId === 'ac1', 'income, expense and bill remember which account they use')
+  ok(cs.incomes.find(i => i.id === 'ni').accountId === undefined, 'a row with no account stays without one')
+  x = await sync(carol, [{ t: 'bills', op: 'put', row: { ...bill, id: 'lb', rev: 1, accountId: null } }])
+  ok((await state(carol)).bills[0].accountId === undefined, 'an account can be taken off a bill')
+  { const y = await sync(carol, [{ t: 'expenses', op: 'put', row: { ...expense, id: 'bad', accountId: "x'; DROP TABLE accounts;--" } }]); ok(y.s === 400, `rejects an unsafe account id on an expense -> ${y.s}`) }
   ok((await state(alice)).accounts.length === 0, "one user's accounts are not visible to another")
   await sync(carol, [{ t: 'accounts', op: 'del', id: 'ac2', rev: 1 }])
   ok((await state(carol)).accounts.length === 1, 'an account can be deleted')

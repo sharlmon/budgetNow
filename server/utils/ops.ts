@@ -10,8 +10,8 @@ const optId = id.nullish().transform(v => v ?? null)
 // The revision of the row the client last saw. Absent for rows the client created itself.
 const revision = z.number().int().min(1).max(2_000_000_000).optional()
 
-export const incomeRow = z.object({ id, rev: revision, label, amount: amt, date, split: z.object({ needs: amt, wants: amt, savings: amt, debt: amt }) })
-export const expenseRow = z.object({ id, rev: revision, label, amount: amt, category: cat, date, debtId: optId, billId: optId })
+export const incomeRow = z.object({ id, rev: revision, label, amount: amt, date, accountId: optId, split: z.object({ needs: amt, wants: amt, savings: amt, debt: amt }) })
+export const expenseRow = z.object({ id, rev: revision, label, amount: amt, category: cat, date, debtId: optId, billId: optId, accountId: optId })
 export const debtRow = z.object({ id, rev: revision, name: z.string().min(1).max(120), balance: amt, original: amt.nullish().transform(v => v ?? null), minPayment: amt, apr: z.number().finite().min(0).max(100).nullish().transform(v => v ?? null) })
 export const goalRow = z.object({
   id, rev: revision, name: z.string().min(1).max(120), target: amt.refine(n => n > 0, 'target must be positive'),
@@ -20,7 +20,7 @@ export const goalRow = z.object({
 })
 export const billRow = z.object({
   id, rev: revision, name: z.string().min(1).max(120), amount: amt, category: z.enum(['needs', 'wants', 'debt']), every: z.enum(['week', 'month', 'year']),
-  nextDue: date, anchorDay: z.number().int().min(1).max(31), auto: z.boolean(), debtId: optId,
+  nextDue: date, anchorDay: z.number().int().min(1).max(31), auto: z.boolean(), debtId: optId, accountId: optId,
 })
 export const ACCOUNT_KINDS = ['mobile', 'bank', 'paypal', 'cash', 'invest', 'other'] as const
 export const accountRow = z.object({
