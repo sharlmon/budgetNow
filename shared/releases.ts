@@ -5,6 +5,18 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.4.0',
+    date: '2026-10-11',
+    title: 'Bill reminders',
+    notes: [
+      'Get a notification on the morning a bill is due, even when Weka is closed',
+      'Choose how early to be reminded, from the day itself up to 3 days before',
+      'Choose what the lock screen shows: just a count, bill names, or names and amounts',
+      'A live example of the notification, and a button to send yourself a test',
+      'On iPhone and iPad, reminders work once Weka is on your Home Screen',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-10-10',
     title: 'Edit entries, and a setup guide',

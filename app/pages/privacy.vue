@@ -12,7 +12,7 @@
     <h3>Account information</h3>
     <p>When you sign up we receive your name, email address and profile photo, plus the sign-in method you use. If you choose "Continue with Google", Google shares your name, email address and profile photo with our sign-in provider. Passwords, where used, are handled by our sign-in provider, not stored by us.</p>
     <h3>Budget data you enter</h3>
-    <p>Income entries (amount, label, date and how it was split), expenses, debts, savings goals and contributions, recurring bills, the accounts you add (a name, a type such as mobile money, bank or cash, the balance you enter, and an optional yearly return you expect, plus which account each income, expense and bill used), your chosen currency, and a display name. This is the core of the service and it is stored against your account.</p>
+    <p>Income entries (amount, label, date and how it was split), expenses, debts, savings goals and contributions, recurring bills, the accounts you add (a name, a type such as mobile money, bank or cash, the balance you enter, and an optional yearly return you expect, plus which account each income, expense and bill used), your chosen currency, and a display name. If you turn on bill reminders, we also store, for each device that turned them on, the browser's push address and encryption keys, your time zone and your reminder choices. This is the core of the service and it is stored against your account.</p>
     <h3>Technical data</h3>
     <p>Like any website, our hosting and sign-in providers process your IP address, browser and device type, and request logs. This is used to deliver the service, keep it secure and prevent abuse.</p>
     <h3>What we do not collect</h3>
@@ -39,6 +39,7 @@
         <tr><td>Vercel</td><td>Hosting and delivery of the app</td></tr>
         <tr><td>Neon</td><td>Managed Postgres database where your budget data is stored</td></tr>
         <tr><td>Google</td><td>Only if you choose "Continue with Google" to sign in</td></tr>
+        <tr><td>Your browser's push service (Google, Apple, Mozilla or Microsoft)</td><td>Only if you turn on bill reminders: it delivers the notification text to your device</td></tr>
       </tbody>
     </table>
     <p>Each provider handles data under its own terms and privacy policy. We may also disclose information if required by law or to protect rights and safety.</p>

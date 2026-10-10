@@ -133,6 +133,24 @@ export const accounts = pgTable('accounts', {
   check('accounts_balance', sql`${t.balance} >= 0`), check('accounts_rate', sql`${t.rate} IS NULL OR (${t.rate} >= 0 AND ${t.rate} <= 100)`),
 ])
 
+// Devices that asked for bill reminders (browser push). Each row is one device: the address the browser's push service gave us,
+// the keys needed to encrypt a message for it, and the choices made on that device.
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  userId: text('user_id').notNull(),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  timeZone: text('time_zone').notNull(),
+  daysBefore: integer('days_before').notNull().default(1),
+  detail: text('detail').notNull().default('names'),
+  // The local date of the last reminder sent to this device, so it gets at most one a day.
+  lastSentOn: text('last_sent_on'),
+  ...stamps,
+}, t => [
+  primaryKey({ columns: [t.userId, t.endpoint] }),
+  check('push_days_before', sql`${t.daysBefore} BETWEEN 0 AND 7`), check('push_detail', sql`${t.detail} IN ('basic','names','full')`),
+])
+
 // Shared counters for rate limiting. Serverless instances do not share memory, so the limit lives in the database.
 export const rateLimits = pgTable('rate_limits', {
   key: text('key').primaryKey(),

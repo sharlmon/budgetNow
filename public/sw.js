@@ -2,7 +2,7 @@
 // - The private app screens are client-rendered, so their first page is the same static shell for everyone. It opens instantly
 //   from the saved copy and is refreshed in the background (stale-while-revalidate), so a slow connection never delays the first paint.
 // - Other pages (landing, legal, guides) are network-first so updates arrive; everything else is cache-first.
-const CACHE = 'weka-v6'
+const CACHE = 'weka-v7'
 const SCOPE = self.registration.scope
 const APP_SCREENS = ['home', 'activity', 'analytics', 'goals', 'bills', 'debts', 'accounts', 'settings']
 const isAppScreen = (url) => APP_SCREENS.some(p => url.pathname === new URL(SCOPE).pathname + p || url.pathname.startsWith(new URL(SCOPE).pathname + p + '/'))
@@ -66,6 +66,39 @@ self.addEventListener('fetch', (e) => {
         return res
       }).catch(() => hit)
       return hit || net
+    }),
+  )
+})
+
+// ---- Bill reminders (browser push) ----
+// A reminder arrives as JSON { title, body, url, tag }. Every push must show a notification (browsers require it), so anything
+// unreadable still shows a plain one. The text is cut to a sensible length and only a path on this site can be opened.
+const clip = (v, n) => String(v ?? '').slice(0, n)
+const safeTarget = (u) => {
+  try { const url = new URL(typeof u === 'string' ? u : '/home', SCOPE); return url.origin === new URL(SCOPE).origin ? url.href : SCOPE + 'home' } catch { return SCOPE + 'home' }
+}
+
+self.addEventListener('push', (e) => {
+  let data = {}
+  try { data = e.data ? e.data.json() : {} } catch { try { data = { body: e.data.text() } } catch { data = {} } }
+  if (!data || typeof data !== 'object') data = {}
+  e.waitUntil(self.registration.showNotification(clip(data.title || 'Weka', 120), {
+    body: clip(data.body, 300),
+    tag: clip(data.tag || 'weka', 60), // a new reminder with the same tag replaces the last one instead of stacking
+    icon: SCOPE + 'icons/icon-192.png',
+    data: { url: safeTarget(data.url) },
+  }))
+})
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close()
+  const target = safeTarget(e.notification.data && e.notification.data.url)
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      const open = list.find(c => c.url.startsWith(SCOPE))
+      // Reuse a window that is already open on Weka; otherwise open one.
+      if (open) return open.focus().then(c => (c && 'navigate' in c ? c.navigate(target) : undefined))
+      return self.clients.openWindow(target)
     }),
   )
 })

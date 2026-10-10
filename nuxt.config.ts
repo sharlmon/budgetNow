@@ -28,7 +28,7 @@ export default defineNuxtConfig({
   css: ['@fontsource-variable/inter'],
   modules: devAuth ? [] : ['@clerk/nuxt'],
   clerk: { signInUrl: '/sign-in', signUpUrl: '/sign-up', signInFallbackRedirectUrl: '/home', signUpFallbackRedirectUrl: '/home' },
-  runtimeConfig: { public: { devAuth, siteUrl, appVersion, buildId, toastMs: Number(process.env.NUXT_PUBLIC_TOAST_MS) || 4500, updateCheckDelayMs: Number(process.env.NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS) || 20_000 } },
+  runtimeConfig: { public: { devAuth, siteUrl, appVersion, buildId, vapidPublicKey: '', toastMs: Number(process.env.NUXT_PUBLIC_TOAST_MS) || 4500, updateCheckDelayMs: Number(process.env.NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS) || 20_000 } },
   routeRules: {
     '/': { prerender: true },
     '/privacy': { prerender: true },
