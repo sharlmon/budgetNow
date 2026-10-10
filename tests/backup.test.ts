@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { buildBackup, parseBackup } from '../app/utils/backup'
 
 const state: any = {
-  incomes: [{ id: 'a', label: 'Salary', amount: 3200, date: '2026-10-01', split: { needs: 1500, wants: 900, savings: 640, debt: 160 } }],
+  incomes: [{ id: 'a', label: 'Salary', amount: 3200, date: '2026-10-01', accountId: 'f', split: { needs: 1500, wants: 900, savings: 640, debt: 160 } }],
   expenses: [
-    { id: 'e', label: 'Rent', amount: 1200, category: 'needs', date: '2026-10-02' },
+    { id: 'e', label: 'Rent', amount: 1200, category: 'needs', date: '2026-10-02', accountId: 'm' },
     { id: 'p', label: 'Pay', amount: 160, category: 'debt', date: '2026-10-03', debtId: 'z', billId: 'b2' },
   ],
   debts: [{ id: 'z', name: 'Loan', balance: 2400, original: 3000, minPayment: 160 }],
   bills: [
-    { id: 'b1', name: 'Rent', amount: 1200, category: 'needs', every: 'month', nextDue: '2026-11-01', anchorDay: 1, auto: true },
+    { id: 'b1', name: 'Rent', amount: 1200, category: 'needs', every: 'month', nextDue: '2026-11-01', anchorDay: 1, auto: true, accountId: 'm' },
     { id: 'b2', name: 'Loan', amount: 160, category: 'debt', every: 'month', nextDue: '2026-10-30', anchorDay: 30, auto: false, debtId: 'z' },
   ],
   accounts: [{ id: 'm', name: 'M-Pesa', kind: 'mobile', balance: 4200.5, color: '#2fa05a' }, { id: 'f', name: 'Money market fund', kind: 'invest', balance: 85000, color: '#e6a321', rate: 14.1 }],
@@ -107,5 +107,21 @@ describe('backup files and linked accounts', () => {
   it('gives a missing colour its kind colour and drops an impossible rate', () => {
     const r: any = parseBackup(wrap({ ...state, accounts: [{ id: '1', name: 'Fund', kind: 'invest', balance: 5, rate: 500 }] }))
     expect(r.data.accounts[0]).toMatchObject({ color: '#e6a321', rate: undefined })
+  })
+})
+
+describe('backup files and account links', () => {
+  it('keeps which account an income, expense and bill used (the round trip test above covers the exact shape)', () => {
+    const r: any = parseBackup(JSON.stringify(buildBackup(state, 'KES', '')))
+    expect(r.data.incomes[0].accountId).toBe('f'); expect(r.data.expenses[0].accountId).toBe('m'); expect(r.data.bills[0].accountId).toBe('m')
+  })
+  it('drops a link to an account that is not in the file instead of pointing at nothing', () => {
+    const r: any = parseBackup(wrap({ ...state, accounts: [state.accounts[0]] }))
+    expect(r.data.incomes[0].accountId).toBeUndefined() // pointed at the fund 'f', which is not in the file
+    expect(r.data.expenses[0].accountId).toBe('m')
+  })
+  it('restores an older file whose records have no account at all', () => {
+    const old = { ...state, accounts: undefined, incomes: state.incomes.map(({ accountId: _a, ...i }: any) => i) }
+    const r: any = parseBackup(wrap(old)); expect(r.ok).toBe(true); expect(r.data.incomes[0].accountId).toBeUndefined()
   })
 })
