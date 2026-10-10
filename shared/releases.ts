@@ -5,6 +5,17 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.3.0',
+    date: '2026-10-10',
+    title: 'Edit entries, and a setup guide',
+    notes: [
+      'Tap any income or expense to edit it: label, amount, date, category and the account it used',
+      'Account balances and debts stay correct when you change an amount or move an entry to another account, and every edit can be undone',
+      'A Get set up card walks new people through adding an account, their first pay and a bill',
+      'Hide the guide any time and bring it back from Settings',
+    ],
+  },
+  {
     version: '1.2.2',
     date: '2026-10-10',
     title: 'A tidier Settings',
