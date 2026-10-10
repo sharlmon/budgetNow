@@ -133,6 +133,7 @@ test('two accounts cannot share a name', async ({ page, request }) => {
 
 test('home shows the accounts card, and it opens the Accounts page', async ({ page, request }) => {
   await page.goto('/home')
+  await page.getByRole('button', { name: 'Hide the setup guide' }).click() // the guide asks the same thing; with it hidden the prompt shows
   await expect(page.getByText('Where is your money?')).toBeVisible()
   await sync(request, [acct('a', 'M-Pesa', 'mobile', 8000), acct('b', 'Equity', 'bank', 20000, '#3b6fe0')])
   await page.reload()
