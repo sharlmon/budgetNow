@@ -2,6 +2,17 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.1.0 - 2026-10-10
+
+- New Accounts screen: add M-Pesa, your bank, PayPal, cash and investments and see the total in one wallet
+- Record money moving between your accounts, with an optional fee, and undo it
+- For investments, enter the yearly return you expect and preview how monthly savings could grow
+- Hide your balances with one tap; Weka remembers the choice on this device
+- The Weka name and logo, and a landing page built around your bills
+- Undo now keeps working after a change has been saved (paying a bill, deleting a debt payment)
+- Bigger tap targets on phones and longer titles on small screens
+- Accounts are included in backups; backups from before still restore
+
 ## 1.0.0 - 2026-10-09
 
 First release.
