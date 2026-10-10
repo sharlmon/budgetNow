@@ -43,6 +43,13 @@ describe('service worker page loading', () => {
     expect(w.fetched).toContain('https://weka.test/home')
     expect(w.store.get('https://weka.test/home').text).toBe('NEW SHELL')
   })
+  it('opens the Settings sub-screens from the saved copy too', async () => {
+    const w = worker({ cached: { 'https://weka.test/settings/budget': 'OLD' }, network: slow(200, 'NEW') })
+    const { answer } = w.start('https://weka.test/settings/budget')
+    expect((await answer).text).toBe('OLD')
+    const x = worker({ cached: { 'https://weka.test/settingsx': 'OLD' }, network: slow(5, 'NEW') })
+    expect((await x.navigate('https://weka.test/settingsx')).text).toBe('NEW') // not a Settings screen: network first
+  })
   it('uses the network the first time, when nothing is saved yet', async () => {
     const w = worker({ network: slow(10, 'FRESH') })
     expect((await w.navigate('https://weka.test/accounts')).text).toBe('FRESH')
