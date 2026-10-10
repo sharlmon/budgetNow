@@ -6,6 +6,7 @@
         <strong class="nm">{{ bill.name }}</strong>
         <div class="sm st">{{ dueLabel }}</div>
         <small class="muted"><Icon name="repeat" :size="11" class="inl" /> {{ everyLabel }}<template v-if="bill.auto"> · Auto-log</template><template v-if="payer"> · from {{ payer.name }}</template></small>
+        <small v-if="after" class="aft" :class="{ bad: after.short }">{{ after.short ? 'Your accounts will not cover this' : `${money(after.balance)} left after` }}</small>
       </div>
       <div class="end">
         <strong>{{ money(bill.amount) }}</strong>
@@ -38,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ bill: Bill; compact?: boolean }>()
+const props = defineProps<{ bill: Bill; compact?: boolean; /** What the runway says is left once this bill is paid. */ after?: { balance: number; short: boolean } | null }>()
 const { state, payBill, removeBill, accountShort } = useBudget()
 const payer = computed(() => (props.bill.accountId ? state.value.accounts.find(a => a.id === props.bill.accountId) : undefined))
 function setAccount(id: string) { const b = props.bill; if (id) b.accountId = id; else delete b.accountId }
@@ -81,6 +82,7 @@ function remove() { const name = props.bill.name; const undo = removeBill(props.
 .paybtn { padding:8px 14px; border-radius:12px; font-size:.82rem; }
 .chev { width:30px; height:30px; border-radius:10px; }
 .acts { margin-top:12px; } .acts .btn { flex:1; }
+.aft { display:block; margin-top:2px; font-size:.78rem; font-weight:600; color:var(--good-ink); } .aft.bad { color:var(--bad); }
 .from { display:flex; flex-direction:column; gap:6px; }
 .more { margin-top:14px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:14px; }
 .del { color:var(--bad); align-self:flex-start; gap:6px; }
