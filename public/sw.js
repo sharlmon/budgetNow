@@ -5,7 +5,7 @@
 const CACHE = 'weka-v6'
 const SCOPE = self.registration.scope
 const APP_SCREENS = ['home', 'activity', 'analytics', 'goals', 'bills', 'debts', 'accounts', 'settings']
-const isAppScreen = (url) => APP_SCREENS.some(p => url.pathname === new URL(SCOPE).pathname + p)
+const isAppScreen = (url) => APP_SCREENS.some(p => url.pathname === new URL(SCOPE).pathname + p || url.pathname.startsWith(new URL(SCOPE).pathname + p + '/'))
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

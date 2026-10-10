@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink v-if="show" to="/settings" class="badge" :class="syncStatus">
+  <NuxtLink v-if="show" to="/settings/account" class="badge" :class="syncStatus">
     <Icon :name="syncStatus === 'error' ? 'x' : 'repeat'" :size="11" :stroke="2.8" />
     <span v-if="syncStatus === 'offline'">Offline{{ syncPending ? ` · ${syncPending} to sync` : '' }}</span>
     <span v-else-if="syncStatus === 'error'">Sync problem · tap to check</span>

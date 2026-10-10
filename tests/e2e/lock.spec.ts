@@ -8,7 +8,7 @@ const pad = async (page: any, scope: string, pin: string) => {
 }
 
 async function turnOnLock(page: any) {
-  await page.goto('/settings')
+  await page.goto('/settings/security')
   await page.locator('.lockcard [role=switch][aria-label="App lock"]').click()
   await pad(page, '.sheet', '1234')
   await expect(page.locator('.sheet h3')).toHaveText('Confirm your PIN')

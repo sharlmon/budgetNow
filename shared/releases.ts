@@ -5,6 +5,16 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.2.2',
+    date: '2026-10-10',
+    title: 'A tidier Settings',
+    notes: [
+      'Settings is now a short menu, with each group on its own screen',
+      'Each row says in one line what is set, such as your split, App lock, or when you last backed up',
+      'Sync, sign out and Delete account are together on one Account and sync screen',
+    ],
+  },
+  {
     version: '1.2.1',
     date: '2026-10-10',
     title: 'Faster start',

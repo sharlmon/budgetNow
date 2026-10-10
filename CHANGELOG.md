@@ -2,6 +2,12 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.2.2 - 2026-10-10
+
+- Settings is now a short menu, with each group on its own screen
+- Each row says in one line what is set, such as your split, App lock, or when you last backed up
+- Sync, sign out and Delete account are together on one Account and sync screen
+
 ## 1.2.1 - 2026-10-10
 
 - A Weka loading screen appears at once instead of a blank page

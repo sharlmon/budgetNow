@@ -24,8 +24,8 @@ test('the server reports its version and is never cached', async ({ request }) =
   expect(sw).toContain('version.json') // the offline cache must never answer this
 })
 
-test('Settings shows the version, the build, and what is new', async ({ page }) => {
-  await page.goto('/settings')
+test('About shows the version, the build, and what is new', async ({ page }) => {
+  await page.goto('/settings/about')
   const about = page.locator('#about')
   await expect(about).toContainText(`Version ${CURRENT}`)
   await expect(about).toContainText('build')
@@ -67,7 +67,7 @@ test('"Later" hides the notice and it stays hidden for that build', async ({ pag
 })
 
 test('Check for updates says so when you are current, and shows the notice when you are not', async ({ page, request }) => {
-  await page.goto('/settings')
+  await page.goto('/settings/about')
   await page.getByRole('button', { name: 'Check for updates' }).click()
   await expect(page.locator('.toast').filter({ hasText: `You're on the latest version (${CURRENT})` })).toBeVisible()
 
@@ -77,7 +77,7 @@ test('Check for updates says so when you are current, and shows the notice when 
 })
 
 test('checking while offline explains instead of failing silently', async ({ page, context }) => {
-  await page.goto('/settings')
+  await page.goto('/settings/about')
   await expect(page.locator('#about')).toBeVisible() // let the screen finish loading before the network goes away
   await context.setOffline(true)
   await page.getByRole('button', { name: 'Check for updates' }).click()
@@ -90,7 +90,7 @@ test('after an update, the first open says so once and links to what is new', as
   const toast = page.locator('.toast').filter({ hasText: `Updated to version ${CURRENT}` })
   await expect(toast).toBeVisible({ timeout: 10_000 })
   await toast.getByRole('button', { name: "What's new" }).click()
-  await expect(page).toHaveURL(/\/settings#about/)
+  await expect(page).toHaveURL(/\/settings\/about$/)
   await expect(page.locator('#about')).toBeVisible()
   await page.goto('/home')
   await page.waitForTimeout(4000)
