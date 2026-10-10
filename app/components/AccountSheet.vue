@@ -5,7 +5,7 @@
         <div class="sheet" role="dialog" aria-modal="true" :aria-label="editing ? `Edit ${editing.name}` : 'Add an account'" @keydown.esc="close">
           <button class="x" aria-label="Close" @click="close"><Icon name="x" :size="18" /></button>
           <h3>{{ editing ? editing.name : 'Add an account' }}</h3>
-          <p class="muted sm lead">{{ editing ? 'Update the balance whenever it changes.' : 'Add where you keep money. You enter the balance yourself; Weka does not connect to your bank or M-Pesa.' }}</p>
+          <p class="muted sm lead">{{ editing ? 'Update the balance whenever it changes.' : 'Add where you keep money. You enter the balance yourself; Weka does not connect to your bank or M-Pesa, so please do not type account numbers or PINs.' }}</p>
 
           <label class="muted sm">Type</label>
           <div class="chips">
