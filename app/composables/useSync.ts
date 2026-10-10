@@ -50,8 +50,8 @@ export function useSync() {
 
   /** Records bills that came due while the app was closed. */
   function autoBills() {
-    const n = runAutoBills()
-    if (n) showToast(`${n} bill${n > 1 ? 's' : ''} logged automatically`)
+    const { n, unpaid } = runAutoBills()
+    if (n) showToast(`${n} bill${n > 1 ? 's' : ''} logged automatically${unpaid ? `. ${unpaid} could not be taken from its account, so that balance is unchanged` : ''}`, undefined, { ms: unpaid ? 8000 : undefined })
   }
 
   async function push(): Promise<boolean> {

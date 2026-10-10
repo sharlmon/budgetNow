@@ -11,8 +11,8 @@ export const CATEGORIES: { key: Category; label: string; hint: string; color: st
 ]
 export const catMeta = (k: Category) => CATEGORIES.find(c => c.key === k)!
 
-export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number> }
-export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string; billId?: string }
+export interface Income { id: string; label: string; amount: number; date: string; split: Record<Category, number>; /** The account it landed in. */ accountId?: string }
+export interface Expense { id: string; label: string; amount: number; category: Category; date: string; debtId?: string; billId?: string; /** The account it was paid from. */ accountId?: string }
 export interface Debt { id: string; name: string; balance: number; original?: number; minPayment: number; /** Annual percentage rate for the payoff planner. */ apr?: number }
 export interface Goal { id: string; name: string; target: number; icon: string; color: string; deadline?: string; contributions: { id: string; amount: number; date: string }[] }
 export const GOAL_STYLES = [
@@ -20,7 +20,7 @@ export const GOAL_STYLES = [
   { icon: 'grad', color: '#f5a524' }, { icon: 'laptop', color: '#64748b' }, { icon: 'heart', color: '#ec4899' }, { icon: 'shield', color: '#2fb67c' },
 ]
 export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) => s + c.amount, 0) * 100) / 100
-export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string }
+export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string; /** The account it is normally paid from. */ accountId?: string }
 export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[]; accounts: Account[] }
 
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -52,12 +52,36 @@ export function useBudget() {
   const totalSpent = computed(() => state.value.expenses.reduce((s, e) => s + e.amount, 0))
   const totalIncome = computed(() => state.value.incomes.reduce((s, i) => s + i.amount, 0))
 
-  function addIncome(label: string, amount: number, split: Record<Category, number>, date = today()) {
-    state.value.incomes.unshift({ id: uid(), label, amount, date, split })
+  /**
+   * Moves money in or out of one account. Returns the amount actually applied (0 when there is no such account or a
+   * withdrawal would take the balance below zero, in which case nothing changes). With `clamp`, a withdrawal takes
+   * whatever is there instead of refusing.
+   */
+  function bump(accountId: string | undefined, delta: number, clamp = false): number {
+    const a = accountId ? state.value.accounts.find(x => x.id === accountId) : undefined
+    if (!a) return 0
+    const applied = delta < 0 && clamp ? -Math.min(-delta, a.balance) : delta
+    const next = round(a.balance + applied)
+    if (next < 0) return 0
+    a.balance = next
+    return applied
   }
-  function addExpense(label: string, amount: number, category: Category, debtId?: string, date = today(), billId?: string) {
+  /** Why an account cannot cover `amount`, or null when it can (or when no account is chosen). */
+  function accountShort(accountId: string | undefined, amount: number): string | null {
+    const a = accountId ? state.value.accounts.find(x => x.id === accountId) : undefined
+    if (!a || amount <= a.balance) return null
+    return `${a.name} is short by ${money(round(amount - a.balance))}.`
+  }
+
+  function addIncome(label: string, amount: number, split: Record<Category, number>, date = today(), accountId?: string) {
+    const landed = accountId && bump(accountId, amount) !== 0
+    state.value.incomes.unshift({ id: uid(), label, amount, date, split, ...(landed ? { accountId } : {}) })
+  }
+  function addExpense(label: string, amount: number, category: Category, debtId?: string, date = today(), billId?: string, accountId?: string) {
     const id = uid()
-    state.value.expenses.unshift({ id, label, amount, category, date, debtId, billId })
+    // The account is only recorded if it really paid: a withdrawal it cannot cover is left off rather than going negative.
+    const paidFrom = accountId && bump(accountId, -amount) !== 0 ? accountId : undefined
+    state.value.expenses.unshift({ id, label, amount, category, date, debtId, billId, ...(paidFrom ? { accountId: paidFrom } : {}) })
     if (debtId) {
       const d = state.value.debts.find(x => x.id === debtId)
       if (d) d.balance = Math.max(0, round(d.balance - amount))
@@ -72,19 +96,27 @@ export function useBudget() {
     const debtOf = () => (e?.debtId ? state.value.debts.find(x => x.id === e.debtId) : undefined)
     const debt = debtOf()
     if (debt && e) debt.balance = round(debt.balance + e.amount)
+    if (e) bump(e.accountId, e.amount) // the money goes back to the account it came from
     // Undo looks the debt up again: a sync can replace the row objects in the meantime, so a held reference would be stale.
     return () => {
       if (!e) return
       state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, restored(e))
       const d = debtOf()
       if (d) d.balance = Math.max(0, round(d.balance - e.amount))
+      bump(e.accountId, -e.amount, true)
     }
   }
   function removeIncome(id: string) {
     const i = state.value.incomes.findIndex(x => x.id === id)
     if (i < 0) return () => {}
     const [inc] = state.value.incomes.splice(i, 1)
-    return () => { if (inc) state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, restored(inc)) }
+    // Taking the income back out of its account may take less than all of it if some was already spent; Undo puts back exactly what was taken.
+    const taken = inc ? -bump(inc.accountId, -inc.amount, true) : 0
+    return () => {
+      if (!inc) return
+      state.value.incomes.splice(Math.min(i, state.value.incomes.length), 0, restored(inc))
+      bump(inc.accountId, taken)
+    }
   }
   function addDebt(name: string, balance: number, minPayment: number, apr?: number) {
     state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment, ...(apr && apr > 0 ? { apr } : {}) })
@@ -163,7 +195,7 @@ export function useBudget() {
     const b = state.value.bills.find(x => x.id === id)
     if (!b) return () => {}
     const due = b.nextDue
-    const expenseId = skip ? undefined : addExpense(b.name, b.amount, b.category, b.debtId, due < today() ? due : today(), b.id)
+    const expenseId = skip ? undefined : addExpense(b.name, b.amount, b.category, b.debtId, due < today() ? due : today(), b.id, b.accountId)
     b.nextDue = addPeriod(due, b.every, b.anchorDay)
     return () => {
       if (expenseId) removeExpense(expenseId)
@@ -174,19 +206,22 @@ export function useBudget() {
   /** Logs every due occurrence of bills set to auto-log. Returns how many expenses were added. */
   function runAutoBills() {
     const t = today()
-    let n = 0
+    let n = 0, unpaid = 0
     for (const b of state.value.bills) {
       if (!b.auto) continue
-      for (let k = 0; k < 12 && b.nextDue <= t; k++) { payBill(b.id); n++ }
+      for (let k = 0; k < 12 && b.nextDue <= t; k++) {
+        if (b.accountId && accountShort(b.accountId, b.amount)) unpaid++ // logged, but the account could not cover it, so its balance is left alone
+        payBill(b.id); n++
+      }
     }
-    return n
+    return { n, unpaid }
   }
 
   function resetAll() {
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }
   }
 
-  return { accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  return { accountShort, accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 // Profile values live in the synced snapshot, not in their own storage keys.
