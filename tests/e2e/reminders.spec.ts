@@ -45,8 +45,9 @@ const toggle = (page: Page) => page.getByRole('switch', { name: 'Remind me about
 
 test('where reminders cannot work, the screen says why instead of offering a switch that does nothing', async ({ page }) => {
   await page.goto('/settings/reminders') // no service worker in the test server
-  // Which message depends on the browser: some test browsers have no push API at all, others have it but no worker to use it.
-  await expect(page.getByText(/Reminders aren't ready on this device yet|This browser can't show reminders/)).toBeVisible({ timeout: 15_000 })
+  // Which honest message appears depends on the test browser: a full Chrome has the push API but no service worker in the dev server;
+  // a headless browser may have no push API at all, or block notifications by default.
+  await expect(page.getByText(/Reminders aren't ready on this device yet|This browser can't show reminders|Notifications are blocked for Weka/)).toBeVisible({ timeout: 15_000 })
   await expect(toggle(page)).toHaveCount(0)
 
   await fakePush(page, { apple: true })
