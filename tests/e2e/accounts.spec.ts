@@ -137,7 +137,7 @@ test('home shows the accounts card, and it opens the Accounts page', async ({ pa
   await sync(request, [acct('a', 'M-Pesa', 'mobile', 8000), acct('b', 'Equity', 'bank', 20000, '#3b6fe0')])
   await page.reload()
   await expect(page.getByRole('region', { name: 'Accounts' })).toContainText('28,000')
-  await page.getByRole('link', { name: 'Open your accounts' }).click()
+  await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Accounts' }).click()
   await expect(page).toHaveURL(/\/accounts$/)
 })
 
@@ -152,4 +152,57 @@ test('the page never scrolls sideways on a small phone, even with long names and
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0)
   await page.getByRole('button', { name: 'Move money' }).click()
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0)
+})
+
+test.describe('home layout', () => {
+  /** Vertical position of each landmark, measured from the top of the page. */
+  const tops = async (page: any, finders: any[]) => Promise.all(finders.map(async (f: any) => { const box = await f.boundingBox(); return box ? Math.round(box.y + await page.evaluate(() => scrollY)) : -1 }))
+
+  test('accounts come first, then the quick actions, bills, safe to spend and the budget', async ({ page, request }) => {
+    const d = new Date(); d.setDate(d.getDate() - 1)
+    await sync(request, [
+      acct('a', 'M-Pesa', 'mobile', 8000), acct('b', 'Equity', 'bank', 20000, '#3b6fe0'),
+      { t: 'incomes', op: 'put', row: { id: 'i1', label: 'Salary', amount: 50000, date: new Date().toLocaleDateString('sv'), split: { needs: 25000, wants: 15000, savings: 10000, debt: 0 } } },
+      { t: 'bills', op: 'put', row: { id: 'b1', name: 'Rent', amount: 10000, category: 'needs', every: 'month', nextDue: d.toLocaleDateString('sv'), anchorDay: d.getDate(), auto: false } },
+    ])
+    await page.goto('/home')
+    await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible() // an overdue bill changes the heading
+    const ys = await tops(page, [
+      page.getByRole('region', { name: 'Accounts' }), page.getByRole('navigation', { name: 'Quick actions' }), page.getByRole('heading', { name: 'Needs attention' }),
+      page.getByText('Safe to spend today'), page.getByRole('heading', { name: 'Monthly budget' }), page.getByRole('heading', { name: 'Savings goals' }), page.getByRole('heading', { name: 'Recent transactions' }),
+    ])
+    expect(ys.every((v: number) => v >= 0), JSON.stringify(ys)).toBe(true)
+    expect([...ys].sort((p: number, q: number) => p - q), 'sections appear in this order').toEqual(ys)
+  })
+
+  test('the budget balance moved into the monthly budget card, and the old wallet card is gone', async ({ page, request }) => {
+    await sync(request, [{ t: 'incomes', op: 'put', row: { id: 'i1', label: 'Salary', amount: 50000, date: new Date().toLocaleDateString('sv'), split: { needs: 25000, wants: 15000, savings: 10000, debt: 0 } } }])
+    await page.goto('/home')
+    await expect(page.locator('.budgetbal')).toContainText('50,000')
+    await expect(page.getByText('Total Balance')).toHaveCount(0)
+    await expect(page.getByText('Latest income')).toHaveCount(0)
+  })
+
+  test('the bill count shows on Pay bill, and Move is disabled until there are two accounts', async ({ page, request }) => {
+    await sync(request, [
+      acct('a', 'M-Pesa', 'mobile', 8000),
+      { t: 'bills', op: 'put', row: { id: 'b1', name: 'Rent', amount: 100, category: 'needs', every: 'month', nextDue: new Date().toLocaleDateString('sv'), anchorDay: new Date().getDate(), auto: false } },
+    ])
+    await page.goto('/home')
+    const actions = page.getByRole('navigation', { name: 'Quick actions' })
+    await expect(actions.getByLabel('1 bill due')).toBeVisible()
+    await expect(actions.getByRole('button', { name: 'Move' })).toBeDisabled()
+    await sync(request, [acct('b', 'Equity', 'bank', 20000, '#3b6fe0')])
+    await page.reload()
+    await expect(actions.getByRole('button', { name: 'Move' })).toBeEnabled()
+    await actions.getByRole('button', { name: 'Move' }).click()
+    await expect(page.getByRole('dialog', { name: 'Move money between accounts' })).toBeVisible()
+  })
+
+  test('Add money opens the add sheet', async ({ page }) => {
+    await page.goto('/home')
+    const actions = page.getByRole('navigation', { name: 'Quick actions' })
+    await actions.getByRole('button', { name: 'Add money' }).click()
+    await expect(page.getByRole('button', { name: 'See my breakdown' })).toBeVisible()
+  })
 })

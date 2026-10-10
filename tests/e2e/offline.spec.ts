@@ -5,7 +5,7 @@ test.beforeEach(async ({ request }) => { await reset(request) })
 
 test('changes made offline are kept, flagged, and uploaded when the connection returns', async ({ page, context, request }) => {
   await page.goto('/home')
-  await expect(page.locator('.wallet')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Accounts' })).toBeVisible()
 
   await context.setOffline(true)
   await openAdd(page)
@@ -24,7 +24,7 @@ test('changes made offline are kept, flagged, and uploaded when the connection r
 
 test('the app opens from its saved copy with no connection', async ({ page, context }) => {
   await page.goto('/home')
-  await expect(page.locator('.wallet')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Accounts' })).toBeVisible()
   await context.setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
   // The dev server is unreachable, but nothing should crash the page we already have.
