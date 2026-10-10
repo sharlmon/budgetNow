@@ -23,7 +23,7 @@ export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) =
 export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string; /** The account it is normally paid from. */ accountId?: string }
 export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[]; accounts: Account[] }
 
-const uid = () => Math.random().toString(36).slice(2, 10)
+const uid = newId
 export const today = () => new Date().toLocaleDateString('sv')
 const round = (n: number) => Math.round(n * 100) / 100
 /**

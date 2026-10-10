@@ -1,5 +1,6 @@
 import type { State } from '../composables/useBudget'
 import { ACCOUNT_KINDS } from './accounts'
+import { newId } from './id'
 import { anchorOf } from './bills'
 import { isValidSplit, type SplitRule } from './split'
 
@@ -12,7 +13,7 @@ const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFin
 const isDate = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v))
 const text = (v: unknown, max = 120) => (typeof v === 'string' ? v.slice(0, max) : '')
 const r2 = (n: number) => Math.round(n * 100) / 100
-const rid = () => Math.random().toString(36).slice(2, 10)
+const rid = newId
 
 export interface Backup { app: 'budgetnow'; version: number; exportedAt: string; currency: string; name: string; split?: SplitRule; data: State }
 
