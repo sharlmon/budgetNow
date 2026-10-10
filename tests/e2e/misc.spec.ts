@@ -30,7 +30,7 @@ test('paying a debt lowers its balance, and Undo restores it', async ({ page, re
 
 test('deleting the account removes everything and signs the person out', async ({ page, request }) => {
   await sync(request, [debt('d1', 'Loan', 500, 50), { t: 'profile', op: 'put', row: { currency: 'EUR', name: 'Sam' } }])
-  await page.goto('/settings')
+  await page.goto('/settings/account')
   page.once('dialog', d => d.accept('DELETE'))
   await page.getByRole('button', { name: 'Delete my account' }).click()
   await expect.poll(async () => { const s = await getState(request); return s.debts.length + (s.profile.name ? 1 : 0) }, { timeout: 15_000 }).toBe(0)
@@ -39,7 +39,7 @@ test('deleting the account removes everything and signs the person out', async (
 
 test('typing something other than DELETE does not delete anything', async ({ page, request }) => {
   await sync(request, [debt('d1', 'Loan', 500, 50)])
-  await page.goto('/settings')
+  await page.goto('/settings/account')
   page.once('dialog', d => d.accept('delete'))
   await page.getByRole('button', { name: 'Delete my account' }).click()
   await page.waitForTimeout(1000)

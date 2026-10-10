@@ -5,7 +5,7 @@ import { getState, keypad, openAdd, reset, sync, debt } from './helpers'
 test.beforeEach(async ({ request }) => { await reset(request) })
 
 test('a chosen split rule is used for new income and saved to the account', async ({ page, request }) => {
-  await page.goto('/settings')
+  await page.goto('/settings/budget')
   await page.locator('.rule .chips button', { hasText: '60/20/20' }).click()
   await expect.poll(async () => (await getState(request)).profile.split).toEqual({ needs: 60, wants: 20, savings: 20 })
 
@@ -17,7 +17,7 @@ test('a chosen split rule is used for new income and saved to the account', asyn
 })
 
 test('a custom split that does not total 100% cannot be saved', async ({ page }) => {
-  await page.goto('/settings')
+  await page.goto('/settings/budget')
   await page.locator('.rule .chips button', { hasText: 'Custom' }).click()
   const f = page.locator('.rule .custom input.field')
   await f.nth(0).fill('70'); await f.nth(1).fill('20'); await f.nth(2).fill('20')

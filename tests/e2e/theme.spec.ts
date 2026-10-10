@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { debt, getState, reset, sync } from './helpers'
 
-const SCREENS = ['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/settings']
+const SCREENS = ['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/accounts', '/settings', '/settings/budget', '/settings/appearance', '/settings/security', '/settings/data', '/settings/account', '/settings/about']
 const today = new Date().toLocaleDateString('sv')
 const daysFromNow = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toLocaleDateString('sv') }
 
@@ -65,21 +65,21 @@ test.describe('theme', () => {
 
   test('an explicit choice beats the device, is remembered, and applies before the first paint', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
-    await page.goto('/settings')
+    await page.goto('/settings/appearance')
     await page.getByRole('tab', { name: 'Dark' }).click()
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
     expect(await page.evaluate(() => localStorage.getItem('bn:theme'))).toBe('dark')
     await page.goto('/home', { waitUntil: 'commit' })
     await page.waitForFunction(() => document.documentElement.hasAttribute('data-theme')) // set by the head script, before hydration
     expect(await page.locator('html').getAttribute('data-theme')).toBe('dark')
-    await page.goto('/settings')
+    await page.goto('/settings/appearance')
     await page.getByRole('tab', { name: 'System' }).click()
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/)
     expect(await page.evaluate(() => localStorage.getItem('bn:theme'))).toBe('system')
   })
 
   test('the theme choice stays on this device (it is never sent to the account)', async ({ page, request }) => {
-    await page.goto('/settings')
+    await page.goto('/settings/appearance')
     await page.getByRole('tab', { name: 'Dark' }).click()
     await page.waitForTimeout(1200)
     expect(JSON.stringify(await getState(request))).not.toContain('dark')
