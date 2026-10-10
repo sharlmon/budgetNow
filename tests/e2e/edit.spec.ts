@@ -109,6 +109,8 @@ test('the date can be changed, and an entry can be deleted from its sheet and br
   await sheet(page).getByRole('button', { name: 'Save changes' }).click()
   await expect.poll(async () => (await getState(request)).expenses[0].date).toBe('2026-01-15')
 
+  // Activity shows one month at a time, so the entry has moved out of view: look at all time to find it again
+  await page.getByRole('button', { name: 'Show all time' }).first().click()
   await page.getByRole('button', { name: 'Edit Lunch' }).click()
   await sheet(page).getByRole('button', { name: 'Delete this expense' }).click()
   await expect.poll(async () => (await getState(request)).expenses.length).toBe(0)
