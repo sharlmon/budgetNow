@@ -338,7 +338,7 @@ export function showToast(msg: string, undo?: () => void, opts?: { action?: Toas
   const t = useToast()
   t.value = { id: Date.now(), msg, undo, action: opts?.action }
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { t.value = null }, opts?.ms ?? 4500)
+  toastTimer = setTimeout(() => { t.value = null }, opts?.ms ?? (Number(useRuntimeConfig().public.toastMs) || 4500))
 }
 
 /** What you can still spend today on Needs + Wants, spreading this month's remaining flexible budget over the days left. */
