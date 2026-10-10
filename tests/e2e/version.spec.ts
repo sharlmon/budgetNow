@@ -59,7 +59,7 @@ test('"Later" hides the notice and it stays hidden for that build', async ({ pag
   await pretendDeployed(page, { version: NEWER, build: 'abc1234' })
   await page.goto('/home')
   await expect(page.locator('.upd')).toBeVisible({ timeout: 10_000 })
-  await page.getByRole('button', { name: 'Later' }).click()
+  await page.getByRole('button', { name: 'Later', exact: true }).click()
   await expect(page.locator('.upd')).toHaveCount(0)
   await page.reload()
   await page.waitForTimeout(2500)

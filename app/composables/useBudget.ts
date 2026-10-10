@@ -1,6 +1,7 @@
 import { DEFAULT_SPLIT, type SplitRule } from '../utils/split'
 import { DEFAULT_CURRENCY, formatMoney } from '../utils/money'
 import { moveProblem, type Account } from '../utils/accounts'
+import { planAccountChange, scaleSplit } from '../utils/edit'
 
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
 export const CATEGORIES: { key: Category; label: string; hint: string; color: string; icon: string }[] = [
@@ -118,6 +119,76 @@ export function useBudget() {
       bump(inc.accountId, taken)
     }
   }
+  /** What can be changed on an expense. `accountId: ''` takes it off its account. */
+  type ExpensePatch = { label?: string; amount?: number; category?: Category; date?: string; accountId?: string }
+  type IncomePatch = { label?: string; amount?: number; date?: string; accountId?: string }
+  type EditResult = { error: string } | { undo: () => void }
+  const shortMsg = (e: { account: string; short: number }) => `${e.account} is short by ${money(e.short)}.`
+  /** Applies per-account changes by id and returns a function that takes them back (looked up again, as a sync may replace the rows). */
+  function applyDeltas(deltas: Record<string, number>) {
+    for (const [id, d] of Object.entries(deltas)) { const a = state.value.accounts.find(x => x.id === id); if (a) a.balance = round(a.balance + d) }
+    return () => { for (const [id, d] of Object.entries(deltas)) { const a = state.value.accounts.find(x => x.id === id); if (a) a.balance = Math.max(0, round(a.balance - d)) } }
+  }
+  const knownAccount = (id?: string) => (id && state.value.accounts.some(a => a.id === id) ? id : undefined)
+
+  /**
+   * Changes an expense. Its effect on its account (and on the debt it pays down, if any) is corrected to match, and an account that
+   * cannot cover a bigger amount refuses the change. Returns an error message (and changes nothing) or an Undo.
+   */
+  function updateExpense(id: string, patch: ExpensePatch): EditResult {
+    const e = state.value.expenses.find(x => x.id === id)
+    if (!e) return { error: 'That entry no longer exists.' }
+    const next = {
+      label: patch.label ?? e.label, amount: round(patch.amount ?? e.amount), date: patch.date ?? e.date,
+      category: e.debtId ? e.category : (patch.category ?? e.category),
+      accountId: knownAccount('accountId' in patch ? patch.accountId || undefined : e.accountId),
+    }
+    if (!(next.amount > 0)) return { error: 'Enter an amount.' }
+    const plan = planAccountChange('expense', e, next, state.value.accounts)
+    if ('error' in plan) return { error: shortMsg(plan.error) }
+    const before = { label: e.label, amount: e.amount, date: e.date, category: e.category, accountId: e.accountId }
+    const debt = e.debtId ? state.value.debts.find(d => d.id === e.debtId) : undefined
+    let debtApplied = 0
+    if (debt) { const after = Math.max(0, round(debt.balance + (e.amount - next.amount))); debtApplied = round(after - debt.balance); debt.balance = after }
+    const takeBack = applyDeltas(plan.deltas)
+    Object.assign(e, { label: next.label, amount: next.amount, date: next.date, category: next.category })
+    if (next.accountId) e.accountId = next.accountId; else delete e.accountId
+    return { undo: () => {
+      const cur = state.value.expenses.find(x => x.id === id)
+      if (!cur) return
+      Object.assign(cur, { label: before.label, amount: before.amount, date: before.date, category: before.category })
+      if (before.accountId) cur.accountId = before.accountId; else delete cur.accountId
+      takeBack()
+      const d = cur.debtId ? state.value.debts.find(x => x.id === cur.debtId) : undefined
+      if (d) d.balance = Math.max(0, round(d.balance - debtApplied))
+    } }
+  }
+
+  /** Changes an income. A new amount rescales its split in proportion, and the account it went into is corrected to match. */
+  function updateIncome(id: string, patch: IncomePatch): EditResult {
+    const inc = state.value.incomes.find(x => x.id === id)
+    if (!inc) return { error: 'That entry no longer exists.' }
+    const next = {
+      label: patch.label ?? inc.label, amount: round(patch.amount ?? inc.amount), date: patch.date ?? inc.date,
+      accountId: knownAccount('accountId' in patch ? patch.accountId || undefined : inc.accountId),
+    }
+    if (!(next.amount > 0)) return { error: 'Enter an amount.' }
+    const plan = planAccountChange('income', inc, next, state.value.accounts)
+    if ('error' in plan) return { error: `${plan.error.account} no longer has enough to take back ${money(plan.error.short)} more. Fix that balance first, or choose another account.` }
+    const before = { label: inc.label, amount: inc.amount, date: inc.date, accountId: inc.accountId, split: { ...inc.split } }
+    const takeBack = applyDeltas(plan.deltas)
+    if (next.amount !== inc.amount) inc.split = scaleSplit(inc.split, inc.amount, next.amount)
+    Object.assign(inc, { label: next.label, amount: next.amount, date: next.date })
+    if (next.accountId) inc.accountId = next.accountId; else delete inc.accountId
+    return { undo: () => {
+      const cur = state.value.incomes.find(x => x.id === id)
+      if (!cur) return
+      Object.assign(cur, { label: before.label, amount: before.amount, date: before.date, split: before.split })
+      if (before.accountId) cur.accountId = before.accountId; else delete cur.accountId
+      takeBack()
+    } }
+  }
+
   function addDebt(name: string, balance: number, minPayment: number, apr?: number) {
     state.value.debts.push({ id: uid(), name, balance, original: balance, minPayment, ...(apr && apr > 0 ? { apr } : {}) })
   }
@@ -221,7 +292,7 @@ export function useBudget() {
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }
   }
 
-  return { accountShort, accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  return { updateExpense, updateIncome, accountShort, accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 // Profile values live in the synced snapshot, not in their own storage keys.
@@ -267,7 +338,7 @@ export function showToast(msg: string, undo?: () => void, opts?: { action?: Toas
   const t = useToast()
   t.value = { id: Date.now(), msg, undo, action: opts?.action }
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { t.value = null }, opts?.ms ?? 4500)
+  toastTimer = setTimeout(() => { t.value = null }, opts?.ms ?? (Number(useRuntimeConfig().public.toastMs) || 4500))
 }
 
 /** What you can still spend today on Needs + Wants, spreading this month's remaining flexible budget over the days left. */

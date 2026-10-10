@@ -28,6 +28,6 @@ export default defineConfig({
     url: `http://localhost:${port}/api/state`,
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,
-    env: { DEV_AUTH_BYPASS: '1', RATE_LIMIT_MULTIPLIER: '50', NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS: '400', PGLITE_DIR: join(tmpdir(), `budgetnow-e2e-${process.pid}`) },
+    env: { DEV_AUTH_BYPASS: '1', RATE_LIMIT_MULTIPLIER: '50', NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS: '400', NUXT_PUBLIC_TOAST_MS: '30000', PGLITE_DIR: join(tmpdir(), `budgetnow-e2e-${process.pid}`) },
   },
 })

@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 const { state, addBill } = useBudget()
-const adding = ref(false)
+const adding = ref(useRoute().query.add === '1') // the setup guide opens the form directly
 const kinds = CATEGORIES.filter(c => c.key !== 'savings')
 const name = ref(''); const amount = ref(0); const category = ref<'needs' | 'wants' | 'debt'>('needs')
 const accountId = ref(''); const debtId = ref(''); const every = ref('month'); const nextDue = ref(today()); const auto = ref(false)

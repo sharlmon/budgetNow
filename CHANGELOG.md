@@ -2,6 +2,13 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.3.0 - 2026-10-10
+
+- Tap any income or expense to edit it: label, amount, date, category and the account it used
+- Account balances and debts stay correct when you change an amount or move an entry to another account, and every edit can be undone
+- A Get set up card walks new people through adding an account, their first pay and a bill
+- Hide the guide any time and bring it back from Settings
+
 ## 1.2.2 - 2026-10-10
 
 - Settings is now a short menu, with each group on its own screen

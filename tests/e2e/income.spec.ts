@@ -5,7 +5,7 @@ test.beforeEach(async ({ request }) => { await reset(request) })
 
 test('adding money in splits it, confirms, saves to the account and survives a reload', async ({ page, request }) => {
   await page.goto('/home')
-  await expect(page.getByText("Let's plan your first pay")).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Get set up' })).toBeVisible() // a new person is guided to their first pay
 
   await openAdd(page)
   await keypad(page, '3200')

@@ -8,7 +8,8 @@
       <NuxtLink to="/settings" class="circ" aria-label="Settings"><Icon name="settings" :size="20" /></NuxtLink>
     </div>
 
-    <div class="rise" style="--i:1"><AccountsCard /></div>
+    <div class="rise" style="--i:1"><GettingStarted /></div>
+    <div class="rise" style="--i:1"><AccountsCard :hide-prompt="guide.visible.value" /></div>
     <div class="rise" style="--i:2"><HomeActions /></div>
 
     <div v-if="syncConflicts.length" class="card white clash rise" style="--i:3" role="alert">
@@ -25,14 +26,14 @@
 
     <div v-if="state.incomes.length && safe.hasBudget" class="rise" style="margin-top:16px;--i:4"><SafeToSpend /></div>
 
-    <div v-if="!state.incomes.length" class="card empty rise" style="margin-top:20px;--i:4">
+    <div v-if="!state.incomes.length && !guide.visible.value" class="card empty rise" style="margin-top:20px;--i:4">
       <div class="art"><Icon name="coins" :size="28" /></div>
       <h2 style="margin-bottom:6px">Let's plan your first pay</h2>
       <p class="muted" style="margin:0 0 18px">Enter how much came in. We split it instantly and you can tweak it before confirming.</p>
       <button class="btn" @click="sheet = { open: true, mode: 'income' }"><Icon name="plus" :size="18" :stroke="2.6" /> Add money in</button>
     </div>
 
-    <template v-else>
+    <template v-else-if="state.incomes.length">
       <div class="card white rise" style="margin-top:16px;--i:5">
         <div class="row" style="justify-content:space-between"><h2>Monthly budget</h2><NuxtLink to="/analytics" class="link">Details <Icon name="next" :size="14" /></NuxtLink></div>
         <div class="muted sm" style="margin:4px 0 14px">{{ monthLabel(month) }}</div>
@@ -72,6 +73,7 @@
 
 <script setup lang="ts">
 const { state, totalIncome, totalSpent } = useBudget()
+const guide = useGuide()
 const sheet = useSheet()
 const txns = useTransactions()
 const month = computed(() => today().slice(0, 7))
