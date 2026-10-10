@@ -2,6 +2,12 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.2.1 - 2026-10-10
+
+- A Weka loading screen appears at once instead of a blank page
+- The app opens straight from your saved data while it checks your sign-in in the background
+- Screens open instantly from this device, even on a slow connection
+
 ## 1.2.0 - 2026-10-10
 
 - The home screen now starts with your accounts, then quick actions, bills that need attention, and your budget
