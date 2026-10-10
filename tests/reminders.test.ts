@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { billsToRemind, buildReminder, dayDiff, isValidTimeZone, localDate, OVERDUE_GRACE_DAYS } from '../shared/reminders'
+import { billsToRemind, buildReminder, dayDiff, isAllowedPushEndpoint, isValidTimeZone, localDate, OVERDUE_GRACE_DAYS } from '../shared/reminders'
 
 const bill = (name: string, nextDue: string, amount = 1000) => ({ name, nextDue, amount })
 const TODAY = '2026-10-10'
@@ -88,4 +88,25 @@ describe('what the notification says', () => {
   it('always opens the Bills page and uses one tag, so a new reminder replaces the last one', () => {
     for (const d of ['basic', 'names', 'full'] as const) expect(buildReminder(g([bill('Rent', '2026-10-10')]), d, 'KES')).toMatchObject({ url: '/bills', tag: 'bill-reminders' })
   })
+})
+
+describe('which push addresses the server will send to', () => {
+  it('accepts the browser vendors\' push services over https', () => {
+    for (const ok of [
+      'https://fcm.googleapis.com/fcm/send/abc123', 'https://updates.push.services.mozilla.com/wpush/v2/abc',
+      'https://web.push.apple.com/QGxyz', 'https://wns2-par02p.notify.windows.com/w/?token=abc', 'https://push.services.mozilla.com/x',
+    ]) expect(isAllowedPushEndpoint(ok), ok).toBe(true)
+  })
+  it('refuses anything that could point the server somewhere else', () => {
+    for (const bad of [
+      'http://fcm.googleapis.com/fcm/send/abc', 'https://evil.example.com/x', 'https://127.0.0.1/x', 'https://localhost/x', 'https://169.254.169.254/latest/meta-data',
+      'https://fcm.googleapis.com.evil.com/x', 'https://evilfcm.googleapis.com.attacker.io/x', 'https://notfcm.googleapis.org/x',
+      'https://fcm.googleapis.com:8443/x', 'https://user:pw@fcm.googleapis.com/x', 'ftp://fcm.googleapis.com/x', 'javascript:alert(1)', '//fcm.googleapis.com/x', '', 'not a url',
+    ]) expect(isAllowedPushEndpoint(bad), bad).toBe(false)
+  })
+  it('refuses non-strings and very long addresses', () => {
+    for (const bad of [null, undefined, 42, {}, ['https://fcm.googleapis.com/x']]) expect(isAllowedPushEndpoint(bad as any)).toBe(false)
+    expect(isAllowedPushEndpoint('https://fcm.googleapis.com/' + 'a'.repeat(1000))).toBe(false)
+  })
+  it('is case-insensitive about the host, as the web is', () => expect(isAllowedPushEndpoint('https://FCM.GoogleAPIs.com/fcm/send/x')).toBe(true))
 })

@@ -71,3 +71,17 @@ export function buildReminder(g: DueGroups, detail: ReminderDetail, currency: st
   const more = all.length - lines.length
   return { ...base, title: `${all.length} bills need your attention`, body: lines.join('. ') + (more > 0 ? `. +${more} more` : '.') }
 }
+
+/**
+ * Push addresses the server is willing to send to. A device chooses its own address, so without a check someone could point the
+ * server at an internal address. Only the browser vendors' push services are allowed, over https on the default port.
+ */
+const PUSH_HOSTS = ['fcm.googleapis.com', 'updates.push.services.mozilla.com', 'push.services.mozilla.com', 'web.push.apple.com', 'push.apple.com', 'notify.windows.com']
+export function isAllowedPushEndpoint(endpoint: unknown): endpoint is string {
+  if (typeof endpoint !== 'string' || endpoint.length > 1000) return false
+  let u: URL
+  try { u = new URL(endpoint) } catch { return false }
+  if (u.protocol !== 'https:' || u.port !== '' || u.username || u.password) return false
+  const host = u.hostname.toLowerCase()
+  return PUSH_HOSTS.some(h => host === h || host.endsWith('.' + h))
+}
