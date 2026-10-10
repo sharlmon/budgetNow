@@ -111,6 +111,24 @@ export const bills = pgTable('bills', {
   check('bills_amount', sql`${t.amount} >= 0`), check('bills_anchor', sql`${t.anchorDay} BETWEEN 1 AND 31`),
 ])
 
+// Places the user keeps money (M-Pesa, a bank, PayPal, cash, an investment). Balances are entered and updated by the user;
+// Weka does not connect to these providers. rate is the yearly return the user expects, for investment-type accounts.
+export const accounts = pgTable('accounts', {
+  userId: text('user_id').notNull(),
+  id: text('id').notNull(),
+  name: text('name').notNull(),
+  kind: text('kind').notNull(),
+  balance: money('balance'),
+  color: text('color').notNull().default('#2fa05a'),
+  rate: numeric('rate', { precision: 6, scale: 3, mode: 'number' }),
+  rev: rev(),
+  ...stamps,
+}, t => [
+  primaryKey({ columns: [t.userId, t.id] }),
+  check('accounts_kind', sql`${t.kind} IN ('mobile','bank','paypal','cash','invest','other')`),
+  check('accounts_balance', sql`${t.balance} >= 0`), check('accounts_rate', sql`${t.rate} IS NULL OR (${t.rate} >= 0 AND ${t.rate} <= 100)`),
+])
+
 // Shared counters for rate limiting. Serverless instances do not share memory, so the limit lives in the database.
 export const rateLimits = pgTable('rate_limits', {
   key: text('key').primaryKey(),

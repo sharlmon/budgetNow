@@ -1,8 +1,8 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import { canon } from '../../shared/sync'
 import { MAX_BODY_BYTES } from '../../shared/security'
-import { bills, debts, expenses, goalContributions, goals, incomes, profiles } from '../db/schema'
-import { content, mapBill, mapDebt, mapExpense, mapGoal, mapIncome } from '../utils/mappers'
+import { accounts, bills, debts, expenses, goalContributions, goals, incomes, profiles } from '../db/schema'
+import { content, mapAccount, mapBill, mapDebt, mapExpense, mapGoal, mapIncome } from '../utils/mappers'
 
 const CHUNK = 200
 const chunks = <T>(a: T[], n = CHUNK) => Array.from({ length: Math.ceil(a.length / n) }, (_, i) => a.slice(i * n, i * n + n))
@@ -13,6 +13,7 @@ const TABLES: Record<string, { tbl: any; toDb: (userId: string, r: any) => any; 
   expenses: { tbl: expenses, toApi: r => mapExpense(r), toDb: (userId, r) => ({ userId, id: r.id, label: r.label, amount: r.amount, category: r.category, date: r.date, debtId: r.debtId, billId: r.billId }) },
   debts: { tbl: debts, toApi: r => mapDebt(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, balance: r.balance, original: r.original, minPayment: r.minPayment, apr: r.apr }) },
   bills: { tbl: bills, toApi: r => mapBill(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, amount: r.amount, category: r.category, frequency: r.every, nextDue: r.nextDue, anchorDay: r.anchorDay, auto: r.auto, debtId: r.debtId }) },
+  accounts: { tbl: accounts, toApi: r => mapAccount(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, kind: r.kind, balance: r.balance, color: r.color, rate: r.rate }) },
   goals: { tbl: goals, toApi: (r, contribs) => mapGoal(r, contribs), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, target: r.target, icon: r.icon, color: r.color, deadline: r.deadline }) },
 }
 
