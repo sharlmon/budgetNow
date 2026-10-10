@@ -3,7 +3,7 @@
     <!-- While locked nothing behind the lock screen can be focused, tabbed to or read by a screen reader. -->
     <div class="shell" :inert="locked || undefined" :aria-hidden="locked || undefined">
       <main v-if="syncReady"><slot /></main>
-      <main v-else class="boot"><div class="spin" /></main>
+      <BootScreen v-else />
       <TabBar />
       <AddSheet />
       <Toast />
@@ -23,7 +23,5 @@ useSeoMeta({ robots: 'noindex, nofollow' })
 </script>
 
 <style>
-.boot { display:grid; place-items:center; }
-.spin { width:34px; height:34px; border-radius:50%; border:4px solid var(--tint-accent2); border-top-color:var(--accent); animation:spin .8s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
+
 </style>
