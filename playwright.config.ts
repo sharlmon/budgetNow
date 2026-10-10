@@ -13,7 +13,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
   timeout: 90_000,
-  expect: { timeout: 10_000 },
+  expect: { timeout: 15_000 }, // the first request to each page also compiles it in the dev server
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${port}`,
@@ -28,6 +28,6 @@ export default defineConfig({
     url: `http://localhost:${port}/api/state`,
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,
-    env: { DEV_AUTH_BYPASS: '1', RATE_LIMIT_MULTIPLIER: '50', NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS: '400', NUXT_PUBLIC_TOAST_MS: '30000', PGLITE_DIR: join(tmpdir(), `budgetnow-e2e-${process.pid}`) },
+    env: { DEV_AUTH_BYPASS: '1', RATE_LIMIT_MULTIPLIER: '50', NUXT_PUBLIC_UPDATE_CHECK_DELAY_MS: '400', NUXT_PUBLIC_TOAST_MS: '30000', CRON_SECRET: 'test-cron-secret-0123456789', PUSH_DRY_RUN: '1', NUXT_PUBLIC_VAPID_PUBLIC_KEY: 'BFnzOl3-oF4xCshRG06WcFsXZY0acTPz8pwjOtBYZ7_Z0WKqBF6SYKGpRwHTM0-M2bFeOk3aXkjfPAnjSXNbnrg', PGLITE_DIR: join(tmpdir(), `budgetnow-e2e-${process.pid}`) },
   },
 })

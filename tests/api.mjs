@@ -190,6 +190,88 @@ ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk up
 // account deletion: removes everything for that user only
 const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u, 'x-requested-with': 'budgetnow', 'x-confirm': 'delete-my-account', 'x-forwarded-for': ipAddr() } }).then(r => r.status)
 
+// bill reminders (the server is started with PUSH_DRY_RUN=1 and CRON_SECRET, so nothing is really sent)
+{
+  const CRON = process.env.CRON_SECRET || 'test-cron-secret-0123456789'
+  const cron = (token) => fetch(B + '/cron/reminders', { headers: { ...(token === undefined ? {} : { authorization: 'Bearer ' + token }), 'x-forwarded-for': ipAddr() } }).then(async r => ({ s: r.status, j: await r.json().catch(() => null) }))
+  const push = (u, path, body) => call('/push/' + path, u, body)
+  const ep = (name) => 'https://fcm.googleapis.com/fcm/send/' + name + '-' + Date.now()
+  const keys = { p256dh: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', auth: 'tBHItJI5svbpez7KI4CCXg' }
+  const sub = (endpoint, over = {}) => ({ endpoint, keys, timeZone: 'UTC', daysBefore: 1, detail: 'names', ...over })
+  const dayOffset = (n) => { const d = new Date(Date.now() + n * 86_400_000); return d.toISOString().slice(0, 10) } // today and later in UTC
+  const dueBill = (id, n) => ({ id, name: 'Rent ' + id, amount: 1000, category: 'needs', every: 'month', nextDue: dayOffset(n), anchorDay: Number(dayOffset(n).slice(8)), auto: false })
+  const dana = 'user_dana_' + Date.now(), eli = 'user_eli_' + Date.now()
+
+  // subscribing and its checks
+  const e1 = ep('dana1')
+  let x = await push(dana, 'subscribe', sub(e1))
+  ok(x.s === 200, 'a device can turn on reminders')
+  x = await call('/push/subscription?endpoint=' + encodeURIComponent(e1), dana)
+  ok(x.s === 200 && x.j.daysBefore === 1 && x.j.detail === 'names' && x.j.timeZone === 'UTC', "the device's choices can be read back")
+  x = await push(dana, 'subscribe', sub(e1, { daysBefore: 3, detail: 'full' }))
+  x = await call('/push/subscription?endpoint=' + encodeURIComponent(e1), dana)
+  ok(x.j.daysBefore === 3 && x.j.detail === 'full', 'subscribing again with new choices updates them (no duplicate)')
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(e1), eli)).s === 404, "another person cannot see or use someone else's device")
+  const rejects = async (m, body) => { const y = await push(dana, 'subscribe', body); ok(y.s === 400, `rejects ${m} -> ${y.s}`) }
+  await rejects('a plain http address', sub('http://fcm.googleapis.com/fcm/send/x'))
+  await rejects('an address that is not a push service', sub('https://evil.example.com/hook'))
+  await rejects('an internal address', sub('https://127.0.0.1/fcm/send/x'))
+  await rejects('a look-alike host', sub('https://fcm.googleapis.com.evil.com/x'))
+  await rejects('a host with credentials', sub('https://user:pw@fcm.googleapis.com/x'))
+  await rejects('a custom port', sub('https://fcm.googleapis.com:8443/x'))
+  await rejects('an unknown time zone', sub(ep('tz'), { timeZone: 'Nowhere/Land' }))
+  await rejects('too many days before', sub(ep('d'), { daysBefore: 9 }))
+  await rejects('an unknown detail level', sub(ep('dt'), { detail: 'everything' }))
+  await rejects('malformed keys', sub(ep('k'), { keys: { p256dh: '<script>', auth: 'x' } }))
+  { const y = await call('/push/subscribe', dana, { endpoint: ep('big'), keys, timeZone: 'UTC', daysBefore: 1, detail: 'names', junk: 'x'.repeat(5000) }); ok(y.s === 413, `rejects an oversized request -> ${y.s}`) }
+
+  // turning it off
+  ok((await push(eli, 'unsubscribe', { endpoint: e1 })).s === 200 && (await call('/push/subscription?endpoint=' + encodeURIComponent(e1), dana)).s === 200, "someone else cannot turn a person's reminders off")
+  await push(dana, 'unsubscribe', { endpoint: e1 })
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(e1), dana)).s === 404, 'a person can turn their own reminders off')
+
+  // the device limit
+  for (let i = 0; i < 10; i++) await push(eli, 'subscribe', sub(ep('cap' + i)))
+  ok((await push(eli, 'subscribe', sub(ep('cap-extra')))).s === 409, 'a person can have reminders on at most 10 devices')
+
+  // the test notification
+  const test1 = await push(dana, 'test', {})
+  ok(test1.s === 200 && test1.j.sent === 0, 'the test notification reports how many devices it reached (none yet)')
+  const e2 = ep('dana2'); await push(dana, 'subscribe', sub(e2))
+  const test2 = await push(dana, 'test', {})
+  ok(test2.s === 200 && test2.j.sent === 1, "the test notification reaches the person's device")
+  await push(dana, 'unsubscribe', { endpoint: e2 })
+
+  // the scheduled job
+  ok((await cron(undefined)).s === 401, 'the reminder job refuses a request with no secret')
+  ok((await cron('wrong-secret-wrong-secret')).s === 401, 'the reminder job refuses the wrong secret')
+  ok((await fetch(B + '/cron/reminders', { method: 'POST', headers: { authorization: 'Bearer ' + CRON, 'content-type': 'application/json', 'x-forwarded-for': ipAddr() }, body: '{}' })).status === 403, 'the reminder job cannot be started by a cross-site style POST')
+
+  const fay = 'user_fay_' + Date.now(), gus = 'user_gus_' + Date.now(), hal = 'user_hal_' + Date.now(), ivy = 'user_ivy_' + Date.now()
+  const fayEp = ep('fay'), gusEp = ep('gus-gone'), halEp = ep('hal-fail'), ivyEp = ep('ivy')
+  await sync(fay, [{ t: 'bills', op: 'put', row: dueBill('f1', 0) }]);           await push(fay, 'subscribe', sub(fayEp))                      // due today
+  await sync(gus, [{ t: 'bills', op: 'put', row: dueBill('g1', 0) }]);           await push(gus, 'subscribe', sub(gusEp))                      // device has gone
+  await sync(hal, [{ t: 'bills', op: 'put', row: dueBill('h1', 0) }]);           await push(hal, 'subscribe', sub(halEp))                      // push service failing
+  await sync(ivy, [{ t: 'bills', op: 'put', row: dueBill('i1', 2) }]);           await push(ivy, 'subscribe', sub(ivyEp, { daysBefore: 1 }))   // due in 2 days, wants 1: nothing yet
+  const run1 = await cron(CRON)
+  ok(run1.s === 200 && run1.j.sent >= 1 && run1.j.removed >= 1 && run1.j.failed >= 1, `the job sends to devices with bills due, removes a gone device, and counts a failure -> ${JSON.stringify(run1.j)}`)
+  ok(!('userId' in run1.j) && Object.keys(run1.j).sort().join() === 'checked,failed,removed,sent,skipped', 'the job reports counts only')
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(gusEp), gus)).s === 404, 'a device the push service says is gone is removed')
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(halEp), hal)).s === 200, 'a device whose send failed is kept, to try again')
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(ivyEp), ivy)).s === 200, 'a device with nothing due is left alone')
+  const run2 = await cron(CRON)
+  ok(run2.s === 200 && run2.j.sent === 0, `a second run the same day sends nothing new -> ${JSON.stringify(run2.j)}`)
+  await sync(ivy, [{ t: 'bills', op: 'put', row: dueBill('i1', 1) }])                                                                                  // now due tomorrow, wants 1 day
+  const run3 = await cron(CRON)
+  ok(run3.j.sent === 1, `a bill that comes within the chosen days gets its reminder -> ${JSON.stringify(run3.j)}`)
+
+  // deleting an account removes its devices
+  const delStatus = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u, 'x-requested-with': 'budgetnow', 'x-confirm': 'delete-my-account', 'x-forwarded-for': ipAddr() } }).then(r => r.status)
+  await delStatus(fay)
+  ok((await call('/push/subscription?endpoint=' + encodeURIComponent(fayEp), fay)).s === 404, 'deleting an account removes its reminder devices')
+  for (const u of [dana, eli, gus, hal, ivy]) await delStatus(u)
+}
+
 // linked accounts
 {
   const acct = { id: 'ac1', name: 'M-Pesa', kind: 'mobile', balance: 1250.75, color: '#2fa05a' }

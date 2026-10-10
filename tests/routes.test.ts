@@ -6,7 +6,7 @@ describe('which pages are open to everyone', () => {
     for (const p of ['/', '/privacy', '/terms', '/guides', '/guides/50-30-20-rule', '/sign-in', '/sign-in/factor-one', '/sign-up', '/sign-up/verify']) expect(isOpenPath(p), p).toBe(true)
   })
   it('every private screen needs a sign-in', () => {
-    for (const p of ['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/accounts', '/settings', '/settings/budget', '/settings/account']) expect(isOpenPath(p), p).toBe(false)
+    for (const p of ['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/plan', '/accounts', '/settings', '/settings/budget', '/settings/account']) expect(isOpenPath(p), p).toBe(false)
   })
   it('does not treat a path that only starts with an open name as open', () => {
     for (const p of ['/privacy-secrets', '/termsx', '/guidesabc', '/sign-inn']) expect(isOpenPath(p), p).toBe(false)
