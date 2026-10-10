@@ -1,6 +1,6 @@
 # Weka
 
-A personal budget tracker. Enter your pay and it's split instantly across **Needs / Wants / Savings / Debt** (you can adjust before confirming), then track expenses, debts, savings goals, recurring bills and the accounts where you keep your money (M-Pesa, banks, cash, investments, with balances you enter yourself). A "safe to spend today" number tells you what's left for the day.
+A personal budget tracker. Enter your pay and it's split instantly across **Needs / Wants / Savings / Debt** (you can adjust before confirming), then track expenses, debts, savings goals, recurring bills and the accounts where you keep your money (M-Pesa, banks, cash, investments, with balances you enter yourself). Income, expenses, bills and debt payments can be tied to an account, which Weka then keeps up to date. A "safe to spend today" number tells you what's left for the day.
 
 **Stack:** Nuxt 4 (client-rendered) · Nuxt server routes on Vercel · Neon Postgres via Drizzle ORM · Clerk authentication · installable PWA.
 

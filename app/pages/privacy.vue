@@ -12,7 +12,7 @@
     <h3>Account information</h3>
     <p>When you sign up we receive your name, email address and profile photo, plus the sign-in method you use. If you choose "Continue with Google", Google shares your name, email address and profile photo with our sign-in provider. Passwords, where used, are handled by our sign-in provider, not stored by us.</p>
     <h3>Budget data you enter</h3>
-    <p>Income entries (amount, label, date and how it was split), expenses, debts, savings goals and contributions, recurring bills, the accounts you add (a name, a type such as mobile money, bank or cash, the balance you enter, and an optional yearly return you expect), your chosen currency, and a display name. This is the core of the service and it is stored against your account.</p>
+    <p>Income entries (amount, label, date and how it was split), expenses, debts, savings goals and contributions, recurring bills, the accounts you add (a name, a type such as mobile money, bank or cash, the balance you enter, and an optional yearly return you expect, plus which account each income, expense and bill used), your chosen currency, and a display name. This is the core of the service and it is stored against your account.</p>
     <h3>Technical data</h3>
     <p>Like any website, our hosting and sign-in providers process your IP address, browser and device type, and request logs. This is used to deliver the service, keep it secure and prevent abuse.</p>
     <h3>What we do not collect</h3>

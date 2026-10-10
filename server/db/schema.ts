@@ -32,6 +32,8 @@ export const incomes = pgTable('incomes', {
   wants: money('wants'),
   savings: money('savings'),
   debt: money('debt'),
+  // The account the money landed in (optional). Not a foreign key: deleting an account keeps the history.
+  accountId: text('account_id'),
   rev: rev(),
   ...stamps,
 }, t => [
@@ -48,6 +50,7 @@ export const expenses = pgTable('expenses', {
   date: date('date', { mode: 'string' }).notNull(),
   debtId: text('debt_id'),
   billId: text('bill_id'),
+  accountId: text('account_id'),
   rev: rev(),
   ...stamps,
 }, t => [
@@ -103,6 +106,7 @@ export const bills = pgTable('bills', {
   anchorDay: integer('anchor_day').notNull(),
   auto: boolean('auto').notNull().default(false),
   debtId: text('debt_id'),
+  accountId: text('account_id'),
   rev: rev(),
   ...stamps,
 }, t => [

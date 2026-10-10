@@ -2,6 +2,16 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.2.0 - 2026-10-10
+
+- The home screen now starts with your accounts, then quick actions, bills that need attention, and your budget
+- Choose the account when you add income or an expense, and Weka updates its balance
+- Pay a bill or a debt from an account; if the account is short you are told by how much
+- Give a bill its own account, so one tap pays it from the right place
+- Activity shows which account each entry used
+- Two devices changing the same account balance are combined instead of clashing
+- Backups carry each entry's account
+
 ## 1.1.0 - 2026-10-10
 
 - New Accounts screen: add M-Pesa, your bank, PayPal, cash and investments and see the total in one wallet

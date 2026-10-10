@@ -46,22 +46,48 @@
         <button class="btn soft sm" @click="pay[d.id] = Math.min(d.minPayment || d.balance, d.balance)">Min</button>
         <button class="btn sm" :disabled="!(pay[d.id] > 0)" @click="payDebt(d)">Pay</button>
       </div>
+      <div v-if="d.balance > 0 && state.accounts.length" class="row from">
+        <label class="muted sm" :for="'from-' + d.id">Pay from</label>
+        <select :id="'from-' + d.id" class="field" :value="fromOf(d)" @change="payFrom[d.id] = ($event.target as HTMLSelectElement).value">
+          <option value="">No account (just log it)</option>
+          <option v-for="a in state.accounts" :key="a.id" :value="a.id">{{ a.name }} · {{ money(a.balance) }}</option>
+        </select>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const { state, totalDebt, totalMinDebt, addDebt, removeDebt, addExpense } = useBudget()
+const { state, totalDebt, totalMinDebt, addDebt, removeDebt, addExpense, accountShort } = useBudget()
 const adding = ref(false)
 const name = ref(''); const balance = ref(0); const minPayment = ref(0); const apr = ref(0)
 const pay = reactive<Record<string, number>>({})
 const paid = (d: Debt) => { const o = d.original ?? d.balance; return o > 0 ? Math.min(100, ((o - d.balance) / o) * 100) : 0 }
 function add() { addDebt(name.value.trim(), balance.value, minPayment.value, Math.min(100, apr.value || 0)); showToast(`${name.value.trim()} added`); name.value = ''; balance.value = 0; minPayment.value = 0; apr.value = 0; adding.value = false }
 function setApr(d: Debt, v: number) { if (v > 0) d.apr = Math.min(100, v); else delete d.apr }
-function payDebt(d: Debt) { const amt = Math.min(pay[d.id] ?? 0, d.balance); addExpense(`Payment: ${d.name}`, amt, 'debt', d.id); showToast(`${money(amt)} paid to ${d.name}`); pay[d.id] = 0 }
+// Which account a payment comes from: what was chosen for this debt, else the one used for the last debt payment, else the first account.
+const payFrom = reactive<Record<string, string>>({})
+const LAST = 'bn:lastAccount:debt'
+function fromOf(d: Debt) {
+  if (d.id in payFrom) return payFrom[d.id]
+  let last: string | null = null
+  try { last = localStorage.getItem(LAST) } catch { /* private mode */ }
+  return last === '' ? '' : state.value.accounts.find(a => a.id === last)?.id ?? state.value.accounts[0]?.id ?? ''
+}
+function payDebt(d: Debt) {
+  const amt = Math.min(pay[d.id] ?? 0, d.balance)
+  const from = fromOf(d)
+  const short = accountShort(from || undefined, amt)
+  if (short) { showToast(`${short} Move money in first, or choose another account.`, undefined, { ms: 8000 }); return }
+  addExpense(`Payment: ${d.name}`, amt, 'debt', d.id, undefined, undefined, from || undefined)
+  try { localStorage.setItem(LAST, from) } catch { /* it just will not be remembered */ }
+  const name = from ? state.value.accounts.find(a => a.id === from)?.name : ''
+  showToast(`${money(amt)} paid to ${d.name}${name ? `, taken from ${name}` : ''}`); pay[d.id] = 0
+}
 </script>
 
 <style scoped>
+.from { margin-top:10px; gap:10px; } .from .field { flex:1; padding:10px 14px; }
 .hero { position:relative; overflow:hidden; background:var(--grad); color:#fff; border-radius:26px; padding:22px; box-shadow:0 18px 34px -16px rgba(239,106,58,.85), inset 0 1px 0 rgba(255,255,255,.35); }
 .hero::before { content:''; position:absolute; width:220px; height:220px; right:-70px; top:-90px; border-radius:50%; background:rgba(255,255,255,.14); }
 .hero::after { content:''; position:absolute; width:150px; height:150px; right:30px; bottom:-90px; border-radius:50%; background:rgba(255,255,255,.1); }

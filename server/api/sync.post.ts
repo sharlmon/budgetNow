@@ -9,10 +9,10 @@ const chunks = <T>(a: T[], n = CHUNK) => Array.from({ length: Math.ceil(a.length
 
 // How each synced table maps between the app's row shape and its database columns.
 const TABLES: Record<string, { tbl: any; toDb: (userId: string, r: any) => any; toApi: (r: any, contribs: any[]) => any }> = {
-  incomes: { tbl: incomes, toApi: r => mapIncome(r), toDb: (userId, r) => ({ userId, id: r.id, label: r.label, amount: r.amount, date: r.date, ...r.split }) },
-  expenses: { tbl: expenses, toApi: r => mapExpense(r), toDb: (userId, r) => ({ userId, id: r.id, label: r.label, amount: r.amount, category: r.category, date: r.date, debtId: r.debtId, billId: r.billId }) },
+  incomes: { tbl: incomes, toApi: r => mapIncome(r), toDb: (userId, r) => ({ userId, id: r.id, label: r.label, amount: r.amount, date: r.date, accountId: r.accountId, ...r.split }) },
+  expenses: { tbl: expenses, toApi: r => mapExpense(r), toDb: (userId, r) => ({ userId, id: r.id, label: r.label, amount: r.amount, category: r.category, date: r.date, debtId: r.debtId, billId: r.billId, accountId: r.accountId }) },
   debts: { tbl: debts, toApi: r => mapDebt(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, balance: r.balance, original: r.original, minPayment: r.minPayment, apr: r.apr }) },
-  bills: { tbl: bills, toApi: r => mapBill(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, amount: r.amount, category: r.category, frequency: r.every, nextDue: r.nextDue, anchorDay: r.anchorDay, auto: r.auto, debtId: r.debtId }) },
+  bills: { tbl: bills, toApi: r => mapBill(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, amount: r.amount, category: r.category, frequency: r.every, nextDue: r.nextDue, anchorDay: r.anchorDay, auto: r.auto, debtId: r.debtId, accountId: r.accountId }) },
   accounts: { tbl: accounts, toApi: r => mapAccount(r), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, kind: r.kind, balance: r.balance, color: r.color, rate: r.rate }) },
   goals: { tbl: goals, toApi: (r, contribs) => mapGoal(r, contribs), toDb: (userId, r) => ({ userId, id: r.id, name: r.name, target: r.target, icon: r.icon, color: r.color, deadline: r.deadline }) },
 }

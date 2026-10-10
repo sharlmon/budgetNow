@@ -18,13 +18,13 @@ test('adding money in splits it, confirms, saves to the account and survives a r
   expect(values).toEqual([1600, 960, 640, 0]) // 50/30/20 of 3200, no debts
   await page.getByRole('button', { name: 'Looks good, confirm' }).click()
 
-  await expect(page.locator('.wallet')).toContainText('$3,200')
+  await expect(page.locator('.budgetbal')).toContainText('$3,200')
   await expect.poll(async () => (await getState(request)).incomes.length).toBe(1)
   const income = (await getState(request)).incomes[0]
   expect(income).toMatchObject({ label: 'October salary', amount: 3200, split: { needs: 1600, wants: 960, savings: 640, debt: 0 }, rev: 1 })
 
   await page.reload()
-  await expect(page.locator('.wallet')).toContainText('$3,200')
+  await expect(page.locator('.budgetbal')).toContainText('$3,200')
 })
 
 test('dragging one category rebalances the others so the total never drifts', async ({ page }) => {
