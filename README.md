@@ -91,3 +91,22 @@ Open copies of the app learn about a new deployment from `/version.json` (never 
 
 ## Roadmap
 See GitHub Issues.
+
+## Bill reminders (browser push)
+
+Reminders are push notifications sent by a daily scheduled job (`vercel.json`, 05:00 UTC, which is 08:00 in Kenya). Nothing is sent
+until you set four environment variables in Vercel (Project, Settings, Environment Variables) and redeploy:
+
+| Variable | What it is |
+|---|---|
+| `NUXT_PUBLIC_VAPID_PUBLIC_KEY` | The public key (safe to expose) |
+| `VAPID_PRIVATE_KEY` | The matching private key. **Secret.** |
+| `VAPID_SUBJECT` | A contact address such as `mailto:you@example.com` |
+| `CRON_SECRET` | A random string of at least 16 characters. Vercel sends it to the cron job, and only a request carrying it can run the job. |
+
+Generate the key pair on your own machine with `node scripts/vapid-keys.mjs`. Then open **Settings, Bill reminders** in the app, turn
+reminders on and press **Send a test reminder**.
+
+- On iPhone and iPad, notifications only work once Weka is added to the Home Screen (iOS 16.4 or later).
+- A free Vercel plan allows one scheduled run a day, which is why the time is fixed. A paid plan could run it hourly.
+- Tests run the server with `PUSH_DRY_RUN=1` (development only, ignored in production) and a test `CRON_SECRET`.

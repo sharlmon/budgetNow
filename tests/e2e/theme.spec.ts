@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { debt, getState, reset, sync } from './helpers'
 
-const SCREENS = ['/home', '/activity', '/analytics', '/plan', '/goals', '/bills', '/debts', '/accounts', '/settings', '/settings/budget', '/settings/appearance', '/settings/security', '/settings/data', '/settings/account', '/settings/about']
+const SCREENS = ['/home', '/activity', '/analytics', '/plan', '/goals', '/bills', '/debts', '/accounts', '/settings', '/settings/budget', '/settings/appearance', '/settings/security', '/settings/data', '/settings/account', '/settings/about', '/settings/reminders']
 const today = new Date().toLocaleDateString('sv')
 const daysFromNow = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toLocaleDateString('sv') }
 
