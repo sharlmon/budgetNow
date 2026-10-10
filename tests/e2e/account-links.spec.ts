@@ -5,6 +5,7 @@ const today = () => new Date().toLocaleDateString('sv')
 const acct = (id: string, name: string, balance: number, kind = 'mobile', color = '#2fa05a') => ({ t: 'accounts', op: 'put', row: { id, name, kind, balance, color } })
 const bill = (id: string, name: string, amount: number, accountId?: string, extra: any = {}) =>
   ({ t: 'bills', op: 'put', row: { id, name, amount, category: 'needs', every: 'month', nextDue: today(), anchorDay: new Date().getDate(), auto: false, ...(accountId ? { accountId } : {}), ...extra } })
+const accountChip = (page: any, name: RegExp | string) => page.getByRole('group', { name: 'Account' }).getByRole('button', { name })
 const balances = async (request: any) => Object.fromEntries((await getState(request)).accounts.map((a: any) => [a.id, a.balance]))
 
 test.beforeEach(async ({ request }) => { await reset(request) })
@@ -14,7 +15,7 @@ test('income goes into the chosen account, and the choice is saved with it', asy
   await page.goto('/home')
   await openAdd(page)
   await keypad(page, '2000')
-  await page.locator('select[aria-label="Account"]').selectOption('b')
+  await accountChip(page, /Equity/).click()
   await expect(page.locator('.hint').filter({ hasText: 'Equity will have' })).toContainText('7,000')
   await page.getByRole('button', { name: 'See my breakdown' }).click()
   await page.getByRole('button', { name: 'Looks good, confirm' }).click()
@@ -30,7 +31,7 @@ test('an expense comes out of the chosen account, and "No account" leaves balanc
   await openAdd(page)
   await page.locator('.seg2 button, .seg button').filter({ hasText: 'Expense' }).first().click()
   await keypad(page, '250')
-  await expect(page.locator('select[aria-label="Account"]')).toHaveValue('a') // a lone account is preselected
+  await expect(accountChip(page, /M-Pesa/)).toHaveAttribute('aria-pressed', 'true') // a lone account is preselected
   await page.getByRole('button', { name: 'Add Transaction', exact: true }).click()
   await expect.poll(async () => (await balances(request)).a).toBe(750)
   expect((await getState(request)).expenses[0].accountId).toBe('a')
@@ -38,7 +39,7 @@ test('an expense comes out of the chosen account, and "No account" leaves balanc
   await openAdd(page)
   await page.locator('.seg2 button, .seg button').filter({ hasText: 'Expense' }).first().click()
   await keypad(page, '100')
-  await page.locator('select[aria-label="Account"]').selectOption('')
+  await accountChip(page, 'No account').click()
   await page.getByRole('button', { name: 'Add Transaction', exact: true }).click()
   await expect.poll(async () => (await getState(request)).expenses.length).toBe(2)
   expect((await balances(request)).a).toBe(750)
@@ -53,7 +54,7 @@ test('an expense the account cannot cover is blocked until another account or no
   await keypad(page, '250')
   await expect(page.getByRole('alert').filter({ hasText: 'short by' })).toContainText('150')
   await expect(page.getByRole('button', { name: 'Add Transaction', exact: true })).toBeDisabled()
-  await page.locator('select[aria-label="Account"]').selectOption('')
+  await accountChip(page, 'No account').click()
   await expect(page.getByRole('button', { name: 'Add Transaction', exact: true })).toBeEnabled()
 })
 

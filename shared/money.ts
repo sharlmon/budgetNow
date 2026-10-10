@@ -28,3 +28,14 @@ export function keypadSymbol(currency: string): string {
   const s = currencySymbol(currency)
   return /[A-Za-z]$/.test(s) ? `${s} ` : s
 }
+
+/** A short form for tight places: 850, 38K, 1.5K, 2.4M. Rounds; never shows a currency. */
+export function compactNumber(n: number): string {
+  const v = Number.isFinite(n) ? Math.abs(n) : 0
+  const sign = n < 0 ? '-' : ''
+  const trim = (x: number) => String(Math.round(x * 10) / 10).replace(/\.0$/, '')
+  if (v >= 1e9) return `${sign}${trim(v / 1e9)}B`
+  if (v >= 1e6) return `${sign}${trim(v / 1e6)}M`
+  if (v >= 1e3) return `${sign}${trim(v / 1e3)}K`
+  return `${sign}${Math.round(v)}`
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_CURRENCY, currencySymbol, formatMoney, keypadSymbol } from '../app/utils/money'
+import { DEFAULT_CURRENCY, compactNumber, currencySymbol, formatMoney, keypadSymbol } from '../app/utils/money'
 
 const nbsp = ' '
 
@@ -44,4 +44,13 @@ describe('symbols', () => {
   it('keypadSymbol adds a space after letter symbols only', () => {
     expect(keypadSymbol('KES')).toBe('KSh '); expect(keypadSymbol('USD')).toBe('$'); expect(keypadSymbol('EUR')).toBe('€')
   })
+})
+
+describe('compactNumber', () => {
+  it('writes thousands, millions and billions briefly', () => {
+    expect(compactNumber(38000)).toBe('38K'); expect(compactNumber(1500)).toBe('1.5K'); expect(compactNumber(2400000)).toBe('2.4M'); expect(compactNumber(3e9)).toBe('3B')
+  })
+  it('leaves small numbers whole and rounds them', () => { expect(compactNumber(850)).toBe('850'); expect(compactNumber(849.6)).toBe('850'); expect(compactNumber(0)).toBe('0') })
+  it('drops a trailing .0 and rounds to one decimal', () => { expect(compactNumber(2000)).toBe('2K'); expect(compactNumber(1249)).toBe('1.2K'); expect(compactNumber(1251)).toBe('1.3K') })
+  it('handles negatives and bad input', () => { expect(compactNumber(-38000)).toBe('-38K'); expect(compactNumber(NaN)).toBe('0'); expect(compactNumber(Infinity)).toBe('0') })
 })
