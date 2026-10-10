@@ -45,7 +45,8 @@ const toggle = (page: Page) => page.getByRole('switch', { name: 'Remind me about
 
 test('where reminders cannot work, the screen says why instead of offering a switch that does nothing', async ({ page }) => {
   await page.goto('/settings/reminders') // no service worker in the test server
-  await expect(page.getByText("Reminders aren't ready on this device yet")).toBeVisible({ timeout: 15_000 })
+  // Which message depends on the browser: some test browsers have no push API at all, others have it but no worker to use it.
+  await expect(page.getByText(/Reminders aren't ready on this device yet|This browser can't show reminders/)).toBeVisible({ timeout: 15_000 })
   await expect(toggle(page)).toHaveCount(0)
 
   await fakePush(page, { apple: true })
