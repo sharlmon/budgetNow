@@ -2,6 +2,14 @@
 
 All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
 
+## 1.5.0 - 2026-10-11
+
+- Plan now tells you whether your accounts cover the bills due in the next 14, 30 or 60 days, and names the first bill they will not cover
+- Activity can be searched and filtered by category, account and day, with a spend-by-day strip and each day's total pinned as you scroll
+- Analytics shows whether you are on pace this month, how each category changed from last month, and your biggest spends
+- Analytics also splits spending by account and gives a few plain-language observations
+- Long entry details no longer run under the amount on small phones
+
 ## 1.4.0 - 2026-10-11
 
 - Get a notification on the morning a bill is due, even when Weka is closed

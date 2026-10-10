@@ -5,6 +5,18 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.5.0',
+    date: '2026-10-11',
+    title: 'Plan, Activity and Analytics, redesigned',
+    notes: [
+      'Plan now tells you whether your accounts cover the bills due in the next 14, 30 or 60 days, and names the first bill they will not cover',
+      'Activity can be searched and filtered by category, account and day, with a spend-by-day strip and each day\'s total pinned as you scroll',
+      'Analytics shows whether you are on pace this month, how each category changed from last month, and your biggest spends',
+      'Analytics also splits spending by account and gives a few plain-language observations',
+      'Long entry details no longer run under the amount on small phones',
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-10-11',
     title: 'Bill reminders',
