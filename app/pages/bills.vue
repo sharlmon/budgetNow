@@ -27,6 +27,10 @@
         <Seg v-model="every" :options="[{ value: 'week', label: 'Weekly' }, { value: 'month', label: 'Monthly' }, { value: 'year', label: 'Yearly' }]" />
         <label class="muted sm">Next due date</label>
         <input v-model="nextDue" type="date" class="field" style="margin-top:-6px" />
+        <template v-if="state.accounts.length">
+          <label class="muted sm" for="bill-acct">Paid from</label>
+          <select id="bill-acct" v-model="accountId" class="field" style="margin-top:-6px"><option value="">No account (just log it)</option><option v-for="a in state.accounts" :key="a.id" :value="a.id">{{ a.name }} · {{ money(a.balance) }}</option></select>
+        </template>
         <div class="row" style="justify-content:space-between">
           <div><strong class="sm">Auto-log when due</strong><div class="muted sm">Records it when you open the app.</div></div>
           <Toggle v-model="auto" />
@@ -58,7 +62,7 @@ const { state, addBill } = useBudget()
 const adding = ref(false)
 const kinds = CATEGORIES.filter(c => c.key !== 'savings')
 const name = ref(''); const amount = ref(0); const category = ref<'needs' | 'wants' | 'debt'>('needs')
-const debtId = ref(''); const every = ref('month'); const nextDue = ref(today()); const auto = ref(false)
+const accountId = ref(''); const debtId = ref(''); const every = ref('month'); const nextDue = ref(today()); const auto = ref(false)
 
 const sorted = computed(() => [...state.value.bills].sort((a, b) => a.nextDue.localeCompare(b.nextDue)))
 const attention = computed(() => sorted.value.filter(b => daysBetween(today(), b.nextDue) <= 7))
@@ -67,9 +71,9 @@ const next30 = computed(() => state.value.bills.reduce((s, b) => s + occurrences
 const monthly = computed(() => state.value.bills.reduce((s, b) => s + monthlyEquivalent(b.amount, b.every), 0))
 
 function add() {
-  addBill({ name: name.value.trim(), amount: amount.value, category: category.value, every: every.value as Every, nextDue: nextDue.value, auto: auto.value, debtId: debtId.value || undefined })
+  addBill({ name: name.value.trim(), amount: amount.value, category: category.value, every: every.value as Every, nextDue: nextDue.value, auto: auto.value, debtId: debtId.value || undefined, accountId: accountId.value || undefined })
   showToast(`${name.value.trim()} added`)
-  name.value = ''; amount.value = 0; category.value = 'needs'; debtId.value = ''; every.value = 'month'; nextDue.value = today(); auto.value = false; adding.value = false
+  name.value = ''; amount.value = 0; category.value = 'needs'; debtId.value = ''; accountId.value = ''; every.value = 'month'; nextDue.value = today(); auto.value = false; adding.value = false
 }
 </script>
 
