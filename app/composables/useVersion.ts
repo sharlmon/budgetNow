@@ -33,6 +33,8 @@ export function useVersion() {
   /** Fetches the new files and reloads into them. */
   async function applyUpdate() {
     try { await (await navigator.serviceWorker?.getRegistration())?.update() } catch { /* the reload still fetches the newest page */ }
+    // The app opens from a saved copy of its first page, so drop the saved pages first; otherwise this reload could land on the old one.
+    try { for (const k of await caches.keys()) await caches.delete(k) } catch { /* no saved pages to drop */ }
     location.reload()
   }
 

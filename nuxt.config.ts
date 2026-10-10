@@ -13,6 +13,8 @@ const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://budget-now-psi.vercel.app')).replace(/\/$/, '')
 const isProd = process.env.NODE_ENV === 'production'
 // A strict CSP would break `nuxt dev` (hot reload uses inline scripts and websockets), so it is applied to builds only.
+// Start connecting to Clerk's servers as soon as the page loads, instead of when its script asks for them.
+const clerkHost = clerkHostFromKey(process.env.NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 const csp = isProd ? { 'Content-Security-Policy': buildCsp(clerkHostFromKey(process.env.NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY)) } : {}
 const devAuth = process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_BYPASS === '1'
 
@@ -45,6 +47,8 @@ export default defineNuxtConfig({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
     } },
   },
+  // Shown from the very first byte while the app loads on the private (client-rendered) screens.
+  spaLoadingTemplate: true,
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     baseURL: base,
@@ -62,6 +66,7 @@ export default defineNuxtConfig({
       script: [{ innerHTML: THEME_BOOT_SCRIPT, tagPosition: 'head' }, { innerHTML: ENTRY_BOOT_SCRIPT, tagPosition: 'head' }],
       link: [
         { rel: 'manifest', href: `${base}manifest.webmanifest` },
+        ...(clerkHost ? [{ rel: 'preconnect', href: `https://${clerkHost}`, crossorigin: '' as const }] : []),
         // Browser tab icon: a circle (SVG scales crisply; PNGs are the fallback). The home-screen icons below stay square, because phones round those themselves.
         { rel: 'icon', type: 'image/svg+xml', href: `${base}icons/favicon.svg` },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: `${base}icons/favicon-32.png` },

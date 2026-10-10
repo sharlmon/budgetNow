@@ -5,6 +5,16 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.2.1',
+    date: '2026-10-10',
+    title: 'Faster start',
+    notes: [
+      'A Weka loading screen appears at once instead of a blank page',
+      'The app opens straight from your saved data while it checks your sign-in in the background',
+      'Screens open instantly from this device, even on a slow connection',
+    ],
+  },
+  {
     version: '1.2.0',
     date: '2026-10-10',
     title: 'Accounts at the top, and linked to your money',

@@ -70,3 +70,14 @@ test('public pages are real HTML for search engines and AI crawlers (no JavaScri
   const sitemap = await (await request.get('/sitemap.xml')).text()
   expect(sitemap).toContain('/privacy'); expect(sitemap).not.toContain('/settings')
 })
+
+test('private screens ship a loading screen in their first HTML, and the public pages do not need one', async ({ request }) => {
+  for (const p of ['/home', '/accounts', '/settings']) {
+    const html = await (await request.get(p)).text()
+    expect(html, p).toContain('Loading Weka')
+    expect(html, p).toContain('wk-splash')
+  }
+  const landing = await (await request.get('/')).text()
+  expect(landing).not.toContain('wk-splash')
+  expect(landing).toContain('Bills on autopilot') // the landing page is still real, server-rendered HTML
+})
