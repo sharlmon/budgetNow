@@ -37,11 +37,12 @@ const saveHint = () => { try { localStorage.setItem(HINT, JSON.stringify({ on: r
 export function useReminders() {
   const configured = computed(() => !!useRuntimeConfig().public.vapidPublicKey)
 
-  /** The service worker registration, waiting a few seconds for it on a first visit. */
+  /** The service worker registration, waiting a few seconds for it on a first visit. Never waits forever, whatever the browser does. */
   async function registration(): Promise<ServiceWorkerRegistration | null> {
-    const existing = await navigator.serviceWorker.getRegistration()
+    const within = <T>(p: Promise<T>) => Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), 4000))])
+    const existing = await within(navigator.serviceWorker.getRegistration()).catch(() => null)
     if (existing) return existing
-    return Promise.race([navigator.serviceWorker.ready, new Promise<null>(r => setTimeout(() => r(null), 4000))])
+    return within(navigator.serviceWorker.ready).catch(() => null)
   }
 
   const body = (sub: PushSubscription) => {
@@ -51,6 +52,10 @@ export function useReminders() {
 
   /** Works out the state from the browser and the server, and heals the case where only one of them remembers this device. */
   async function refresh() {
+    // Whatever goes wrong while asking the browser, the screen must settle on an answer instead of staying on "Checking".
+    try { await check() } catch { reminderState.value = 'unavailable' }
+  }
+  async function check() {
     const { supported, appleNeedsInstall } = reminderSupport()
     if (appleNeedsInstall) { reminderState.value = 'needs-install'; return }
     if (!supported) { reminderState.value = 'unsupported'; return }
