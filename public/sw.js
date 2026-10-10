@@ -4,7 +4,7 @@
 // - Other pages (landing, legal, guides) are network-first so updates arrive; everything else is cache-first.
 const CACHE = 'weka-v6'
 const SCOPE = self.registration.scope
-const APP_SCREENS = ['home', 'activity', 'analytics', 'goals', 'bills', 'debts', 'accounts', 'settings']
+const APP_SCREENS = ['home', 'activity', 'analytics', 'plan', 'goals', 'bills', 'debts', 'accounts', 'settings']
 const isAppScreen = (url) => APP_SCREENS.some(p => url.pathname === new URL(SCOPE).pathname + p || url.pathname.startsWith(new URL(SCOPE).pathname + p + '/'))
 
 self.addEventListener('install', (e) => {
