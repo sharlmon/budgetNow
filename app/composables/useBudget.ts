@@ -251,12 +251,12 @@ export function useMonthStats(month: Ref<string>) {
 
 export const useSheet = () => useState('sheet', () => ({ open: false, mode: 'income' as 'income' | 'expense' }))
 
-export interface Txn { id: string; kind: 'income' | 'expense'; title: string; amount: number; date: string; category?: Category }
+export interface Txn { id: string; kind: 'income' | 'expense'; title: string; amount: number; date: string; category?: Category; accountId?: string }
 export function useTransactions() {
   const { state } = useBudget()
   return computed<Txn[]>(() => [
-    ...state.value.incomes.map(i => ({ id: i.id, kind: 'income' as const, title: i.label || 'Income', amount: i.amount, date: i.date })),
-    ...state.value.expenses.map(e => ({ id: e.id, kind: 'expense' as const, title: e.label || catMeta(e.category).label, amount: e.amount, date: e.date, category: e.category })),
+    ...state.value.incomes.map(i => ({ id: i.id, kind: 'income' as const, title: i.label || 'Income', amount: i.amount, date: i.date, accountId: i.accountId })),
+    ...state.value.expenses.map(e => ({ id: e.id, kind: 'expense' as const, title: e.label || catMeta(e.category).label, amount: e.amount, date: e.date, category: e.category, accountId: e.accountId })),
   ].sort((a, b) => b.date.localeCompare(a.date)))
 }
 
