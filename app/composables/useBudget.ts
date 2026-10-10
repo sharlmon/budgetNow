@@ -69,12 +69,15 @@ export function useBudget() {
     const i = state.value.expenses.findIndex(e => e.id === id)
     if (i < 0) return () => {}
     const [e] = state.value.expenses.splice(i, 1)
-    const debt = e?.debtId ? state.value.debts.find(x => x.id === e!.debtId) : undefined
+    const debtOf = () => (e?.debtId ? state.value.debts.find(x => x.id === e.debtId) : undefined)
+    const debt = debtOf()
     if (debt && e) debt.balance = round(debt.balance + e.amount)
+    // Undo looks the debt up again: a sync can replace the row objects in the meantime, so a held reference would be stale.
     return () => {
       if (!e) return
       state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, restored(e))
-      if (debt) debt.balance = Math.max(0, round(debt.balance - e.amount))
+      const d = debtOf()
+      if (d) d.balance = Math.max(0, round(d.balance - e.amount))
     }
   }
   function removeIncome(id: string) {
@@ -135,10 +138,15 @@ export function useBudget() {
     const from = state.value.accounts.find(a => a.id === fromId), to = state.value.accounts.find(a => a.id === toId)
     const error = moveProblem(from, to, amount, fee)
     if (error || !from || !to) return { error: error ?? 'Pick both accounts.' }
-    const before = { from: from.balance, to: to.balance }
     from.balance = round(from.balance - amount - fee)
     to.balance = round(to.balance + amount)
-    return { undo: () => { from.balance = before.from; to.balance = before.to } }
+    // Undo looks the accounts up again and reverses the move (rather than restoring old balances), because a sync can replace
+    // the row objects in the meantime and the person may have edited a balance since.
+    return { undo: () => {
+      const f = state.value.accounts.find(a => a.id === fromId), t = state.value.accounts.find(a => a.id === toId)
+      if (f) f.balance = round(f.balance + amount + fee)
+      if (t) t.balance = round(t.balance - amount)
+    } }
   }
 
   function addBill(b: Omit<Bill, 'id' | 'anchorDay'>) {
@@ -159,7 +167,8 @@ export function useBudget() {
     b.nextDue = addPeriod(due, b.every, b.anchorDay)
     return () => {
       if (expenseId) removeExpense(expenseId)
-      b.nextDue = due
+      const current = state.value.bills.find(x => x.id === id) // looked up again: a sync may have replaced the row since
+      if (current) current.nextDue = due
     }
   }
   /** Logs every due occurrence of bills set to auto-log. Returns how many expenses were added. */
