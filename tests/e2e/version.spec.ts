@@ -1,5 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 import { reset } from './helpers'
+import { readFileSync } from 'node:fs'
+import { RELEASES } from '../../shared/releases'
+
+// Tests follow the release in package.json, so a version bump never breaks them.
+const CURRENT: string = JSON.parse(readFileSync('package.json', 'utf8')).version
+const NEWER = '99.0.0'
 
 test.beforeEach(async ({ request }) => { await reset(request) })
 
@@ -12,7 +18,7 @@ test('the server reports its version and is never cached', async ({ request }) =
   expect(res.ok()).toBeTruthy()
   expect(res.headers()['cache-control']).toContain('no-store')
   const j = await res.json()
-  expect(j.version).toBe('1.0.0')
+  expect(j.version).toBe(CURRENT)
   expect(j.build).toMatch(/^[0-9a-f]{7}$|^\d{6,}$/)
   const sw = await (await request.get('/sw.js')).text()
   expect(sw).toContain('version.json') // the offline cache must never answer this
@@ -21,9 +27,9 @@ test('the server reports its version and is never cached', async ({ request }) =
 test('Settings shows the version, the build, and what is new', async ({ page }) => {
   await page.goto('/settings')
   const about = page.locator('#about')
-  await expect(about).toContainText('Version 1.0.0')
+  await expect(about).toContainText(`Version ${CURRENT}`)
   await expect(about).toContainText('build')
-  await expect(about.locator('details').first()).toContainText('Enter a pay and see it split')
+  await expect(about.locator('details').first()).toContainText(RELEASES[0]!.notes[0]!)
 })
 
 test('running the deployed build shows no update notice', async ({ page }) => {
@@ -33,24 +39,24 @@ test('running the deployed build shows no update notice', async ({ page }) => {
 })
 
 test('a newer version shows a notice with its number, and Update reloads into it', async ({ page }) => {
-  await pretendDeployed(page, { version: '1.1.0', build: 'abc1234' })
+  await pretendDeployed(page, { version: NEWER, build: 'abc1234' })
   await page.goto('/home')
   const notice = page.locator('.upd')
   await expect(notice).toBeVisible({ timeout: 10_000 })
-  await expect(notice).toContainText('Version 1.1.0 is available')
+  await expect(notice).toContainText(`Version ${NEWER} is available`)
   await page.evaluate(() => { (window as any).__beforeUpdate = true })
   await notice.getByRole('button', { name: 'Update' }).click()
   await page.waitForFunction(() => (window as any).__beforeUpdate === undefined, null, { timeout: 15_000 }) // the page was reloaded
 })
 
 test('a redeploy without a version bump still says an update is available', async ({ page }) => {
-  await pretendDeployed(page, { version: '1.0.0', build: 'def5678' })
+  await pretendDeployed(page, { version: CURRENT, build: 'def5678' })
   await page.goto('/home')
   await expect(page.locator('.upd')).toContainText('An update is available', { timeout: 10_000 })
 })
 
 test('"Later" hides the notice and it stays hidden for that build', async ({ page }) => {
-  await pretendDeployed(page, { version: '1.1.0', build: 'abc1234' })
+  await pretendDeployed(page, { version: NEWER, build: 'abc1234' })
   await page.goto('/home')
   await expect(page.locator('.upd')).toBeVisible({ timeout: 10_000 })
   await page.getByRole('button', { name: 'Later' }).click()
@@ -63,7 +69,7 @@ test('"Later" hides the notice and it stays hidden for that build', async ({ pag
 test('Check for updates says so when you are current, and shows the notice when you are not', async ({ page, request }) => {
   await page.goto('/settings')
   await page.getByRole('button', { name: 'Check for updates' }).click()
-  await expect(page.locator('.toast').filter({ hasText: "You're on the latest version (1.0.0)" })).toBeVisible()
+  await expect(page.locator('.toast').filter({ hasText: `You're on the latest version (${CURRENT})` })).toBeVisible()
 
   await pretendDeployed(page, { version: '2.0.0', build: 'fff0000' })
   await page.getByRole('button', { name: 'Check for updates' }).click()
@@ -81,7 +87,7 @@ test('checking while offline explains instead of failing silently', async ({ pag
 test('after an update, the first open says so once and links to what is new', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('bn:last-version')) localStorage.setItem('bn:last-version', '0.9.0') })
   await page.goto('/home')
-  const toast = page.locator('.toast').filter({ hasText: 'Updated to version 1.0.0' })
+  const toast = page.locator('.toast').filter({ hasText: `Updated to version ${CURRENT}` })
   await expect(toast).toBeVisible({ timeout: 10_000 })
   await toast.getByRole('button', { name: "What's new" }).click()
   await expect(page).toHaveURL(/\/settings#about/)
