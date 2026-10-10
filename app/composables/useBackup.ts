@@ -8,7 +8,7 @@ export function useBackup() {
   const { state } = useBudget()
   const { adoptRevs } = useSync()
 
-  const hasData = computed(() => state.value.incomes.length + state.value.expenses.length + state.value.debts.length + state.value.goals.length + state.value.bills.length > 0)
+  const hasData = computed(() => state.value.incomes.length + state.value.expenses.length + state.value.debts.length + state.value.goals.length + state.value.bills.length + state.value.accounts.length > 0)
   const daysSince = computed(() => (lastBackup.value ? Math.floor((Date.now() - new Date(lastBackup.value).getTime()) / 86400000) : null))
   /** Gentle nudge: you have data, and it's never been backed up or the last backup is over 30 days old. */
   const needsBackup = computed(() => hasData.value && state.value.incomes.length + state.value.expenses.length >= 3 && (daysSince.value === null || daysSince.value > 30))
@@ -34,7 +34,7 @@ export function useBackup() {
     if (!res.ok) { alert(res.error); return }
     const d = res.data
     const when = res.exportedAt ? ` from ${new Date(res.exportedAt).toLocaleDateString()}` : ''
-    const summary = `${d.incomes.length} income, ${d.expenses.length} expenses, ${d.debts.length} debts, ${d.goals.length} goals, ${d.bills.length} bills`
+    const summary = `${d.incomes.length} income, ${d.expenses.length} expenses, ${d.debts.length} debts, ${d.goals.length} goals, ${d.bills.length} bills, ${d.accounts.length} accounts`
     const skipNote = res.skipped ? `\n\n${res.skipped} unreadable record${res.skipped === 1 ? ' was' : 's were'} skipped.` : ''
     if (!confirm(`Replace everything in the app with this backup${when}?\n\n${summary}${skipNote}\n\nYou can undo right after.`)) return
     const snapshot = JSON.parse(JSON.stringify(state.value))

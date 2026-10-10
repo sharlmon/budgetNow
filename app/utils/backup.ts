@@ -1,4 +1,5 @@
 import type { State } from '../composables/useBudget'
+import { ACCOUNT_KINDS } from './accounts'
 import { anchorOf } from './bills'
 import { isValidSplit, type SplitRule } from './split'
 
@@ -33,7 +34,7 @@ export function parseBackup(raw: string): ParseResult {
   const wrapped = json.app === 'budgetnow'
   if (wrapped && isNum(json.version) && json.version > BACKUP_VERSION) return { ok: false, error: 'This backup was made by a newer version of Weka.' }
   const src = wrapped ? json.data : json
-  if (!isObj(src) || !['incomes', 'expenses', 'debts', 'goals', 'bills'].some(k => Array.isArray(src[k]))) {
+  if (!isObj(src) || !['incomes', 'expenses', 'debts', 'goals', 'bills', 'accounts'].some(k => Array.isArray(src[k]))) {
     return { ok: false, error: 'That file is not a Weka backup.' }
   }
 
@@ -75,6 +76,12 @@ export function parseBackup(raw: string): ParseResult {
     goals.push({ id: uid(g.id), name: text(g.name), target: r2(g.target), icon: text(g.icon, 20) || 'target', color: /^#[0-9a-f]{6}$/i.test(g.color) ? g.color : '#ef6a3a', deadline: isDate(g.deadline) ? g.deadline : undefined, contributions })
   }
 
+  const accounts: State['accounts'] = []
+  for (const a of list(src.accounts)) {
+    if (!isObj(a) || !text(a.name, 60).trim() || !isNum(a.balance) || a.balance < 0 || !ACCOUNT_KINDS.some(k => k.key === a.kind)) { skipped++; continue }
+    accounts.push({ id: uid(a.id), name: text(a.name, 60), kind: a.kind, balance: r2(a.balance), color: /^#[0-9a-f]{6}$/i.test(a.color) ? a.color : ACCOUNT_KINDS.find(k => k.key === a.kind)!.color, rate: isNum(a.rate) && a.rate > 0 && a.rate <= 100 ? Math.round(a.rate * 1000) / 1000 : undefined })
+  }
+
   let currency: string | undefined
   if (wrapped && typeof json.currency === 'string' && /^[A-Z]{3}$/.test(json.currency)) {
     try {
@@ -84,7 +91,7 @@ export function parseBackup(raw: string): ParseResult {
     } catch { /* unknown currency: keep current */ }
   }
   return {
-    ok: true, data: { incomes, expenses, debts, goals, bills }, currency,
+    ok: true, data: { incomes, expenses, debts, goals, bills, accounts }, currency,
     name: wrapped ? text(json.name, 40) : undefined,
     split: wrapped && isValidSplit(json.split) ? { needs: json.split.needs, wants: json.split.wants, savings: json.split.savings } : undefined,
     exportedAt: wrapped && typeof json.exportedAt === 'string' ? json.exportedAt : undefined,
