@@ -20,6 +20,7 @@
 <script setup lang="ts">
 // Private screens must never show up in search results.
 useSeoMeta({ robots: 'noindex, nofollow' })
+useGuideWatcher() // keeps the setup guide in step with sign-in and syncing, wherever the last step is finished
 // The shell waits only for the local copy (instant), never for the network.
 </script>
 
