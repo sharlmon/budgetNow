@@ -33,6 +33,14 @@
               <input v-model="date" type="date" />
             </label>
           </div>
+          <div v-if="state.accounts.length" class="pills acctrow">
+            <label class="pill">
+              <span class="pl"><Icon name="wallet" :size="16" /> {{ accountLabel }}</span><Icon name="down" :size="14" />
+              <select v-model="accountId" aria-label="Account"><option value="">No account</option><option v-for="a in state.accounts" :key="a.id" :value="a.id">{{ a.name }} · {{ money(a.balance) }}</option></select>
+            </label>
+          </div>
+          <p v-if="sheet.mode === 'expense' && short" class="hint bad" role="alert">{{ short }} Pick another account, or "No account".</p>
+          <p v-else-if="accountId && amount > 0" class="hint">{{ afterText }}</p>
           <p v-if="sheet.mode === 'expense' && amount > 0" class="hint" :class="{ bad: over > 0 }">
             <template v-if="over > 0">That's {{ money(over) }} over your {{ catMeta(eCat).label }} budget.</template>
             <template v-else>{{ money(left - amount) }} will be left in {{ catMeta(eCat).label }}.</template>
@@ -44,7 +52,7 @@
               <template v-else>{{ k }}</template>
             </button>
           </div>
-          <button class="btn" :disabled="!(amount > 0)" @click="sheet.mode === 'income' ? toBreakdown() : addExp()">{{ sheet.mode === 'income' ? 'See my breakdown' : 'Add Transaction' }}<Icon :name="sheet.mode === 'income' ? 'next' : 'check'" :size="18" :stroke="2.6" /></button>
+          <button class="btn" :disabled="!(amount > 0) || (sheet.mode === 'expense' && !!short)" @click="sheet.mode === 'income' ? toBreakdown() : addExp()">{{ sheet.mode === 'income' ? 'See my breakdown' : 'Add Transaction' }}<Icon :name="sheet.mode === 'income' ? 'next' : 'check'" :size="18" :stroke="2.6" /></button>
         </template>
 
         <!-- step 2: breakdown -->
@@ -75,7 +83,7 @@ import { splitLabel, suggestSplit } from '../utils/split'
 import { keypadSymbol } from '../utils/money'
 const sheet = useSheet()
 const mode = computed({ get: () => sheet.value.mode, set: (v: string) => { sheet.value.mode = v as 'income' | 'expense' } })
-const { totalMinDebt, addIncome, addExpense } = useBudget()
+const { state, totalMinDebt, addIncome, addExpense, accountShort } = useBudget()
 const symbol = computed(() => keypadSymbol(currency.value))
 
 const step = ref(1)
@@ -120,7 +128,32 @@ function setCat(k: Category, v: number) {
   })
   split[k] = r2(total - others.reduce((s, x) => s + split[x], 0))
 }
-function confirm() { addIncome(label.value.trim(), amount.value, { ...split }, date.value); showToast(`${label.value.trim() || 'Income'} added and split`); close() }
+function confirm() {
+  addIncome(label.value.trim(), amount.value, { ...split }, date.value, accountId.value || undefined)
+  remember()
+  showToast(`${label.value.trim() || 'Income'} added and split${accountName.value ? `, and ${money(amount.value)} added to ${accountName.value}` : ''}`)
+  close()
+}
+
+// Which account the money goes into or comes out of. It starts on the one used last time for this kind of entry.
+const accountId = ref('')
+const accountName = computed(() => state.value.accounts.find(a => a.id === accountId.value)?.name ?? '')
+const accountLabel = computed(() => (accountName.value ? `${sheet.value.mode === 'income' ? 'Into' : 'From'} ${accountName.value}` : 'No account'))
+const lastKey = () => `bn:lastAccount:${sheet.value.mode}`
+function pickDefault() {
+  if (!state.value.accounts.length) { accountId.value = ''; return }
+  let last: string | null = null
+  try { last = localStorage.getItem(lastKey()) } catch { /* private mode */ }
+  accountId.value = last === '' ? '' : state.value.accounts.find(a => a.id === last)?.id ?? state.value.accounts[0]!.id
+}
+function remember() { try { localStorage.setItem(lastKey(), accountId.value) } catch { /* it just will not be remembered */ } }
+watch(() => [sheet.value.open, sheet.value.mode, state.value.accounts.length] as const, ([open]) => { if (open) pickDefault() }, { immediate: true })
+const short = computed(() => (amount.value > 0 ? accountShort(accountId.value || undefined, amount.value) : null))
+const afterText = computed(() => {
+  const a = state.value.accounts.find(x => x.id === accountId.value)
+  if (!a) return ''
+  return sheet.value.mode === 'income' ? `${a.name} will have ${money(a.balance + amount.value)}.` : `${a.name} will have ${money(Math.max(0, a.balance - amount.value))} left.`
+})
 
 const spendCats = CATEGORIES.filter(c => c.key !== 'debt')
 const eCat = ref<Category>('needs')
@@ -128,7 +161,7 @@ const month = computed(() => ym(date.value))
 const stats = useMonthStats(month)
 const left = computed(() => stats.value.budgeted[eCat.value] - stats.value.spent[eCat.value])
 const over = computed(() => amount.value - left.value)
-function addExp() { addExpense(label.value.trim(), amount.value, eCat.value, undefined, date.value); showToast(`${money(amount.value)} added to ${catMeta(eCat.value).label}`); close() }
+function addExp() { addExpense(label.value.trim(), amount.value, eCat.value, undefined, date.value, undefined, accountId.value || undefined); remember(); showToast(`${money(amount.value)} added to ${catMeta(eCat.value).label}${accountName.value ? `, taken from ${accountName.value}` : ''}`); close() }
 
 function back() { if (step.value === 2) step.value = 1; else close() }
 function close() {
@@ -149,6 +182,7 @@ function close() {
 .lbl::placeholder { color:rgba(255,255,255,.8); }
 .panel { flex:1; overflow:auto; background:var(--surface); border-radius:28px 28px 0 0; margin-top:-24px; padding:20px 18px calc(18px + env(safe-area-inset-bottom)); }
 .pills { display:flex; gap:10px; }
+.acctrow { margin-top:10px; }
 .pill { flex:1; position:relative; display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line); border-radius:99px; padding:11px 16px; font-size:.85rem; font-weight:500; cursor:pointer; }
 .pl { display:inline-flex; align-items:center; gap:8px; } .pill svg { color:var(--muted); } .pl svg { color:var(--accent); }
 .pill.static { cursor:default; }
