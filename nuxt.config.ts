@@ -45,6 +45,8 @@ export default defineNuxtConfig({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
     } },
   },
+  // Shown from the very first byte while the app loads on the private (client-rendered) screens.
+  spaLoadingTemplate: true,
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     baseURL: base,
