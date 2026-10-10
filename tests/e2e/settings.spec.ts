@@ -25,21 +25,21 @@ test('Settings is a short menu: a profile card, three groups, each row with a on
   for (const t of ['Delete my account', 'Erase all data', 'Export', 'Check for updates', 'Default split']) await expect(page.getByText(t, { exact: true })).toHaveCount(0)
 })
 
-const screens: [string, string, RegExp | string][] = [
-  ['Budget', '/settings/budget', 'Default split'],
-  ['Appearance', '/settings/appearance', 'System'],
-  ['Security', '/settings/security', 'App lock'],
-  ['Backup and data', '/settings/data', 'Backup & restore'],
-  ['About and what\'s new', '/settings/about', 'Check for updates'],
+const screens: [label: string, link: RegExp, url: string, content: string][] = [
+  ['Budget', /Budget/, '/settings/budget', 'Default split'],
+  ['Appearance', /Appearance/, '/settings/appearance', 'System'],
+  ['Security', /Security/, '/settings/security', 'App lock'],
+  ['Backup and data', /Backup and data/, '/settings/data', 'Backup & restore'],
+  ['About and what\'s new', /About and what/, '/settings/about', 'Check for updates'],
 ]
-for (const [row, url, content] of screens) {
-  test(`${row} opens its own screen and Back returns to the menu`, async ({ page }) => {
+for (const [label, link, url, content] of screens) {
+  test(`${label} opens its own screen and Back returns to the menu`, async ({ page }) => {
     await page.goto('/settings')
-    await menu(page).getByRole('link', { name: new RegExp(row.replace("'", '.')) }).click()
-    await expect(page).toHaveURL(new RegExp(url + '$'))
+    await menu(page).getByRole('link', { name: link }).click()
+    await expect(page).toHaveURL(url)
     await expect(page.getByText(content, { exact: true }).first()).toBeVisible()
     await page.getByRole('link', { name: 'Back to settings' }).click()
-    await expect(page).toHaveURL(/\/settings$/)
+    await expect(page).toHaveURL('/settings')
   })
 }
 
