@@ -35,7 +35,7 @@ import type { Conflict } from '#shared/reconcile'
 const open = useState('conflictSheet', () => false)
 const { keepTheirs, useMine } = useSync()
 
-const NAMES: Record<string, string> = { label: 'Label', name: 'Name', amount: 'Amount', date: 'Date', split: 'Split', balance: 'Balance', minPayment: 'Minimum payment', apr: 'Interest rate', target: 'Target', deadline: 'Target date', nextDue: 'Next due', every: 'Repeats', category: 'Category', auto: 'Auto-log', contributions: 'Contributions', icon: 'Icon', color: 'Colour', original: 'Original balance', anchorDay: 'Due day' }
+const NAMES: Record<string, string> = { label: 'Label', name: 'Name', amount: 'Amount', date: 'Date', split: 'Split', balance: 'Balance', minPayment: 'Minimum payment', apr: 'Interest rate', target: 'Target', deadline: 'Target date', nextDue: 'Next due', every: 'Repeats', category: 'Category', auto: 'Auto-log', contributions: 'Contributions', icon: 'Icon', color: 'Colour', original: 'Original balance', anchorDay: 'Due day', kind: 'Type', rate: 'Yearly return' }
 const pretty = (f: string) => NAMES[f] ?? f
 const show = (v: unknown) => (v === undefined || v === null || v === '' ? '(empty)' : typeof v === 'object' ? JSON.stringify(v).slice(0, 60) : String(v))
 
