@@ -10,6 +10,8 @@
       <small>{{ state.bills.length ? `About ${money(monthly)} a month across ${state.bills.length} bill${state.bills.length === 1 ? '' : 's'}` : 'Add rent, subscriptions and loan payments' }}</small>
     </div>
 
+    <ReminderPrompt class="rise" style="--i:2" />
+
     <div class="sec rise" style="--i:3"><h2>Recurring bills</h2><button class="link" @click="adding = !adding"><Icon :name="adding ? 'x' : 'plus'" :size="14" :stroke="2.6" /> {{ adding ? 'Cancel' : 'Add bill' }}</button></div>
 
     <Transition name="drop">

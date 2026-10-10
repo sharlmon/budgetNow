@@ -21,6 +21,7 @@
     <h2 class="gh rise" style="--i:3">This device</h2>
     <div class="card white group rise" style="--i:4">
       <SettingsRow to="/settings/appearance" :icon="activeTheme === 'dark' ? 'moon' : 'sun'" tone="blue" title="Appearance" :summary="themeSummary" />
+      <SettingsRow to="/settings/reminders" icon="bill" tone="accent" title="Bill reminders" :summary="remindersSummary" />
       <SettingsRow to="/settings/security" :icon="lockEnabled ? 'lock' : 'unlock'" title="Security" :summary="lockEnabled ? 'App lock is on' : 'App lock is off'" />
       <SettingsRow to="/settings/data" icon="shield" tone="good" title="Backup and data" :summary="backupSummary" />
     </div>
@@ -44,6 +45,13 @@ const { state } = useBudget()
 const { daysSince } = useBackup()
 const version = useVersion()
 const guide = useGuide()
+const remindersSummary = ref('Get a notification when a bill is due')
+onMounted(() => {
+  const h = reminderHint(), { supported, appleNeedsInstall } = reminderSupport()
+  if (h?.on) remindersSummary.value = `On · ${h.daysBefore === 0 ? 'on the day' : h.daysBefore === 1 ? '1 day before' : `${h.daysBefore} days before`}`
+  else if (appleNeedsInstall) remindersSummary.value = 'Add Weka to your Home Screen first'
+  else if (!supported) remindersSummary.value = 'Not available in this browser'
+})
 
 const accountsSummary = computed(() => { const n = state.value.accounts.length; return n ? `${n} account${n === 1 ? '' : 's'} · ${money(state.value.accounts.reduce((s, a) => s + a.balance, 0))}` : 'Add where you keep money' })
 const themeSummary = computed(() => (themeChoice.value === 'system' ? `Follows your device (${activeTheme.value})` : themeChoice.value === 'dark' ? 'Dark' : 'Light'))
