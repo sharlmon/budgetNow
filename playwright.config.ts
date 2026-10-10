@@ -13,7 +13,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
   timeout: 90_000,
-  expect: { timeout: 10_000 },
+  expect: { timeout: 15_000 }, // the first request to each page also compiles it in the dev server
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${port}`,

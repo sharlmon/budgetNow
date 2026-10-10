@@ -5,7 +5,7 @@ const clean = (u: string) => u.replace(/\/$/, '')
 /** Crawl rules: public pages open (including AI answer engines), private screens and the API closed. */
 export function buildRobots(siteUrl: string): string {
   const base = clean(siteUrl)
-  const disallow = ['/api/', '/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/accounts', '/settings', '/sign-in', '/sign-up']
+  const disallow = ['/api/', '/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/plan', '/accounts', '/settings', '/sign-in', '/sign-up']
   const bots = ['*', 'GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-User', 'Claude-SearchBot', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended']
   return [
     ...bots.flatMap(b => [`User-agent: ${b}`, 'Allow: /', ...disallow.map(d => `Disallow: ${d}`), '']),

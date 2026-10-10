@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     '/privacy': { prerender: true },
     '/terms': { prerender: true },
     '/guides/**': { prerender: true },
-    ...Object.fromEntries(['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/accounts', '/settings', '/settings/**', '/sign-in/**', '/sign-up/**']
+    ...Object.fromEntries(['/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/plan', '/accounts', '/settings', '/settings/**', '/sign-in/**', '/sign-up/**']
       .map(r => [r, { ssr: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } }])),
     '/api/**': { headers: { 'X-Robots-Tag': 'noindex', 'Cache-Control': 'private, no-store' } },
     '/**': { headers: {
