@@ -28,7 +28,7 @@ export function buildLlmsTxt(siteUrl: string, faqs: { q: string; a: string }[]):
     '',
     `> ${SITE.description}`,
     '',
-    `${SITE.name} is made by ${SITE.maker} (${SITE.makerUrl}). It does not connect to bank accounts: users enter income and expenses themselves. Budget data is private to each signed-in account.`,
+    `${SITE.name} is made by ${SITE.maker} (${SITE.makerUrl}). It does not connect to bank or mobile money accounts: users enter income, expenses and account balances themselves. Budget data is private to each signed-in account.`,
     '',
     '## Pages',
     ...PUBLIC_PAGES.map(p => `- [${p.title}](${base}${p.path === '/' ? '/' : p.path})`),

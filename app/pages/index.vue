@@ -92,7 +92,7 @@ useSeo({
       browserRequirements: 'Requires JavaScript', inLanguage: 'en', isAccessibleForFree: true,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'KES' },
       creator: { '@id': `${site}/#maker` }, publisher: { '@id': `${site}/#maker` },
-      featureList: ['Recurring bills tracked and logged on their due dates', 'Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
+      featureList: ['Recurring bills tracked and logged on their due dates', 'All your accounts in one wallet', 'Instant income split into Needs, Wants, Savings and Debt', 'Safe to spend today', 'Debt tracking', 'Savings goals', 'Recurring bills', 'Offline use', 'Backup and restore'],
     },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   ],
@@ -107,6 +107,7 @@ const demo = [
 const features = [
   { i: 'bill', t: 'Bills on autopilot', d: 'Add rent, subscriptions and loan payments once. Weka tracks what is due, lets you mark one paid with a tap, and can log each bill automatically on its due date.' },
   { i: 'wallet', t: 'Instant income split', d: 'Your pay is divided into Needs, Wants, Savings and Debt the moment you enter it, with sliders to adjust before you confirm.' },
+  { i: 'wallet', t: 'All your accounts in one wallet', d: 'Add M-Pesa, your bank, PayPal, cash and investments, see the total at a glance, and record money moving between them.' },
   { i: 'shield', t: 'Safe to spend today', d: 'One daily number worked out from what is left in your budget and the bills still due this month.' },
   { i: 'card', t: 'Debt tracking', d: 'Add what you owe, reserve the minimum from every pay, record payments and watch the balance fall.' },
   { i: 'target', t: 'Savings goals', d: 'Set a target and a date, assign savings to it, and see how much to put aside each month.' },
