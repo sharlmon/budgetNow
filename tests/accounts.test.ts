@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ACCOUNT_KINDS, kindMeta, moveProblem, projectGrowth } from '../app/utils/accounts'
+import { ACCOUNT_KINDS, inkOn, kindMeta, moveProblem, projectGrowth } from '../app/utils/accounts'
 import { diffSnaps, emptySnap } from '../shared/sync'
 
 const mpesa = { id: 'm', name: 'M-Pesa', balance: 1000 }
@@ -54,5 +54,16 @@ describe('syncing accounts', () => {
     const prev = { ...emptySnap(), accounts: [{ ...acct, rev: 3 }] as any }
     expect(diffSnaps(prev, { ...prev, accounts: [{ ...acct, rev: 3, balance: 450 }] as any })).toHaveLength(1)
     expect(diffSnaps(prev, emptySnap())).toEqual([{ t: 'accounts', op: 'del', id: 'a1', rev: 3 }])
+  })
+})
+
+describe('readable text on account colours', () => {
+  it('uses white on dark colours and dark ink on light ones', () => {
+    expect(inkOn('#1f3a8a')).toBe('#ffffff'); expect(inkOn('#2fa05a')).toBe('#ffffff')
+    expect(inkOn('#e6a321')).toBe('#17181c'); expect(inkOn('#ffffff')).toBe('#17181c')
+  })
+  it('every built-in kind colour gets text with at least 3:1 contrast', () => {
+    const lum = (hex: string) => { const n = parseInt(hex.slice(1), 16); const l = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }; return 0.2126 * l((n >> 16) & 255) + 0.7152 * l((n >> 8) & 255) + 0.0722 * l(n & 255) }
+    for (const k of ACCOUNT_KINDS) { const a = lum(k.color), b = lum(inkOn(k.color)); expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05), k.key).toBeGreaterThanOrEqual(3) }
   })
 })

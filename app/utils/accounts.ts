@@ -46,3 +46,11 @@ export function projectGrowth(monthly: number, months: number, ratePct: number, 
   const put = round(start + monthly * months)
   return { balances, end, put, earned: round(end - put) }
 }
+
+/** Text colour that stays readable on an account's colour (white on dark colours, near-black on light ones). */
+export function inkOn(hex: string): '#ffffff' | '#17181c' {
+  const n = parseInt(hex.replace('#', ''), 16)
+  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+  const lum = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255)
+  return lum > 0.4 ? '#17181c' : '#ffffff'
+}
