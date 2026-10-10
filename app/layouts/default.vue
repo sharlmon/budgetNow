@@ -11,6 +11,7 @@
       <ConflictSheet />
       <AccountSheet />
       <MoveSheet />
+      <EditSheet />
     </div>
     <LockScreen />
   </div>
