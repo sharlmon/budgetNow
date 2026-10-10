@@ -1,5 +1,6 @@
 import { DEFAULT_SPLIT, type SplitRule } from '../utils/split'
 import { DEFAULT_CURRENCY, formatMoney } from '../utils/money'
+import { moveProblem, type Account } from '../utils/accounts'
 
 export type Category = 'needs' | 'wants' | 'savings' | 'debt'
 export const CATEGORIES: { key: Category; label: string; hint: string; color: string; icon: string }[] = [
@@ -20,7 +21,7 @@ export const GOAL_STYLES = [
 ]
 export const goalSaved = (g: Goal) => Math.round(g.contributions.reduce((s, c) => s + c.amount, 0) * 100) / 100
 export interface Bill { id: string; name: string; amount: number; category: Exclude<Category, 'savings'>; every: Every; nextDue: string; anchorDay: number; auto: boolean; debtId?: string }
-export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[] }
+export interface State { incomes: Income[]; expenses: Expense[]; debts: Debt[]; goals: Goal[]; bills: Bill[]; accounts: Account[] }
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 export const today = () => new Date().toLocaleDateString('sv')
@@ -33,7 +34,7 @@ const restored = <T extends { rev?: number }>(row: T): T => { const { rev: _gone
 
 export function useBudget() {
   // Loading and saving is handled by the sync engine (useSync), which owns persistence per signed-in user.
-  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [] }))
+  const state = useState<State>('budget', () => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }))
 
   const totalMinDebt = computed(() => state.value.debts.reduce((s, d) => s + (d.balance > 0 ? Math.min(d.minPayment, d.balance) : 0), 0))
   const totalDebt = computed(() => state.value.debts.reduce((s, d) => s + d.balance, 0))
@@ -68,12 +69,15 @@ export function useBudget() {
     const i = state.value.expenses.findIndex(e => e.id === id)
     if (i < 0) return () => {}
     const [e] = state.value.expenses.splice(i, 1)
-    const debt = e?.debtId ? state.value.debts.find(x => x.id === e!.debtId) : undefined
+    const debtOf = () => (e?.debtId ? state.value.debts.find(x => x.id === e.debtId) : undefined)
+    const debt = debtOf()
     if (debt && e) debt.balance = round(debt.balance + e.amount)
+    // Undo looks the debt up again: a sync can replace the row objects in the meantime, so a held reference would be stale.
     return () => {
       if (!e) return
       state.value.expenses.splice(Math.min(i, state.value.expenses.length), 0, restored(e))
-      if (debt) debt.balance = Math.max(0, round(debt.balance - e.amount))
+      const d = debtOf()
+      if (d) d.balance = Math.max(0, round(d.balance - e.amount))
     }
   }
   function removeIncome(id: string) {
@@ -112,6 +116,39 @@ export function useBudget() {
     return { allocated, assigned, available: round(allocated - assigned) }
   })
 
+  /** Everything the user holds across accounts, investments included. */
+  const accountsTotal = computed(() => round(state.value.accounts.reduce((s, a) => s + a.balance, 0)))
+  function addAccount(a: Omit<Account, 'id'>) {
+    const id = uid()
+    state.value.accounts.push({ ...a, id, balance: round(a.balance), ...(a.rate && a.rate > 0 ? { rate: a.rate } : {}) })
+    return id
+  }
+  function removeAccount(id: string) {
+    const i = state.value.accounts.findIndex(a => a.id === id)
+    if (i < 0) return () => {}
+    const [a] = state.value.accounts.splice(i, 1)
+    return () => { if (a) state.value.accounts.splice(Math.min(i, state.value.accounts.length), 0, restored(a)) }
+  }
+  /**
+   * Records money moving between two of the user's accounts: the amount (plus any fee) leaves one balance and the amount arrives
+   * in the other. It only updates balances; the real transfer happens in the user's own banking or mobile money app.
+   * Returns an error message (and changes nothing) or a function that undoes the move.
+   */
+  function moveMoney(fromId: string, toId: string, amount: number, fee = 0): { error: string } | { undo: () => void } {
+    const from = state.value.accounts.find(a => a.id === fromId), to = state.value.accounts.find(a => a.id === toId)
+    const error = moveProblem(from, to, amount, fee)
+    if (error || !from || !to) return { error: error ?? 'Pick both accounts.' }
+    from.balance = round(from.balance - amount - fee)
+    to.balance = round(to.balance + amount)
+    // Undo looks the accounts up again and reverses the move (rather than restoring old balances), because a sync can replace
+    // the row objects in the meantime and the person may have edited a balance since.
+    return { undo: () => {
+      const f = state.value.accounts.find(a => a.id === fromId), t = state.value.accounts.find(a => a.id === toId)
+      if (f) f.balance = round(f.balance + amount + fee)
+      if (t) t.balance = round(t.balance - amount)
+    } }
+  }
+
   function addBill(b: Omit<Bill, 'id' | 'anchorDay'>) {
     state.value.bills.push({ ...b, id: uid(), anchorDay: anchorOf(b.nextDue), debtId: b.category === 'debt' ? b.debtId : undefined })
   }
@@ -130,7 +167,8 @@ export function useBudget() {
     b.nextDue = addPeriod(due, b.every, b.anchorDay)
     return () => {
       if (expenseId) removeExpense(expenseId)
-      b.nextDue = due
+      const current = state.value.bills.find(x => x.id === id) // looked up again: a sync may have replaced the row since
+      if (current) current.nextDue = due
     }
   }
   /** Logs every due occurrence of bills set to auto-log. Returns how many expenses were added. */
@@ -145,10 +183,10 @@ export function useBudget() {
   }
 
   function resetAll() {
-    state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
+    state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }
   }
 
-  return { addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  return { accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 // Profile values live in the synced snapshot, not in their own storage keys.

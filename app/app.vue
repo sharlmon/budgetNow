@@ -20,6 +20,7 @@ watch(() => auth.userId.value, (uid) => { if (!import.meta.client) return; if (u
 :root {
   --page:#e8e8ec; --bg:#fff; --surface:#fff; --surface2:#fafafc; --card:#f6f6f9; --soft:#f1f1f5; --track:#ececf1; --line:#ebebf0;
   --silver-3:#d9d9e0; --silver-2a:#d4d4db; --silver-2b:#bdbdc6; --silver-1a:#e8e8ee; --silver-1b:#aeaeb9; --silver-ink:#33333b; --silver-ink2:#46464f;
+  --vault:#15161a; --vault-ink:#fff; --vault-muted:#a9abb4;
   --thumb:#fff; --toggle-off:#dcdce3; --toast:#17181c; --glass:rgba(255,255,255,.86);
   --ink:#16171c; --ink2:#3c3f4a; --ink3:#555968; --muted:#8a8d9a;
   --accent:#ef6a3a; --accent2:#f7a04b;
@@ -37,6 +38,7 @@ watch(() => auth.userId.value, (uid) => { if (!import.meta.client) return; if (u
   :root:not([data-theme="light"]) {
     --page:#07080b; --bg:#0e1015; --surface:#171a21; --surface2:#13161c; --card:#1c2029; --soft:#262b36; --track:#2a2f3b; --line:#2a2f3a;
     --silver-3:#262a33; --silver-2a:#2f343e; --silver-2b:#262a33; --silver-1a:#3b404c; --silver-1b:#2d313b; --silver-ink:#d5d8e2; --silver-ink2:#aab0c0;
+    --vault:#1d212b; --vault-ink:#fff; --vault-muted:#a9abb4;
     --thumb:#3a4152; --toggle-off:#3a4152; --toast:#2b303b; --glass:rgba(14,16,21,.82);
     --ink:#f2f3f7; --ink2:#c9ccd7; --ink3:#a8adbb; --muted:#8b92a5;
     --good:#35c58b; --good-ink:#5fd6a0; --goodbg:rgba(47,182,124,.16); --good-line:rgba(47,182,124,.35);
@@ -50,6 +52,7 @@ watch(() => auth.userId.value, (uid) => { if (!import.meta.client) return; if (u
 :root[data-theme="dark"] {
   --page:#07080b; --bg:#0e1015; --surface:#171a21; --surface2:#13161c; --card:#1c2029; --soft:#262b36; --track:#2a2f3b; --line:#2a2f3a;
   --silver-3:#262a33; --silver-2a:#2f343e; --silver-2b:#262a33; --silver-1a:#3b404c; --silver-1b:#2d313b; --silver-ink:#d5d8e2; --silver-ink2:#aab0c0;
+  --vault:#1d212b; --vault-ink:#fff; --vault-muted:#a9abb4;
     --thumb:#3a4152; --toggle-off:#3a4152; --toast:#2b303b; --glass:rgba(14,16,21,.82);
   --ink:#f2f3f7; --ink2:#c9ccd7; --ink3:#a8adbb; --muted:#8b92a5;
   --good:#35c58b; --good-ink:#5fd6a0; --goodbg:rgba(47,182,124,.16); --good-line:rgba(47,182,124,.35);
@@ -69,6 +72,7 @@ h1 { font-size:1.5rem; margin:0; letter-spacing:-.025em; font-weight:700; } h2 {
 :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
 /* surfaces */
+.num { font-variant-numeric:tabular-nums; }
 .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:18px; }
 .card.white { background:var(--surface); box-shadow:0 1px 2px rgba(20,20,40,.04), 0 8px 24px -16px rgba(20,20,40,.14); }
 .sec { display:flex; justify-content:space-between; align-items:center; margin:28px 0 12px; }

@@ -22,6 +22,11 @@ export const billRow = z.object({
   id, rev: revision, name: z.string().min(1).max(120), amount: amt, category: z.enum(['needs', 'wants', 'debt']), every: z.enum(['week', 'month', 'year']),
   nextDue: date, anchorDay: z.number().int().min(1).max(31), auto: z.boolean(), debtId: optId,
 })
+export const ACCOUNT_KINDS = ['mobile', 'bank', 'paypal', 'cash', 'invest', 'other'] as const
+export const accountRow = z.object({
+  id, rev: revision, name: z.string().min(1).max(60), kind: z.enum(ACCOUNT_KINDS), balance: amt,
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/), rate: z.number().finite().min(0).max(100).nullish().transform(v => v ?? null),
+})
 const pct = z.number().int().min(0).max(100)
 export const splitRow = z.object({ needs: pct, wants: pct, savings: pct }).refine(r => r.needs + r.wants + r.savings === 100, 'split must total 100')
 export const profileRow = z.object({ currency: z.string().regex(/^[A-Z]{3}$/), name: z.string().max(40), split: splitRow.optional() })
@@ -36,6 +41,7 @@ export const syncBody = z.object({
     put('debts', debtRow), del('debts'),
     put('goals', goalRow), del('goals'),
     put('bills', billRow), del('bills'),
+    put('accounts', accountRow), del('accounts'),
     put('profile', profileRow),
   ])).max(1000),
 })

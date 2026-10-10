@@ -14,6 +14,7 @@
         <button class="btn soft sm acct" @click="signOut"><Icon name="back" :size="15" /> Sign out</button>
       </div>
     </div>
+    <NuxtLink to="/accounts" class="card white rise acclink" style="margin-bottom:12px;--i:1"><span class="bk"><Icon name="wallet" :size="20" /></span><span class="grow"><strong>Accounts</strong><span class="muted sm" style="display:block">M-Pesa, banks, cash and investments</span></span><Icon name="next" :size="18" /></NuxtLink>
     <div class="rise" style="--i:1"><ThemeCard /></div>
     <div class="rise" style="--i:1"><SplitRuleCard /></div>
     <div class="rise" style="--i:1"><AppLockCard /></div>
@@ -37,7 +38,7 @@
     </div>
     <div class="card white rise" style="margin-bottom:16px;--i:4">
       <h2>Erase data</h2>
-      <p class="muted sm" style="margin:6px 0 14px">Permanently deletes all your income, expenses, debts, goals and bills from your account and every device.</p>
+      <p class="muted sm" style="margin:6px 0 14px">Permanently deletes all your income, expenses, debts, goals, bills and accounts from your account and every device.</p>
       <button class="btn soft" @click="erase"><Icon name="trash" :size="16" /> Erase all data</button>
     </div>
     <div class="card white rise" style="margin-bottom:16px;--i:5;border-color:var(--bad-line)">
@@ -107,6 +108,7 @@ async function signOut() {
 .nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sync { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 12px; border-radius:12px; font-size:.8rem; font-weight:500; background:var(--soft); color:var(--muted); }
 .sync.synced { background:var(--goodbg); color:var(--good-ink); } .sync.error { background:var(--bad-bg); color:var(--bad); } .sync.offline { background:var(--warn-bg); color:var(--warn-ink); }
+.acclink { display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); min-height:64px; }
 .legal { display:flex; justify-content:center; gap:10px; font-size:.82rem; color:var(--muted); }
 .legal a { color:var(--muted); padding:12px 6px; }
 .bk { width:42px; height:42px; border-radius:14px; background:var(--goodbg); color:var(--good); display:grid; place-items:center; flex:none; }

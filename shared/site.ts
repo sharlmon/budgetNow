@@ -5,7 +5,7 @@ export const SITE = {
   description: 'Weka is a free money app for Kenya. Add your bills once and Weka tracks them and logs them when they are due. It also splits each pay into Needs, Wants, Savings and Debt and shows what is safe to spend today.',
   maker: 'SharlTech',
   makerUrl: 'https://sharl-tech.co.ke/',
-  privacyUpdated: '9 October 2026',
+  privacyUpdated: '10 October 2026',
   currencies: ['KES', 'USD', 'EUR', 'GBP', 'ZAR', 'NGN', 'GHS', 'TZS', 'UGX', 'INR', 'CAD', 'AUD', 'JPY', 'AED'],
 } as const
 
@@ -17,6 +17,7 @@ export const FAQS: Faq[] = [
   { q: 'How does Weka split my income?', a: 'It reserves the minimum payments on your debts first, then divides what is left 50% to Needs, 30% to Wants and 20% to Savings. You can drag a slider or type an amount for any category. The other categories rebalance automatically so the total always matches your income, and nothing is saved until you confirm.' },
   { q: 'What is the 50/30/20 rule?', a: 'The 50/30/20 rule is a simple budgeting guideline: spend about 50% of your after-tax income on needs, 30% on wants, and put 20% towards savings or debt repayment. Weka uses it as the starting point and lets you change it to fit your life.' },
   { q: 'What does "safe to spend today" mean?', a: 'It is the amount you can spend today on Needs and Wants without going over this month. Weka takes what is left in those two budgets, sets aside bills that are still due this month, and spreads the rest evenly across the days remaining. If you spend more today, tomorrow\'s allowance adjusts.' },
+  { q: 'Can I see M-Pesa, my bank and cash in one place?', a: 'Yes. In Accounts you add each place you keep money (M-Pesa, a bank, PayPal, cash or an investment) and enter its balance. Weka shows the total in one wallet, records moves between your accounts, and can preview how an investment might grow at the yearly return you enter. Balances are typed in by you; Weka does not connect to those providers.' },
   { q: 'Does Weka pay my bills for me?', a: 'Not yet. Weka keeps track of your bills, shows what is due and can log a bill as paid on its due date, but the payment itself is still made by you, for example through M-Pesa. Paying from inside the app is something we are exploring.' },
   { q: 'Does Weka connect to my bank?', a: 'No. You enter your income and expenses yourself, so Weka never asks for your bank login, card number or account details.' },
   { q: 'Is my financial data private?', a: 'Your budget is saved to your own account and is only visible when you are signed in. Sign-in is handled by Clerk, and your data is stored in a managed Postgres database. Weka does not sell your data and does not show ads. The Privacy Policy explains exactly what is collected and why.' },

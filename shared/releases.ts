@@ -5,6 +5,20 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.1.0',
+    date: '2026-10-10',
+    title: 'All your accounts in one wallet',
+    notes: [
+      'New Accounts screen: add M-Pesa, your bank, PayPal, cash and investments and see the total in one wallet',
+      'Record money moving between your accounts, with an optional fee, and undo it',
+      'For investments, enter the yearly return you expect and preview how monthly savings could grow',
+      'Hide your balances with one tap; Weka remembers the choice on this device',
+      'The Weka name and logo, and a landing page built around your bills',
+      'Undo now keeps working after a change has been saved (paying a bill, deleting a debt payment)',
+      'Bigger tap targets on phones and longer titles on small screens',
+    ],
+  },
+  {
     version: '1.0.0',
     date: '2026-10-09',
     title: 'Weka 1.0',

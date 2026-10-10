@@ -17,6 +17,7 @@
       <BillRow v-for="b in dueSoon.slice(0, 3)" :key="b.id" :bill="b" compact />
       <NuxtLink v-if="dueSoon.length > 3" to="/bills" class="link" style="margin-top:6px">+{{ dueSoon.length - 3 }} more</NuxtLink>
     </div>
+    <div class="rise" style="margin-top:16px;--i:3"><AccountsCard /></div>
     <div v-if="syncConflicts.length" class="card white clash rise" style="--i:3" role="alert">
       <span class="cl"><Icon name="repeat" :size="20" /></span>
       <div class="grow"><strong>{{ syncConflicts.length }} change{{ syncConflicts.length === 1 ? '' : 's' }} clashed</strong><div class="muted sm">Another device edited the same thing as you.</div></div>

@@ -19,7 +19,7 @@ export async function sync(request: APIRequestContext, ops: unknown[]) {
 export async function reset(request: APIRequestContext) {
   const s = await getState(request)
   const del = (t: string, rows: any[]) => rows.map(r => ({ t, op: 'del', id: r.id, rev: r.rev }))
-  const ops = [...del('incomes', s.incomes), ...del('expenses', s.expenses), ...del('debts', s.debts), ...del('goals', s.goals), ...del('bills', s.bills),
+  const ops = [...del('incomes', s.incomes), ...del('expenses', s.expenses), ...del('debts', s.debts), ...del('goals', s.goals), ...del('bills', s.bills), ...del('accounts', s.accounts ?? []),
     { t: 'profile', op: 'put', row: { currency: 'USD', name: '', split: { needs: 50, wants: 30, savings: 20 } } }]
   await sync(request, ops)
 }

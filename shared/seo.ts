@@ -5,7 +5,7 @@ const clean = (u: string) => u.replace(/\/$/, '')
 /** Crawl rules: public pages open (including AI answer engines), private screens and the API closed. */
 export function buildRobots(siteUrl: string): string {
   const base = clean(siteUrl)
-  const disallow = ['/api/', '/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/settings', '/sign-in', '/sign-up']
+  const disallow = ['/api/', '/home', '/activity', '/analytics', '/goals', '/bills', '/debts', '/accounts', '/settings', '/sign-in', '/sign-up']
   const bots = ['*', 'GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-User', 'Claude-SearchBot', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended']
   return [
     ...bots.flatMap(b => [`User-agent: ${b}`, 'Allow: /', ...disallow.map(d => `Disallow: ${d}`), '']),
@@ -28,7 +28,7 @@ export function buildLlmsTxt(siteUrl: string, faqs: { q: string; a: string }[]):
     '',
     `> ${SITE.description}`,
     '',
-    `${SITE.name} is made by ${SITE.maker} (${SITE.makerUrl}). It does not connect to bank accounts: users enter income and expenses themselves. Budget data is private to each signed-in account.`,
+    `${SITE.name} is made by ${SITE.maker} (${SITE.makerUrl}). It does not connect to bank or mobile money accounts: users enter income, expenses and account balances themselves. Budget data is private to each signed-in account.`,
     '',
     '## Pages',
     ...PUBLIC_PAGES.map(p => `- [${p.title}](${base}${p.path === '/' ? '/' : p.path})`),

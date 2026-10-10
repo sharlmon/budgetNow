@@ -3,8 +3,8 @@ import type { State } from '../app/composables/useBudget'
 /** Everything that is synced: the budget data plus the small profile (currency and display name). */
 export interface Profile { currency: string; name: string; split: { needs: number; wants: number; savings: number } }
 export type Snap = State & { profile: Profile }
-export type TableName = 'incomes' | 'expenses' | 'debts' | 'goals' | 'bills'
-export const TABLES: TableName[] = ['incomes', 'expenses', 'debts', 'goals', 'bills']
+export type TableName = 'incomes' | 'expenses' | 'debts' | 'goals' | 'bills' | 'accounts'
+export const TABLES: TableName[] = ['incomes', 'expenses', 'debts', 'goals', 'bills', 'accounts']
 
 export type Op =
   | { t: TableName; op: 'put'; row: Record<string, any> }
@@ -17,7 +17,7 @@ export const canon = (v: unknown): string => JSON.stringify(v, (_k, val) =>
     ? Object.fromEntries(Object.keys(val).sort().filter(k => val[k] !== undefined).map(k => [k, val[k]]))
     : val)
 
-export const emptySnap = (): Snap => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [], profile: { currency: 'KES', name: '', split: { needs: 50, wants: 30, savings: 20 } } })
+export const emptySnap = (): Snap => ({ incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [], profile: { currency: 'KES', name: '', split: { needs: 50, wants: 30, savings: 20 } } })
 
 /** The minimal set of row changes that turns `prev` into `next`. Puts and deletes are idempotent, so retrying is always safe. */
 export function diffSnaps(prev: Snap, next: Snap): Op[] {

@@ -40,7 +40,7 @@ export function useSync() {
 
   const snapshot = (): Snap => clone({ ...state.value, profile: { currency: currency.value, name: userName.value, split: { ...splitRule.value } } })
   const apply = (s: Snap) => {
-    state.value = { incomes: s.incomes, expenses: s.expenses, debts: s.debts, goals: s.goals, bills: s.bills }
+    state.value = { incomes: s.incomes, expenses: s.expenses, debts: s.debts, goals: s.goals, bills: s.bills, accounts: s.accounts ?? [] }
     currency.value = s.profile.currency
     userName.value = s.profile.name
     splitRule.value = isValidSplit(s.profile.split) ? { ...s.profile.split } : { ...DEFAULT_SPLIT }
@@ -180,7 +180,7 @@ export function useSync() {
     syncStatus.value = 'idle'
     syncPending.value = 0
     locked.value = false
-    state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [] }
+    state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }
     currency.value = DEFAULT_CURRENCY
     userName.value = ''
     splitRule.value = { ...DEFAULT_SPLIT }

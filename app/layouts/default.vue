@@ -9,6 +9,8 @@
       <Toast />
       <UpdateToast />
       <ConflictSheet />
+      <AccountSheet />
+      <MoveSheet />
     </div>
     <LockScreen />
   </div>

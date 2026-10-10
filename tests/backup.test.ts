@@ -12,6 +12,7 @@ const state: any = {
     { id: 'b1', name: 'Rent', amount: 1200, category: 'needs', every: 'month', nextDue: '2026-11-01', anchorDay: 1, auto: true },
     { id: 'b2', name: 'Loan', amount: 160, category: 'debt', every: 'month', nextDue: '2026-10-30', anchorDay: 30, auto: false, debtId: 'z' },
   ],
+  accounts: [{ id: 'm', name: 'M-Pesa', kind: 'mobile', balance: 4200.5, color: '#2fa05a' }, { id: 'f', name: 'Money market fund', kind: 'invest', balance: 85000, color: '#e6a321', rate: 14.1 }],
   goals: [{ id: 'g', name: 'Deposit', target: 1500, icon: 'house', color: '#5b8def', deadline: '2027-01-15', contributions: [{ id: 'c', amount: 600, date: '2026-10-04' }] }],
 }
 const canon = (v: any): any => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v
@@ -87,5 +88,24 @@ describe('backup file parsing', () => {
     expect(r.data.bills[0]).toMatchObject({ anchorDay: 31, auto: false })
     expect(r.data.bills[0].debtId).toBeUndefined()
     expect(r.data.expenses[0].billId).toBeUndefined()
+  })
+})
+
+describe('backup files and linked accounts', () => {
+  it('restores a backup from before accounts existed, with no accounts', () => {
+    const { accounts: _a, ...old } = state
+    const r: any = parseBackup(wrap(old))
+    expect(r.ok).toBe(true)
+    expect(r.data.accounts).toEqual([])
+  })
+  it('skips accounts with a bad kind, a negative balance or no name, and keeps the good ones', () => {
+    const bad = [{ id: '1', name: 'Ok', kind: 'bank', balance: 10 }, { id: '2', name: 'X', kind: 'crypto', balance: 1 }, { id: '3', name: 'Neg', kind: 'cash', balance: -5 }, { id: '4', name: '  ', kind: 'cash', balance: 1 }]
+    const r: any = parseBackup(wrap({ ...state, accounts: bad }))
+    expect(r.data.accounts.map((a: any) => a.name)).toEqual(['Ok'])
+    expect(r.skipped).toBe(3)
+  })
+  it('gives a missing colour its kind colour and drops an impossible rate', () => {
+    const r: any = parseBackup(wrap({ ...state, accounts: [{ id: '1', name: 'Fund', kind: 'invest', balance: 5, rate: 500 }] }))
+    expect(r.data.accounts[0]).toMatchObject({ color: '#e6a321', rate: undefined })
   })
 })

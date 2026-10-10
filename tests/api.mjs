@@ -189,11 +189,39 @@ ok(r.s === 200 && (await state(alice)).expenses.length === 451, `450-row bulk up
 
 // account deletion: removes everything for that user only
 const del = (u) => fetch(B + '/account', { method: 'DELETE', headers: { 'x-dev-user': u, 'x-requested-with': 'budgetnow', 'x-confirm': 'delete-my-account', 'x-forwarded-for': ipAddr() } }).then(r => r.status)
+
+// linked accounts
+{
+  const acct = { id: 'ac1', name: 'M-Pesa', kind: 'mobile', balance: 1250.75, color: '#2fa05a' }
+  const fund = { id: 'ac2', name: 'Money market fund', kind: 'invest', balance: 85000, color: '#e6a321', rate: 14.1 }
+  const carol = 'user_carol_' + Date.now()
+  let x = await sync(carol, [{ t: 'accounts', op: 'put', row: acct }, { t: 'accounts', op: 'put', row: fund }])
+  ok(x.s === 200 && x.j.revs.accounts.ac1 === 1, 'accounts are saved and start at revision 1')
+  let cs = await state(carol)
+  ok(cs.accounts.length === 2 && cs.accounts[0].balance === 1250.75 && cs.accounts[0].rate === undefined && cs.accounts[1].rate === 14.1, 'accounts round-trip (decimals, optional rate)')
+  x = await sync(carol, [{ t: 'accounts', op: 'put', row: { ...acct, rev: 1, balance: 900 } }])
+  cs = await state(carol)
+  ok(x.s === 200 && cs.accounts[0].balance === 900 && cs.accounts[0].rev === 2, 'editing a balance bumps the revision')
+  x = await sync(carol, [{ t: 'accounts', op: 'put', row: { ...acct, rev: 1, balance: 5 } }])
+  ok(x.j.conflicts.length === 1 && (await state(carol)).accounts[0].balance === 900, 'a stale edit to an account is a conflict, not an overwrite')
+  const badAcct = async (m, row) => { const y = await sync(carol, [{ t: 'accounts', op: 'put', row }]); ok(y.s === 400, `rejects ${m} -> ${y.s}`) }
+  await badAcct('an unknown kind', { ...acct, id: 'x1', kind: 'crypto' })
+  await badAcct('a negative balance', { ...acct, id: 'x2', balance: -1 })
+  await badAcct('a rate over 100', { ...fund, id: 'x3', rate: 101 })
+  await badAcct('a bad colour', { ...acct, id: 'x4', color: 'red' })
+  await badAcct('an empty name', { ...acct, id: 'x5', name: '' })
+  ok((await state(alice)).accounts.length === 0, "one user's accounts are not visible to another")
+  await sync(carol, [{ t: 'accounts', op: 'del', id: 'ac2', rev: 1 }])
+  ok((await state(carol)).accounts.length === 1, 'an account can be deleted')
+  await del(carol)
+  ok((await state(carol)).accounts.length === 0, 'deleting the account removes its linked accounts too')
+}
+
 await sync(bob, [{ t: 'incomes', op: 'put', row: { ...income, id: 'bob-i', split: { needs: 1, wants: 0, savings: 0, debt: 0 }, amount: 1 } }, { t: 'goals', op: 'put', row: { ...goal, id: 'bob-g' } }, { t: 'profile', op: 'put', row: { currency: 'EUR', name: 'Bob' } }])
 const before = await state(alice)
 ok((await del(bob)) === 200, 'DELETE /api/account succeeds')
 const sbDeleted = await state(bob)
-ok(sbDeleted.incomes.length + sbDeleted.expenses.length + sbDeleted.debts.length + sbDeleted.goals.length + sbDeleted.bills.length === 0 && sbDeleted.profile.name === '', 'deleted user has no rows left (incl. goal contributions and profile)')
+ok(sbDeleted.incomes.length + sbDeleted.expenses.length + sbDeleted.debts.length + sbDeleted.goals.length + sbDeleted.bills.length + sbDeleted.accounts.length === 0 && sbDeleted.profile.name === '', 'deleted user has no rows left (incl. goal contributions and profile)')
 const after = await state(alice)
 ok(JSON.stringify(after) === JSON.stringify(before), "deleting one account never touches another user's data")
 ok((await del(bob)) === 200, 'deleting an already-empty account is harmless')
