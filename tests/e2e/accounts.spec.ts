@@ -235,3 +235,16 @@ test('a standing rule asks first, then sweeps everything above the amount to kee
   await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort((x: number, y: number) => x - y)).toEqual([5000, 47000])
   await expect(rules).not.toContainText('ready to sweep')
 })
+
+test('home points to money that a rule is ready to sweep', async ({ page, request }) => {
+  await sync(request, [acct('a', 'M-Pesa', 'mobile', 12000), acct('b', 'Fund', 'invest', 40000, '#e6a321')])
+  await page.addInitScript(() => {
+    const rule = { id: 'r1', fromId: 'a', toId: 'b', keep: 5000, billDays: 0, min: 100, auto: false, on: true }
+    if (!localStorage.getItem('bn:sweepRules:dev-user')) localStorage.setItem('bn:sweepRules:dev-user', JSON.stringify([rule]))
+  })
+  await page.goto('/home')
+  const strip = page.getByRole('link', { name: 'Money ready to sweep' })
+  await expect(strip).toContainText('7,000 is ready to sweep')
+  await strip.click()
+  await expect(page).toHaveURL(/\/accounts/)
+})
