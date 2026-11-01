@@ -1,8 +1,8 @@
 // Single source of truth for public site facts. The landing page, FAQ markup, llms.txt and sitemap all read from here.
 export const SITE = {
   name: 'Fluxa',
-  tagline: 'Bills on autopilot. Know what is safe to spend.',
-  description: 'Fluxa is a free money app for Kenya. Add your bills once and Fluxa tracks them and logs them when they are due. It also splits each pay into Needs, Wants, Savings and Debt and shows what is safe to spend today.',
+  tagline: 'All your money in one wallet. Know what is safe to spend.',
+  description: 'Fluxa is a free money app for Kenya. See M-Pesa, your bank, cash and savings funds in one wallet and plan moves between them (in demo mode for now). Add your bills once and Fluxa tracks them and logs them when they are due. It also splits each pay into Needs, Wants, Savings and Debt and shows what is safe to spend today.',
   maker: 'SharlTech',
   makerUrl: 'https://sharl-tech.co.ke/',
   privacyUpdated: '11 October 2026',
@@ -31,7 +31,7 @@ export const FAQS: Faq[] = [
 
 /** Public, indexable pages. Used for the sitemap and llms.txt. */
 export const PUBLIC_PAGES = [
-  { path: '/', title: 'Fluxa: bills on autopilot and a budget that splits your pay', priority: '1.0', changefreq: 'monthly' },
+  { path: '/', title: 'Fluxa: all your money in one wallet and a budget that splits your pay', priority: '1.0', changefreq: 'monthly' },
   { path: '/guides/50-30-20-rule', title: 'The 50/30/20 budget rule explained (with a calculator)', priority: '0.8', changefreq: 'monthly' },
   { path: '/privacy', title: 'Privacy Policy', priority: '0.3', changefreq: 'yearly' },
   { path: '/terms', title: 'Terms of Service', priority: '0.3', changefreq: 'yearly' },

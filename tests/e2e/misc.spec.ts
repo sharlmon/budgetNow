@@ -58,7 +58,7 @@ test('hostile text in a label is shown as plain text and never runs', async ({ p
 })
 
 test('public pages are real HTML for search engines and AI crawlers (no JavaScript needed)', async ({ request }) => {
-  for (const [path, h1] of [['/', 'Bills on autopilot'], ['/privacy', 'Privacy Policy'], ['/terms', 'Terms of Service'], ['/guides/50-30-20-rule', '50/30/20']] as const) {
+  for (const [path, h1] of [['/', 'All your money in one wallet'], ['/privacy', 'Privacy Policy'], ['/terms', 'Terms of Service'], ['/guides/50-30-20-rule', '50/30/20']] as const) {
     const html = await (await request.get(path)).text()
     expect(html, path).toContain(h1)
     expect(html, path).toMatch(/<link rel="canonical"/)
@@ -79,5 +79,5 @@ test('private screens ship a loading screen in their first HTML, and the public 
   }
   const landing = await (await request.get('/')).text()
   expect(landing).not.toContain('wk-splash')
-  expect(landing).toContain('Bills on autopilot') // the landing page is still real, server-rendered HTML
+  expect(landing).toContain('All your money in one wallet') // the landing page is still real, server-rendered HTML
 })
