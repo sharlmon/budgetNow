@@ -5,7 +5,7 @@
         <div class="copy">
           <p class="eyebrow">Free money app for Kenya</p>
           <h1>Bills on autopilot. Know what's safe to spend.</h1>
-          <p class="lead">Add your bills once and Weka keeps track of what is due. Then enter your pay and it instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>, so you always know what is left after the bills.</p>
+          <p class="lead">Add your bills once and Fluxa keeps track of what is due. Then enter your pay and it instantly divides it into <strong>Needs, Wants, Savings and Debt</strong>, so you always know what is left after the bills.</p>
           <div class="actions">
             <NuxtLink to="/sign-up" class="btn">Get started free</NuxtLink>
             <NuxtLink to="/#how" class="btn soft">See how it works</NuxtLink>
@@ -31,8 +31,8 @@
     </section>
 
     <section class="wrap answer" aria-labelledby="what">
-      <h2 id="what">What is Weka?</h2>
-      <p>Weka (Swahili for "put aside") is a free money app for Kenya. It tracks your recurring bills and logs them on their due dates, splits each pay into Needs, Wants, Savings and Debt, and shows how much is safe to spend today. It works offline and never asks for your bank login.</p>
+      <h2 id="what">What is Fluxa?</h2>
+      <p>Fluxa is a free money app for Kenya. It tracks your recurring bills and logs them on their due dates, splits each pay into Needs, Wants, Savings and Debt, and shows how much is safe to spend today. It works offline and never asks for your bank login.</p>
     </section>
 
     <section class="wrap" aria-labelledby="features">
@@ -81,8 +81,8 @@ definePageMeta({ layout: 'public' })
 
 const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 useSeo({
-  title: 'Weka: bills on autopilot and a budget that splits your pay',
-  description: 'Weka is a free money app for Kenya. Track recurring bills and log them on their due dates, split every pay into Needs, Wants, Savings and Debt, and see what is safe to spend today. Works offline.',
+  title: 'Fluxa: bills on autopilot and a budget that splits your pay',
+  description: 'Fluxa is a free money app for Kenya. Track recurring bills and log them on their due dates, split every pay into Needs, Wants, Savings and Debt, and see what is safe to spend today. Works offline.',
   path: '/',
   jsonLd: [
     ...siteGraph(site),
@@ -105,7 +105,7 @@ const demo = [
   { n: 'Debt', c: '#5b8def', p: 100, v: 'KSh 8,000' },
 ]
 const features = [
-  { i: 'bill', t: 'Bills on autopilot', d: 'Add rent, subscriptions and loan payments once. Weka tracks what is due, lets you mark one paid with a tap, and can log each bill automatically on its due date.' },
+  { i: 'bill', t: 'Bills on autopilot', d: 'Add rent, subscriptions and loan payments once. Fluxa tracks what is due, lets you mark one paid with a tap, and can log each bill automatically on its due date.' },
   { i: 'wallet', t: 'Instant income split', d: 'Your pay is divided into Needs, Wants, Savings and Debt the moment you enter it, with sliders to adjust before you confirm.' },
   { i: 'wallet', t: 'All your accounts in one wallet', d: 'Add M-Pesa, your bank, PayPal, cash and investments, see the total at a glance, and record money moving between them.' },
   { i: 'shield', t: 'Safe to spend today', d: 'One daily number worked out from what is left in your budget and the bills still due this month.' },

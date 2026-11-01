@@ -1,8 +1,8 @@
-// Weka service worker: app shell works offline.
+// Fluxa service worker: app shell works offline.
 // - The private app screens are client-rendered, so their first page is the same static shell for everyone. It opens instantly
 //   from the saved copy and is refreshed in the background (stale-while-revalidate), so a slow connection never delays the first paint.
 // - Other pages (landing, legal, guides) are network-first so updates arrive; everything else is cache-first.
-const CACHE = 'weka-v7'
+const CACHE = 'fluxa-v7'
 const SCOPE = self.registration.scope
 const APP_SCREENS = ['home', 'activity', 'analytics', 'plan', 'goals', 'bills', 'debts', 'accounts', 'settings']
 const isAppScreen = (url) => APP_SCREENS.some(p => url.pathname === new URL(SCOPE).pathname + p || url.pathname.startsWith(new URL(SCOPE).pathname + p + '/'))
@@ -82,9 +82,9 @@ self.addEventListener('push', (e) => {
   let data = {}
   try { data = e.data ? e.data.json() : {} } catch { try { data = { body: e.data.text() } } catch { data = {} } }
   if (!data || typeof data !== 'object') data = {}
-  e.waitUntil(self.registration.showNotification(clip(data.title || 'Weka', 120), {
+  e.waitUntil(self.registration.showNotification(clip(data.title || 'Fluxa', 120), {
     body: clip(data.body, 300),
-    tag: clip(data.tag || 'weka', 60), // a new reminder with the same tag replaces the last one instead of stacking
+    tag: clip(data.tag || 'fluxa', 60), // a new reminder with the same tag replaces the last one instead of stacking
     icon: SCOPE + 'icons/icon-192.png',
     data: { url: safeTarget(data.url) },
   }))
@@ -96,7 +96,7 @@ self.addEventListener('notificationclick', (e) => {
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       const open = list.find(c => c.url.startsWith(SCOPE))
-      // Reuse a window that is already open on Weka; otherwise open one.
+      // Reuse a window that is already open on Fluxa; otherwise open one.
       if (open) return open.focus().then(c => (c && 'navigate' in c ? c.navigate(target) : undefined))
       return self.clients.openWindow(target)
     }),

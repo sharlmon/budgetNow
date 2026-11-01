@@ -47,12 +47,12 @@ test('where reminders cannot work, the screen says why instead of offering a swi
   await page.goto('/settings/reminders') // no service worker in the test server
   // Which honest message appears depends on the test browser: a full Chrome has the push API but no service worker in the dev server;
   // a headless browser may have no push API at all, or block notifications by default.
-  await expect(page.getByText(/Reminders aren't ready on this device yet|This browser can't show reminders|Notifications are blocked for Weka/)).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(/Reminders aren't ready on this device yet|This browser can't show reminders|Notifications are blocked for Fluxa/)).toBeVisible({ timeout: 15_000 })
   await expect(toggle(page)).toHaveCount(0)
 
   await fakePush(page, { apple: true })
   await page.goto('/settings/reminders')
-  await expect(page.getByText('Add Weka to your Home Screen first')).toBeVisible()
+  await expect(page.getByText('Add Fluxa to your Home Screen first')).toBeVisible()
   await expect(toggle(page)).toHaveCount(0)
 })
 
@@ -64,7 +64,7 @@ test('a browser without push says so, and so does a blocked permission', async (
   const p2 = await page.context().newPage()
   await fakePush(p2, { permission: 'denied' })
   await p2.goto('/settings/reminders')
-  await expect(p2.getByText('Notifications are blocked for Weka')).toBeVisible()
+  await expect(p2.getByText('Notifications are blocked for Fluxa')).toBeVisible()
   await expect(p2.getByRole('switch')).toHaveCount(0)
 })
 

@@ -61,7 +61,7 @@ export function buildReminder(g: DueGroups, detail: ReminderDetail, currency: st
   if (detail === 'basic') {
     const n = all.length
     const urgent = g.overdue.length + g.today.length
-    return { ...base, title: n === 1 ? 'A bill needs your attention' : `${n} bills need your attention`, body: urgent ? `${urgent === 1 ? 'One is' : `${urgent} are`} ${g.overdue.length ? 'due or overdue' : 'due today'}. Open Weka to see which.` : 'Open Weka to see which.' }
+    return { ...base, title: n === 1 ? 'A bill needs your attention' : `${n} bills need your attention`, body: urgent ? `${urgent === 1 ? 'One is' : `${urgent} are`} ${g.overdue.length ? 'due or overdue' : 'due today'}. Open Fluxa to see which.` : 'Open Fluxa to see which.' }
   }
   if (all.length === 1) {
     const b = all[0]!

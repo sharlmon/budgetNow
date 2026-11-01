@@ -5,15 +5,15 @@
     <div class="card white rise" style="--i:1">
       <div class="row top">
         <span class="ic"><Icon name="bill" :size="20" /></span>
-        <div class="grow"><h2>Never miss a bill</h2><div class="muted sm">A notification on the morning a bill is due, even when Weka is closed. Weka checks once a day, around {{ checkTime }}.</div></div>
+        <div class="grow"><h2>Never miss a bill</h2><div class="muted sm">A notification on the morning a bill is due, even when Fluxa is closed. Fluxa checks once a day, around {{ checkTime }}.</div></div>
       </div>
 
       <p v-if="state === 'checking'" class="muted sm status" role="status">Checking this device…</p>
 
-      <p v-else-if="state === 'needs-install'" class="note" role="status"><strong>Add Weka to your Home Screen first.</strong> On iPhone and iPad, reminders work once Weka is installed. Tap the Share button, choose <b>Add to Home Screen</b>, then open Weka from there and come back to this page.</p>
-      <p v-else-if="state === 'unsupported'" class="note" role="status"><strong>This browser can't show reminders.</strong> Try Chrome or Safari on your phone, or install Weka to your Home Screen.</p>
+      <p v-else-if="state === 'needs-install'" class="note" role="status"><strong>Add Fluxa to your Home Screen first.</strong> On iPhone and iPad, reminders work once Fluxa is installed. Tap the Share button, choose <b>Add to Home Screen</b>, then open Fluxa from there and come back to this page.</p>
+      <p v-else-if="state === 'unsupported'" class="note" role="status"><strong>This browser can't show reminders.</strong> Try Chrome or Safari on your phone, or install Fluxa to your Home Screen.</p>
       <p v-else-if="state === 'unavailable'" class="note" role="status"><strong>Reminders aren't ready on this device yet.</strong> They work in the installed or deployed app, once its notification service is switched on.</p>
-      <p v-else-if="state === 'denied'" class="note" role="status"><strong>Notifications are blocked for Weka.</strong> Allow them in your browser or phone settings, then reopen this page.</p>
+      <p v-else-if="state === 'denied'" class="note" role="status"><strong>Notifications are blocked for Fluxa.</strong> Allow them in your browser or phone settings, then reopen this page.</p>
 
       <template v-else>
         <div class="row switch">
@@ -41,7 +41,7 @@
 
         <div class="preview" aria-label="Preview of a reminder">
           <img :src="icon" alt="" width="36" height="36" />
-          <div class="pv"><small class="muted">Weka · {{ checkTime }}</small><strong>{{ sample?.title }}</strong><span>{{ sample?.body }}</span></div>
+          <div class="pv"><small class="muted">Fluxa · {{ checkTime }}</small><strong>{{ sample?.title }}</strong><span>{{ sample?.body }}</span></div>
         </div>
         <p class="muted sm hint">This is an example. Anyone who can see your lock screen can read it, so choose what you are comfortable with.</p>
       </div>
@@ -52,7 +52,7 @@
       </div>
     </template>
 
-    <p class="muted sm foot rise" style="--i:4">Reminders travel through your browser's own push service (Google, Apple, Mozilla or Microsoft). Weka sends only the text shown above. Turn reminders off here at any time.</p>
+    <p class="muted sm foot rise" style="--i:4">Reminders travel through your browser's own push service (Google, Apple, Mozilla or Microsoft). Fluxa sends only the text shown above. Turn reminders off here at any time.</p>
   </div>
 </template>
 

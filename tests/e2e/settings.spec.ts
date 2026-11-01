@@ -14,7 +14,7 @@ test('Settings is a short menu: a profile card, three groups, each row with a on
   await page.goto('/settings')
   await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Account and sync' })).toBeVisible() // the profile card
-  for (const h of ['Your money', 'This device', 'Weka']) await expect(page.getByRole('heading', { name: h, exact: true })).toBeVisible()
+  for (const h of ['Your money', 'This device', 'Fluxa']) await expect(page.getByRole('heading', { name: h, exact: true })).toBeVisible()
   await expect(menu(page).getByRole('link', { name: /Accounts/ })).toContainText('2 accounts')
   await expect(menu(page).getByRole('link', { name: /Budget/ })).toContainText('KES · 60/20/20 split')
   await expect(menu(page).getByRole('link', { name: /Appearance/ })).toContainText('Follows your device')

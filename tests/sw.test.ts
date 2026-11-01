@@ -20,7 +20,7 @@ function worker(opts: { windows?: any[]; cached?: Record<string, string>; networ
     matchAll: async () => windows,
     openWindow: async (u: string) => { opened.push(u) },
   }
-  const self = { registration: { scope: 'https://weka.test/', showNotification: async (title: string, options: any) => { shown.push({ title, options }) } }, location: new URL('https://weka.test/'), addEventListener: (t: string, f: Function) => { listeners[t] = f }, skipWaiting() {}, clients }
+  const self = { registration: { scope: 'https://fluxa.test/', showNotification: async (title: string, options: any) => { shown.push({ title, options }) } }, location: new URL('https://fluxa.test/'), addEventListener: (t: string, f: Function) => { listeners[t] = f }, skipWaiting() {}, clients }
   runInNewContext(readFileSync('public/sw.js', 'utf8'), { self, caches, URL, Promise, String, fetch: (r: any) => { fetched.push(r.url); return opts.network(r.url).then(x => ({ ...x, clone() { return this } })) } })
   /** The page's answer (as soon as the worker gives it) and a promise for everything the worker keeps doing afterwards. */
   function start(url: string) {
@@ -48,52 +48,52 @@ const slow = (ms: number, text: string) => () => new Promise<any>(r => setTimeou
 
 describe('service worker page loading', () => {
   it('opens a private screen from the saved copy without waiting for a slow network', async () => {
-    const w = worker({ cached: { 'https://weka.test/home': 'OLD SHELL' }, network: slow(300, 'NEW SHELL') })
+    const w = worker({ cached: { 'https://fluxa.test/home': 'OLD SHELL' }, network: slow(300, 'NEW SHELL') })
     const t = Date.now()
-    const { answer, finished } = w.start('https://weka.test/home')
+    const { answer, finished } = w.start('https://fluxa.test/home')
     const res = await answer
     expect(res.text).toBe('OLD SHELL')
     expect(Date.now() - t).toBeLessThan(100) // did not wait for the 300 ms network round trip
     await finished
     expect(Date.now() - t).toBeGreaterThanOrEqual(250) // the background refresh still ran to completion
-    expect(w.store.get('https://weka.test/home').text).toBe('NEW SHELL')
+    expect(w.store.get('https://fluxa.test/home').text).toBe('NEW SHELL')
   })
   it('refreshes the saved copy in the background for next time', async () => {
-    const w = worker({ cached: { 'https://weka.test/home': 'OLD SHELL' }, network: slow(10, 'NEW SHELL') })
-    await w.navigate('https://weka.test/home')
-    expect(w.fetched).toContain('https://weka.test/home')
-    expect(w.store.get('https://weka.test/home').text).toBe('NEW SHELL')
+    const w = worker({ cached: { 'https://fluxa.test/home': 'OLD SHELL' }, network: slow(10, 'NEW SHELL') })
+    await w.navigate('https://fluxa.test/home')
+    expect(w.fetched).toContain('https://fluxa.test/home')
+    expect(w.store.get('https://fluxa.test/home').text).toBe('NEW SHELL')
   })
   it('opens the Settings sub-screens from the saved copy too', async () => {
-    const w = worker({ cached: { 'https://weka.test/settings/budget': 'OLD' }, network: slow(200, 'NEW') })
-    const { answer } = w.start('https://weka.test/settings/budget')
+    const w = worker({ cached: { 'https://fluxa.test/settings/budget': 'OLD' }, network: slow(200, 'NEW') })
+    const { answer } = w.start('https://fluxa.test/settings/budget')
     expect((await answer).text).toBe('OLD')
-    const x = worker({ cached: { 'https://weka.test/settingsx': 'OLD' }, network: slow(5, 'NEW') })
-    expect((await x.navigate('https://weka.test/settingsx')).text).toBe('NEW') // not a Settings screen: network first
+    const x = worker({ cached: { 'https://fluxa.test/settingsx': 'OLD' }, network: slow(5, 'NEW') })
+    expect((await x.navigate('https://fluxa.test/settingsx')).text).toBe('NEW') // not a Settings screen: network first
   })
   it('uses the network the first time, when nothing is saved yet', async () => {
     const w = worker({ network: slow(10, 'FRESH') })
-    expect((await w.navigate('https://weka.test/accounts')).text).toBe('FRESH')
+    expect((await w.navigate('https://fluxa.test/accounts')).text).toBe('FRESH')
   })
   it('falls back to the saved home screen when offline and the page was never saved', async () => {
-    const w = worker({ cached: { 'https://weka.test/home': 'HOME SHELL' }, network: () => Promise.reject(new Error('offline')) })
-    expect((await w.navigate('https://weka.test/goals')).text).toBe('HOME SHELL')
+    const w = worker({ cached: { 'https://fluxa.test/home': 'HOME SHELL' }, network: () => Promise.reject(new Error('offline')) })
+    expect((await w.navigate('https://fluxa.test/goals')).text).toBe('HOME SHELL')
   })
   it('does not save an error page as the shell', async () => {
-    const w = worker({ cached: { 'https://weka.test/home': 'GOOD' }, network: async () => ({ ok: false, type: 'basic', text: 'ERROR' }) })
-    await w.navigate('https://weka.test/home')
-    expect(w.store.get('https://weka.test/home').text).toBe('GOOD')
+    const w = worker({ cached: { 'https://fluxa.test/home': 'GOOD' }, network: async () => ({ ok: false, type: 'basic', text: 'ERROR' }) })
+    await w.navigate('https://fluxa.test/home')
+    expect(w.store.get('https://fluxa.test/home').text).toBe('GOOD')
   })
   it('keeps the landing and legal pages network-first so updates arrive', async () => {
-    const w = worker({ cached: { 'https://weka.test/': 'OLD LANDING' }, network: slow(10, 'NEW LANDING') })
-    expect((await w.navigate('https://weka.test/')).text).toBe('NEW LANDING')
-    const p = worker({ cached: { 'https://weka.test/privacy': 'OLD' }, network: slow(10, 'NEW') })
-    expect((await p.navigate('https://weka.test/privacy')).text).toBe('NEW')
+    const w = worker({ cached: { 'https://fluxa.test/': 'OLD LANDING' }, network: slow(10, 'NEW LANDING') })
+    expect((await w.navigate('https://fluxa.test/')).text).toBe('NEW LANDING')
+    const p = worker({ cached: { 'https://fluxa.test/privacy': 'OLD' }, network: slow(10, 'NEW') })
+    expect((await p.navigate('https://fluxa.test/privacy')).text).toBe('NEW')
   })
   it('leaves API calls and sign-in handshakes alone', async () => {
     const w = worker({ network: slow(1, 'x') })
-    expect(await w.navigate('https://weka.test/api/state')).toBeUndefined()
-    expect(await w.navigate('https://weka.test/home?__clerk_handshake=abc')).toBeUndefined()
+    expect(await w.navigate('https://fluxa.test/api/state')).toBeUndefined()
+    expect(await w.navigate('https://fluxa.test/home?__clerk_handshake=abc')).toBeUndefined()
   })
 })
 
@@ -104,13 +104,13 @@ describe('service worker bill reminders', () => {
     await w.push(JSON.stringify({ title: 'Rent is due today', body: 'Tap to mark it paid.', url: '/bills', tag: 'bill-reminders' }))
     expect(w.shown).toHaveLength(1)
     expect(w.shown[0]!.title).toBe('Rent is due today')
-    expect(w.shown[0]!.options).toMatchObject({ body: 'Tap to mark it paid.', tag: 'bill-reminders', icon: 'https://weka.test/icons/icon-192.png', data: { url: 'https://weka.test/bills' } })
+    expect(w.shown[0]!.options).toMatchObject({ body: 'Tap to mark it paid.', tag: 'bill-reminders', icon: 'https://fluxa.test/icons/icon-192.png', data: { url: 'https://fluxa.test/bills' } })
   })
   it('still shows a plain notification when the message is empty or unreadable (browsers require one)', async () => {
     for (const data of [null, 'not json at all', '42', 'null']) {
       const w = worker(net); await w.push(data)
       expect(w.shown, String(data)).toHaveLength(1)
-      expect(w.shown[0]!.title).toBe('Weka')
+      expect(w.shown[0]!.title).toBe('Fluxa')
     }
   })
   it('cuts overlong text so a bad message cannot fill the screen', async () => {
@@ -122,23 +122,23 @@ describe('service worker bill reminders', () => {
     for (const evil of ['https://evil.example.com/steal', '//evil.example.com', 'javascript:alert(1)', 42, null]) {
       const w = worker(net)
       await w.push(JSON.stringify({ title: 'x', url: evil }))
-      expect(w.shown[0]!.options.data.url, String(evil)).toMatch(/^https:\/\/weka\.test\//)
+      expect(w.shown[0]!.options.data.url, String(evil)).toMatch(/^https:\/\/fluxa\.test\//)
     }
-    const w = worker(net); await w.tap('https://evil.example.com/x'); expect(w.opened).toEqual(['https://weka.test/home'])
+    const w = worker(net); await w.tap('https://evil.example.com/x'); expect(w.opened).toEqual(['https://fluxa.test/home'])
   })
   it('closes the notification and opens the app when none is open', async () => {
     const w = worker(net)
-    expect(await w.tap('https://weka.test/bills')).toBe(true)
-    expect(w.opened).toEqual(['https://weka.test/bills'])
+    expect(await w.tap('https://fluxa.test/bills')).toBe(true)
+    expect(w.opened).toEqual(['https://fluxa.test/bills'])
   })
-  it('reuses a window that is already open on Weka instead of opening another', async () => {
+  it('reuses a window that is already open on Fluxa instead of opening another', async () => {
     const calls: string[] = []
-    const win = { url: 'https://weka.test/home', focus: async () => win, navigate: async (u: string) => { calls.push(u) } }
+    const win = { url: 'https://fluxa.test/home', focus: async () => win, navigate: async (u: string) => { calls.push(u) } }
     const w = worker({ ...net, windows: [{ url: 'https://other.example/', focus: async () => { throw new Error('wrong window') } }, win] })
-    await w.tap('https://weka.test/bills')
-    expect(calls).toEqual(['https://weka.test/bills']); expect(w.opened).toEqual([])
+    await w.tap('https://fluxa.test/bills')
+    expect(calls).toEqual(['https://fluxa.test/bills']); expect(w.opened).toEqual([])
   })
   it('falls back to the home screen when the notification carries no address', async () => {
-    const w = worker(net); await w.tap(); expect(w.opened).toEqual(['https://weka.test/home'])
+    const w = worker(net); await w.tap(); expect(w.opened).toEqual(['https://fluxa.test/home'])
   })
 })

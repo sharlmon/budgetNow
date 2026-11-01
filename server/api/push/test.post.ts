@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   if (!pushReady()) throw createError({ statusCode: 503, statusMessage: 'Reminders are not set up on the server yet' })
   const subs = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId))
   const send = createSender()
-  const payload = JSON.stringify({ title: 'Weka reminders are working', body: 'You will get a message like this when a bill is due.', url: '/settings/reminders', tag: 'weka-test' })
+  const payload = JSON.stringify({ title: 'Fluxa reminders are working', body: 'You will get a message like this when a bill is due.', url: '/settings/reminders', tag: 'fluxa-test' })
   let sent = 0, removed = 0, failed = 0
   for (const s of subs) {
     const r = await send({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload)

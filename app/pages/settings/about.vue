@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: 'About Weka' })
+useSeoMeta({ title: 'About Fluxa' })
 </script>
 
 <style scoped>

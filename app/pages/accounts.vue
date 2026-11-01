@@ -28,7 +28,7 @@
           <b class="num">{{ hide(money(a.balance)) }}</b>
         </button>
       </div>
-      <p class="note muted sm">Balances are entered by you. Weka does not connect to your bank, M-Pesa or any other provider, and never asks for their logins.</p>
+      <p class="note muted sm">Balances are entered by you. Fluxa does not connect to your bank, M-Pesa or any other provider, and never asks for their logins.</p>
     </template>
 
     <div v-else class="card empty rise" style="--i:1">

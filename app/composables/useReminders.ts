@@ -5,10 +5,10 @@ import { isAppleMobile, urlBase64ToBytes } from '../utils/push'
 /** What this device can do about bill reminders right now. */
 export type ReminderState =
   | 'checking'
-  | 'needs-install' // iPhone or iPad, and Weka is not on the Home Screen yet
+  | 'needs-install' // iPhone or iPad, and Fluxa is not on the Home Screen yet
   | 'unsupported' // this browser cannot show push notifications
   | 'unavailable' // the app is not ready for it (server not set up, or no service worker)
-  | 'denied' // the person blocked notifications for Weka
+  | 'denied' // the person blocked notifications for Fluxa
   | 'off'
   | 'on'
 
@@ -84,7 +84,7 @@ export function useReminders() {
         if (answer !== 'granted') { reminderState.value = answer === 'denied' ? 'denied' : 'off'; saveHint(); return answer === 'denied' ? null : 'Reminders need your permission to show notifications.' }
       }
       const reg = await registration()
-      if (!reg) return "Weka isn't ready for reminders yet. Reload the app and try again."
+      if (!reg) return "Fluxa isn't ready for reminders yet. Reload the app and try again."
       const sub = (await reg.pushManager.getSubscription()) ?? await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToBytes(String(useRuntimeConfig().public.vapidPublicKey)) })
       try { await post('/api/push/subscribe', body(sub)) } catch (e: any) {
         await sub.unsubscribe().catch(() => {})

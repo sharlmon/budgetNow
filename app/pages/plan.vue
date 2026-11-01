@@ -43,7 +43,7 @@
     <div v-else class="card empty rise" style="--i:3;margin-top:8px">
       <div class="art"><Icon name="calendar" :size="28" /></div>
       <h2 style="margin-bottom:4px">A clear stretch</h2>
-      <p class="muted" style="margin:0 0 14px">Nothing is due in the next {{ days }} days. Add your bills and Weka will tell you whether you can cover them.</p>
+      <p class="muted" style="margin:0 0 14px">Nothing is due in the next {{ days }} days. Add your bills and Fluxa will tell you whether you can cover them.</p>
       <NuxtLink to="/bills?add=1" class="btn"><Icon name="plus" :size="18" :stroke="2.6" /> Add a bill</NuxtLink>
     </div>
 

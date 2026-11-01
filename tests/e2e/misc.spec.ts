@@ -74,7 +74,7 @@ test('public pages are real HTML for search engines and AI crawlers (no JavaScri
 test('private screens ship a loading screen in their first HTML, and the public pages do not need one', async ({ request }) => {
   for (const p of ['/home', '/accounts', '/settings']) {
     const html = await (await request.get(p)).text()
-    expect(html, p).toContain('Loading Weka')
+    expect(html, p).toContain('Loading Fluxa')
     expect(html, p).toContain('wk-splash')
   }
   const landing = await (await request.get('/')).text()

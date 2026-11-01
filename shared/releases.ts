@@ -5,6 +5,15 @@ export interface Release { version: string; date: string; title: string; notes: 
 
 export const RELEASES: Release[] = [
   {
+    version: '1.5.0',
+    date: '2026-11-01',
+    title: 'Weka is now Fluxa',
+    notes: [
+      'The app has a new name: Fluxa',
+      'Your data, backups and sign-in are unchanged; nothing to do',
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-10-11',
     title: 'Bill reminders',

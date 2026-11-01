@@ -1,12 +1,12 @@
 <template>
-  <div class="boot" role="status" aria-label="Loading Weka">
+  <div class="boot" role="status" aria-label="Loading Fluxa">
     <svg class="mark" viewBox="0 0 512 512" width="88" height="88" aria-hidden="true">
       <defs><linearGradient id="bootg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f9ad60" /><stop offset="1" stop-color="#ec5a2a" /></linearGradient></defs>
       <rect width="512" height="512" rx="116" fill="url(#bootg)" />
       <path d="M118 232 L188 382 L256 262 L324 382 L394 232" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" />
       <circle class="coin" cx="256" cy="150" r="44" fill="#fff" />
     </svg>
-    <div class="name">Weka</div>
+    <div class="name">Fluxa</div>
     <div class="bar" aria-hidden="true"><i /></div>
   </div>
 </template>
