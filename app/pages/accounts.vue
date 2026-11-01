@@ -28,7 +28,9 @@
           <b class="num">{{ hide(money(a.balance)) }}</b>
         </button>
       </div>
-      <p class="note muted sm">Balances are entered by you. Fluxa does not connect to your bank, M-Pesa or any other provider, and never asks for their logins.</p>
+      <TransfersCard class="rise" style="--i:5" />
+      <RulesCard class="rise" style="--i:6" />
+      <p class="note muted sm">Demo mode: balances are entered by you and transfers use simulated providers. Fluxa does not yet connect to your bank, M-Pesa or any fund, and never asks for their logins.</p>
     </template>
 
     <div v-else class="card empty rise" style="--i:1">
