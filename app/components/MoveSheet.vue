@@ -5,7 +5,7 @@
         <div class="sheet" role="dialog" aria-modal="true" aria-label="Move money between accounts" @keydown.esc="close">
           <button class="x" aria-label="Close" @click="close"><Icon name="x" :size="18" /></button>
           <h3>Move money</h3>
-          <p class="muted sm lead">Record money moving between your own accounts. Make the actual transfer in your bank or M-Pesa app.</p>
+          <p class="muted sm lead">Send money between your own accounts. Fluxa is in demo mode: the providers are simulated, so no real money moves yet.</p>
 
           <span class="lab" id="from-lab">From</span>
           <div class="accs" role="group" aria-labelledby="from-lab"><button v-for="a in accounts" :key="a.id" class="acc" :aria-pressed="from === a.id" @click="pick('from', a.id)"><b><i class="dot" :style="{ background: a.color }" />{{ a.name }}</b><small class="num">{{ money(a.balance) }}</small></button></div>
@@ -27,7 +27,7 @@
             <div><dt>{{ toAcc.name }} after</dt><dd>{{ money(toAcc.balance + amount) }}</dd></div>
           </dl>
           <p class="err" role="alert">{{ shown }}</p>
-          <button class="btn" :disabled="!!problem" @click="go"><Icon name="swap" :size="18" /> Record move</button>
+          <button class="btn" :disabled="!!problem" @click="go"><Icon name="swap" :size="18" /> Send</button>
         </div>
       </div>
     </Transition>
@@ -38,10 +38,13 @@
 import { moveProblem } from '../utils/accounts'
 
 const ui = useMoveSheet()
-const { state, moveMoney } = useBudget()
+const { state } = useBudget()
+const { send } = useTransfers()
 const accounts = computed(() => state.value.accounts)
 const from = ref(''); const to = ref(''); const amount = ref(0); const fee = ref(0)
 const touched = ref(false)
+// One key per opening of the sheet, so tapping Send twice can never send twice.
+const key = ref('')
 const quick = [500, 1000, 5000, 10000]
 const fromAcc = computed(() => accounts.value.find(a => a.id === from.value))
 const toAcc = computed(() => accounts.value.find(a => a.id === to.value))
@@ -54,7 +57,7 @@ watch(() => ui.value.open, (open) => {
   const list = accounts.value
   from.value = ui.value.from && list.some(a => a.id === ui.value.from) ? ui.value.from : (list.find(a => a.balance > 0) ?? list[0])?.id ?? ''
   to.value = list.find(a => a.id !== from.value)?.id ?? ''
-  amount.value = 0; fee.value = 0; touched.value = false
+  amount.value = 0; fee.value = 0; touched.value = false; key.value = newId()
 }, { immediate: true })
 
 function pick(which: 'from' | 'to', id: string) {
@@ -66,10 +69,10 @@ const close = () => { ui.value.open = false }
 function go() {
   touched.value = true
   const f = fromAcc.value, t = toAcc.value, amt = amount.value
-  const res = moveMoney(from.value, to.value, amt, fee.value)
+  const res = send({ key: key.value, fromId: from.value, toId: to.value, amount: amt, fee: fee.value })
   if ('error' in res) return
   close()
-  showToast(`Moved ${money(amt)} from ${f?.name} to ${t?.name}`, res.undo)
+  showToast(`Sending ${money(amt)} from ${f?.name} to ${t?.name}`)
 }
 </script>
 

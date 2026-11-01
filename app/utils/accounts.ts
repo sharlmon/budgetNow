@@ -1,5 +1,5 @@
 // Places a person keeps money, and the small calculations the Accounts screen needs.
-// Balances are entered by the user. Weka does not connect to any of these providers.
+// Balances are entered by the user. Fluxa does not connect to any of these providers.
 
 export type AccountKind = 'mobile' | 'bank' | 'paypal' | 'cash' | 'invest' | 'other'
 export const ACCOUNT_KINDS: { key: AccountKind; label: string; color: string; icon: string; hint: string }[] = [

@@ -1,6 +1,6 @@
 {
-  "name": "Weka",
-  "short_name": "Weka",
+  "name": "Fluxa",
+  "short_name": "Fluxa",
   "description": "Split your income instantly and track every spend and debt.",
   "start_url": "./home",
   "scope": "./",

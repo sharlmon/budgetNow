@@ -116,7 +116,7 @@ export const bills = pgTable('bills', {
 ])
 
 // Places the user keeps money (M-Pesa, a bank, PayPal, cash, an investment). Balances are entered and updated by the user;
-// Weka does not connect to these providers. rate is the yearly return the user expects, for investment-type accounts.
+// Fluxa does not connect to these providers. rate is the yearly return the user expects, for investment-type accounts.
 export const accounts = pgTable('accounts', {
   userId: text('user_id').notNull(),
   id: text('id').notNull(),

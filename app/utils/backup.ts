@@ -27,16 +27,16 @@ export type ParseResult =
 
 /** Parses and sanitises a backup file. Bad records are skipped (and counted) rather than trusted. */
 export function parseBackup(raw: string): ParseResult {
-  if (raw.length > MAX_BACKUP_BYTES) return { ok: false, error: 'That file is too large to be a Weka backup.' }
+  if (raw.length > MAX_BACKUP_BYTES) return { ok: false, error: 'That file is too large to be a Fluxa backup.' }
   let json: unknown
   try { json = JSON.parse(raw) } catch { return { ok: false, error: 'That file is not valid JSON.' } }
-  if (!isObj(json)) return { ok: false, error: 'That file is not a Weka backup.' }
+  if (!isObj(json)) return { ok: false, error: 'That file is not a Fluxa backup.' }
 
   const wrapped = json.app === 'budgetnow'
-  if (wrapped && isNum(json.version) && json.version > BACKUP_VERSION) return { ok: false, error: 'This backup was made by a newer version of Weka.' }
+  if (wrapped && isNum(json.version) && json.version > BACKUP_VERSION) return { ok: false, error: 'This backup was made by a newer version of Fluxa.' }
   const src = wrapped ? json.data : json
   if (!isObj(src) || !['incomes', 'expenses', 'debts', 'goals', 'bills', 'accounts'].some(k => Array.isArray(src[k]))) {
-    return { ok: false, error: 'That file is not a Weka backup.' }
+    return { ok: false, error: 'That file is not a Fluxa backup.' }
   }
 
   let skipped = 0

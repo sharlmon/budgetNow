@@ -11,6 +11,7 @@
     <div class="rise" style="--i:1"><GettingStarted /></div>
     <div class="rise" style="--i:1"><AccountsCard :hide-prompt="guide.visible.value" /></div>
     <div class="rise" style="--i:2"><HomeActions /></div>
+    <div class="rise" style="--i:2"><WalletStatus /></div>
 
     <div v-if="syncConflicts.length" class="card white clash rise" style="--i:3" role="alert">
       <span class="cl"><Icon name="repeat" :size="20" /></span>

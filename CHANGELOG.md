@@ -1,6 +1,11 @@
 # Changelog
 
-All notable changes to Weka. Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
+All notable changes to Fluxa (called Weka until 1.4.0). Versions follow [Semantic Versioning](https://semver.org): MAJOR for breaking changes, MINOR for new features, PATCH for fixes.
+
+## 1.6.0 - 2026-11-01
+
+- The app has a new name: Fluxa (it was Weka)
+- Your data, backups and sign-in are unchanged; nothing to do
 
 ## 1.5.0 - 2026-10-11
 

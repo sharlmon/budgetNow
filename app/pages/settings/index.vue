@@ -26,7 +26,7 @@
       <SettingsRow to="/settings/data" icon="shield" tone="good" title="Backup and data" :summary="backupSummary" />
     </div>
 
-    <h2 class="gh rise" style="--i:4">Weka</h2>
+    <h2 class="gh rise" style="--i:4">Fluxa</h2>
     <div class="card white group rise" style="--i:5">
       <SettingsRow v-if="guide.dismissed.value && guide.progress.value.done < guide.progress.value.total" to="/home" icon="flag" tone="good" title="Setup guide" :summary="`${guide.progress.value.done} of ${guide.progress.value.total} done · tap to show it again`" @click="guide.show()" />
       <SettingsRow to="/settings/about" icon="sparkles" tone="accent" title="About and what's new" :summary="`Version ${version.current.version}`" :dot="updateAvailable ? 'An update is available' : undefined" />
@@ -49,7 +49,7 @@ const remindersSummary = ref('Get a notification when a bill is due')
 onMounted(() => {
   const h = reminderHint(), { supported, appleNeedsInstall } = reminderSupport()
   if (h?.on) remindersSummary.value = `On · ${h.daysBefore === 0 ? 'on the day' : h.daysBefore === 1 ? '1 day before' : `${h.daysBefore} days before`}`
-  else if (appleNeedsInstall) remindersSummary.value = 'Add Weka to your Home Screen first'
+  else if (appleNeedsInstall) remindersSummary.value = 'Add Fluxa to your Home Screen first'
   else if (!supported) remindersSummary.value = 'Not available in this browser'
 })
 

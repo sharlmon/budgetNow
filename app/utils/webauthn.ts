@@ -65,8 +65,8 @@ export async function biometricsAvailable(): Promise<boolean> {
 export async function createBiometricCredential(rpId: string): Promise<string> {
   const cred = await navigator.credentials.create({
     publicKey: {
-      rp: { name: 'Weka', id: rpId },
-      user: { id: randomBytes(16), name: 'budgetnow-app-lock', displayName: 'Weka app lock' },
+      rp: { name: 'Fluxa', id: rpId },
+      user: { id: randomBytes(16), name: 'budgetnow-app-lock', displayName: 'Fluxa app lock' },
       challenge: randomBytes(32),
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
       authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },

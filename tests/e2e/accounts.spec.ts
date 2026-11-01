@@ -34,7 +34,7 @@ test('the total, and a tab on the stack, show the right balances', async ({ page
   await expect(page.locator('.front .amt')).toContainText('28,000')
 })
 
-test('moving money updates both balances, counts the fee, can be undone, and saves', async ({ page, request }) => {
+test('sending money takes it from the sender at once, credits the receiver when the provider confirms, counts the fee, and saves', async ({ page, request }) => {
   await sync(request, [acct('a', 'M-Pesa', 'mobile', 8000), acct('b', 'Equity', 'bank', 20000, '#3b6fe0')])
   await page.goto('/accounts')
   await page.getByRole('button', { name: 'Move money' }).click()
@@ -45,15 +45,12 @@ test('moving money updates both balances, counts the fee, can be undone, and sav
   await sheet.getByLabel('Fee (optional)').fill('25')
   await expect(sheet).toContainText('16,975') // Equity after: 20,000 - 3,000 - 25
   await expect(sheet).toContainText('11,000') // M-Pesa after
-  await sheet.getByRole('button', { name: 'Record move' }).click()
-  await expect(page.getByRole('status')).toContainText('Moved')
-  await expect(page.locator('.list')).toContainText('16,975')
-  await expect(page.locator('.list')).toContainText('11,000')
-  await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort()).toEqual([11000, 16975])
-
-  await page.getByRole('button', { name: 'Undo' }).click()
-  await expect(page.locator('.list')).toContainText('20,000')
-  await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort((x: number, y: number) => x - y)).toEqual([8000, 20000])
+  await sheet.getByRole('button', { name: 'Send' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Sending' })).toBeVisible()
+  await expect(page.locator('.list').first()).toContainText('16,975') // the sender is debited at once
+  await expect(page.locator('.list').first()).toContainText('11,000') // and the receiver is credited when the simulated provider answers
+  await expect(page.getByRole('status').filter({ hasText: 'arrived in M-Pesa' })).toBeVisible()
+  await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort((x: number, y: number) => x - y)).toEqual([11000, 16975])
 })
 
 test('a move that the balance cannot cover is refused with the exact shortfall', async ({ page, request }) => {
@@ -65,10 +62,10 @@ test('a move that the balance cannot cover is refused with the exact shortfall',
   await sheet.getByRole('group', { name: 'To' }).getByRole('button', { name: /Equity/ }).click()
   await sheet.getByLabel('Amount').fill('1500')
   await expect(sheet.getByRole('alert')).toContainText('500 short')
-  await expect(sheet.getByRole('button', { name: 'Record move' })).toBeDisabled()
+  await expect(sheet.getByRole('button', { name: 'Send' })).toBeDisabled()
   await sheet.getByRole('button', { name: 'All' }).click()
   await expect(sheet.getByLabel('Amount')).toHaveValue('1000')
-  await expect(sheet.getByRole('button', { name: 'Record move' })).toBeEnabled()
+  await expect(sheet.getByRole('button', { name: 'Send' })).toBeEnabled()
 })
 
 test('with one account, moving money is disabled and says why', async ({ page, request }) => {
@@ -206,4 +203,48 @@ test.describe('home layout', () => {
     await actions.getByRole('button', { name: 'Add money' }).click()
     await expect(page.getByRole('button', { name: 'See my breakdown' })).toBeVisible()
   })
+})
+
+test('a transfer the provider refuses is returned in full and marked failed', async ({ page, request }) => {
+  await sync(request, [acct('a', 'M-Pesa', 'mobile', 400000), acct('b', 'Fund', 'invest', 1000, '#e6a321')])
+  await page.goto('/accounts')
+  await page.getByRole('button', { name: 'Move money' }).click()
+  const sheet = dialog(page, 'Move money between accounts')
+  await sheet.getByRole('group', { name: 'From' }).getByRole('button', { name: /M-Pesa/ }).click()
+  await sheet.getByRole('group', { name: 'To' }).getByRole('button', { name: /Fund/ }).click()
+  await sheet.getByLabel('Amount').fill('300000')
+  await sheet.getByRole('button', { name: 'Send' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'failed' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Recent transfers' })).toContainText('Failed, money returned')
+  await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort((x: number, y: number) => x - y)).toEqual([1000, 400000])
+})
+
+test('a standing rule asks first, then sweeps everything above the amount to keep', async ({ page, request }) => {
+  await sync(request, [acct('a', 'M-Pesa', 'mobile', 12000), acct('b', 'Fund', 'invest', 40000, '#e6a321')])
+  await page.goto('/accounts')
+  const rules = page.getByRole('region', { name: 'Standing rules' })
+  await rules.getByRole('button', { name: 'Add a rule' }).click()
+  await rules.getByLabel('From', { exact: true }).selectOption({ label: 'M-Pesa' })
+  await rules.getByLabel('Sweep into').selectOption({ label: 'Fund' })
+  await rules.getByLabel('Always keep in the first account').fill('5000')
+  await rules.getByLabel('Also hold back what bills need').selectOption({ label: 'Ignore bills' })
+  await rules.getByRole('button', { name: 'Save rule' }).click()
+  await expect(rules).toContainText('7,000 is ready to sweep')
+  await rules.getByRole('button', { name: 'Send' }).click()
+  await expect(page.getByRole('region', { name: 'Recent transfers' })).toContainText('by your rule')
+  await expect.poll(async () => (await getState(request)).accounts.map((a: any) => a.balance).sort((x: number, y: number) => x - y)).toEqual([5000, 47000])
+  await expect(rules).not.toContainText('ready to sweep')
+})
+
+test('home points to money that a rule is ready to sweep', async ({ page, request }) => {
+  await sync(request, [acct('a', 'M-Pesa', 'mobile', 12000), acct('b', 'Fund', 'invest', 40000, '#e6a321')])
+  await page.addInitScript(() => {
+    const rule = { id: 'r1', fromId: 'a', toId: 'b', keep: 5000, billDays: 0, min: 100, auto: false, on: true }
+    if (!localStorage.getItem('bn:sweepRules:dev-user')) localStorage.setItem('bn:sweepRules:dev-user', JSON.stringify([rule]))
+  })
+  await page.goto('/home')
+  const strip = page.getByRole('link', { name: 'Money ready to sweep' })
+  await expect(strip).toContainText('7,000 is ready to sweep')
+  await strip.click()
+  await expect(page).toHaveURL(/\/accounts/)
 })

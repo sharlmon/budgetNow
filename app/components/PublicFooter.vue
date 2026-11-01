@@ -2,7 +2,7 @@
   <footer class="pf">
     <div class="in">
       <div class="col about">
-        <strong>Weka</strong>
+        <strong>Fluxa</strong>
         <p>{{ SITE.tagline }}</p>
       </div>
       <nav class="col" aria-label="Product">
@@ -19,7 +19,7 @@
       </nav>
     </div>
     <div class="base">
-      <span>© {{ year }} Weka</span>
+      <span>© {{ year }} Fluxa</span>
       <span class="dot">·</span>
       <CraftedBy />
     </div>

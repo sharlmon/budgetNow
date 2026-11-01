@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { clerkVariables } from '../../utils/theme'
 definePageMeta({ layout: 'auth' })
-useHead({ title: 'Sign in · Weka' })
+useHead({ title: 'Sign in · Fluxa' })
 const appearance = computed(() => ({ variables: clerkVariables(activeTheme.value) })) // follows Light / Dark
 </script>
 

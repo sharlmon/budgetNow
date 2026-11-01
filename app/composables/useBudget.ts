@@ -292,7 +292,7 @@ export function useBudget() {
     state.value = { incomes: [], expenses: [], debts: [], goals: [], bills: [], accounts: [] }
   }
 
-  return { updateExpense, updateIncome, accountShort, accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
+  return { applyDeltas, updateExpense, updateIncome, accountShort, accountsTotal, addAccount, removeAccount, moveMoney, addBill, removeBill, payBill, runAutoBills, addGoal, removeGoal, addToGoal, savingsPot, totalSpent, resetAll, state, totalMinDebt, totalDebt, budgeted, spent, totalIncome, addIncome, addExpense, removeExpense, removeIncome, addDebt, removeDebt }
 }
 
 // Profile values live in the synced snapshot, not in their own storage keys.

@@ -8,8 +8,8 @@ export interface GuideCounts { accounts: number; incomes: number; bills: number 
 export function guideSteps(c: GuideCounts): GuideStep[] {
   return [
     { key: 'account', title: 'Add where your money is', done: c.accounts > 0, detail: c.accounts > 0 ? `${c.accounts} account${c.accounts === 1 ? '' : 's'} added` : 'M-Pesa, your bank or cash. You type the balance.' },
-    { key: 'pay', title: 'Add your first pay', done: c.incomes > 0, detail: c.incomes > 0 ? 'Added and split' : 'Weka splits it into Needs, Wants, Savings and Debt.' },
-    { key: 'bill', title: 'Add a bill', done: c.bills > 0, detail: c.bills > 0 ? `${c.bills} bill${c.bills === 1 ? '' : 's'} added` : 'Rent, internet or electricity, so Weka can keep track.' },
+    { key: 'pay', title: 'Add your first pay', done: c.incomes > 0, detail: c.incomes > 0 ? 'Added and split' : 'Fluxa splits it into Needs, Wants, Savings and Debt.' },
+    { key: 'bill', title: 'Add a bill', done: c.bills > 0, detail: c.bills > 0 ? `${c.bills} bill${c.bills === 1 ? '' : 's'} added` : 'Rent, internet or electricity, so Fluxa can keep track.' },
   ]
 }
 
